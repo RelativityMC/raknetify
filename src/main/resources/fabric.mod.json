@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "id": "raknet-fabric",
+  "version": "${version}",
+
+  "name": "RaknetFabric",
+  "description": "Use Raknet as Minecraft networking backend. ",
+  "authors": [
+    "ishland"
+  ],
+  "contact": {
+  },
+
+  "license": "MIT",
+  "icon": "assets/raknet-fabric/icon.png",
+
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "com.ishland.raknetfabric.RaknetFabric"
+    ]
+  },
+  "mixins": [
+    "raknet-fabric.mixins.json"
+  ],
+
+  "depends": {
+    "fabricloader": ">=0.12.12",
+    "minecraft": ">=1.18",
+    "java": ">=17"
+  },
+  "suggests": {
+  }
+}
