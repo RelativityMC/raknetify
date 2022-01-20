@@ -1,0 +1,5 @@
+accessWidener v1 named
+
+accessible    method    net/minecraft/client/network/MultiplayerServerListPinger    createPlayerCountText    (II)Lnet/minecraft/text/Text;
+
+accessible    field     net/minecraft/client/network/MultiplayerServerListPinger    ZERO_SPLITTER            Lcom/google/common/base/Splitter;

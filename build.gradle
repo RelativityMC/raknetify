@@ -1,5 +1,8 @@
 plugins {
+	id 'java'
+	id 'java-library'
 	id 'fabric-loom' version '0.10-SNAPSHOT'
+	id 'io.github.juuxel.loom-quiltflower-mini' version '1.2.1'
 	id 'maven-publish'
 }
 
@@ -16,6 +19,8 @@ repositories {
 	// Loom adds the essential maven repositories to download Minecraft and libraries from automatically.
 	// See https://docs.gradle.org/current/userguide/declaring_repositories.html
 	// for more information about repositories.
+
+	maven { url 'https://jitpack.io' }
 }
 
 dependencies {
@@ -24,8 +29,12 @@ dependencies {
 	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
 	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
+	include implementation("com.github.yesdog.netty-raknet:netty-raknet-common:81c7c51136")
+	include implementation("com.github.yesdog.netty-raknet:netty-raknet-client:81c7c51136")
+	include implementation("com.github.yesdog.netty-raknet:netty-raknet-server:81c7c51136")
+
 	// Fabric API. This is technically optional, but you probably want it anyway.
-	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+//	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 }
 
 processResources {
@@ -46,6 +55,10 @@ java {
 	// if it is present.
 	// If you remove this line, sources will not be generated.
 	withSourcesJar()
+}
+
+loom {
+	accessWidenerPath = file("src/main/resources/raknet-fabric.accesswidener")
 }
 
 jar {

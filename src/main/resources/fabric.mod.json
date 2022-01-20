@@ -20,6 +20,9 @@
       "com.ishland.raknetfabric.RaknetFabric"
     ]
   },
+
+  "accessWidener" : "raknet-fabric.accesswidener",
+
   "mixins": [
     "raknet-fabric.mixins.json"
   ],
