@@ -3,6 +3,7 @@
   "minVersion": "0.8",
   "package": "com.ishland.raknetfabric.mixin",
   "compatibilityLevel": "JAVA_16",
+  "mixinPriority": 1010,
   "mixins": [
     "access.IClientConnection",
     "client.MixinConnectionScreen1",
@@ -11,6 +12,7 @@
     "client.MixinMultiplayerServerListPinger1",
     "common.MixinClientConnection",
     "common.MixinClientConnection1",
+    "compat.fabricapi.MixinServerLoginNetworkAddon",
     "server.MixinPlayerManager",
     "server.MixinServerLoginNetworkHandler",
     "server.MixinServerNetworkIo",

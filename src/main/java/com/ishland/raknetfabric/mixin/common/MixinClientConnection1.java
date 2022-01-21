@@ -1,6 +1,7 @@
 package com.ishland.raknetfabric.mixin.common;
 
 import com.ishland.raknetfabric.Constants;
+import com.ishland.raknetfabric.common.compat.viafabric.ViaFabricCompatInjector;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelInitializer;
 import net.minecraft.network.ClientConnection;
@@ -19,6 +20,13 @@ public abstract class MixinClientConnection1 extends ChannelInitializer<Channel>
         if (channel.config() instanceof RakNet.Config config) {
             config.setMaxQueuedBytes(Constants.MAX_QUEUED_SIZE);
             channel.pipeline().addLast("raknet_backend", new UserDataCodec(Constants.RAKNET_PACKET_ID));
+        }
+    }
+
+    @Inject(method = "initChannel(Lio/netty/channel/Channel;)V", at = @At("RETURN"))
+    private void postChannelInit(Channel channel, CallbackInfo ci) {
+        if (channel.config() instanceof RakNet.Config) {
+            ViaFabricCompatInjector.inject(channel, true);
         }
     }
 

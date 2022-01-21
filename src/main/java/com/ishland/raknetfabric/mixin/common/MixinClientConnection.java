@@ -10,11 +10,10 @@ import io.netty.channel.epoll.EpollDatagramChannel;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioDatagramChannel;
 import net.minecraft.network.ClientConnection;
-import net.minecraft.network.NetworkSide;
 import network.ycc.raknet.client.channel.RakNetClientChannel;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
@@ -23,13 +22,23 @@ import java.net.InetSocketAddress;
 @Mixin(ClientConnection.class)
 public class MixinClientConnection {
 
+    @Shadow private Channel channel;
+    @Unique
+    private volatile boolean isClosing = false;
+
     @Redirect(method = "disconnect", at = @At(value = "INVOKE", target = "Lio/netty/channel/ChannelFuture;awaitUninterruptibly()Lio/netty/channel/ChannelFuture;", remap = false))
     private ChannelFuture noDisconnectWait(ChannelFuture instance) {
+        isClosing = true;
         if (instance.channel().eventLoop().inEventLoop()) {
             return instance; // no-op
         } else {
             return instance.awaitUninterruptibly();
         }
+    }
+
+    @Redirect(method = "*", at = @At(value = "INVOKE", target = "Lio/netty/channel/Channel;isOpen()Z"))
+    private boolean redirectIsOpen(Channel instance) {
+        return this.channel != null && (this.channel.isOpen() && !this.isClosing);
     }
 
 //    @Inject(method = "channelActive", at = @At("HEAD"))
