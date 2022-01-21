@@ -17,8 +17,6 @@ import net.minecraft.network.packet.c2s.handshake.HandshakeC2SPacket;
 import net.minecraft.network.packet.c2s.login.LoginHelloC2SPacket;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
-import net.minecraft.util.logging.UncaughtExceptionLogger;
-import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -33,8 +31,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 @Mixin(ConnectScreen.class)
 public abstract class MixinConnectScreen {
-
-    @Shadow @Final private static Logger LOGGER;
 
     @Shadow @Final private static AtomicInteger CONNECTOR_THREADS_COUNT;
 
@@ -53,7 +49,7 @@ public abstract class MixinConnectScreen {
 
         ServerAddress address = new ServerAddress(rawAddress.getAddress().substring(Constants.RAKNET_PREFIX.length()), rawAddress.getPort());
         // TODO [VanillaCopy] modified
-        LOGGER.info("Connecting to {}, {} via raknet", address.getAddress(), address.getPort());
+        System.out.println(String.format("Connecting to %s, %d via raknet", address.getAddress(), address.getPort()));
         Thread thread = new Thread("Server Connector #" + CONNECTOR_THREADS_COUNT.incrementAndGet()) {
             public void run() {
                 InetSocketAddress inetSocketAddress = null;
@@ -99,7 +95,8 @@ public abstract class MixinConnectScreen {
                         exception2 = var6;
                     }
 
-                    MixinConnectScreen.LOGGER.error("Couldn't connect to server", var6);
+                    System.err.println("Couldn't connect to server");
+                    var6.printStackTrace();
                     String exception = inetSocketAddress == null
                             ? exception2.getMessage()
                             : exception2.getMessage()
@@ -116,7 +113,7 @@ public abstract class MixinConnectScreen {
 
             }
         };
-        thread.setUncaughtExceptionHandler(new UncaughtExceptionLogger(LOGGER));
+//        thread.setUncaughtExceptionHandler(new UncaughtExceptionLogger(LOGGER));
         thread.start();
     }
 
