@@ -2,6 +2,7 @@ package com.ishland.raknetfabric.common.connection;
 
 import com.google.common.collect.Iterables;
 import com.ishland.raknetfabric.Constants;
+import com.ishland.raknetfabric.common.util.ThreadLocalUtil;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -43,47 +44,54 @@ public class RaknetClientConnectionUtil {
     }
 
     public static ClientConnection connect(InetSocketAddress address, boolean useEpoll) {
-        // TODO [VanillaCopy] from Lnet/minecraft/network/ClientConnection;connect(Ljava/net/InetSocketAddress;Z)Lnet/minecraft/network/ClientConnection;
-        final ClientConnection clientConnection = new ClientConnection(NetworkSide.CLIENTBOUND);
-        ChannelFactory<RakNetClientChannel> channelFactory; // RaknetFabric
-        @SuppressWarnings("deprecation") Lazy<? extends EventLoopGroup> lazy;
-        if (Epoll.isAvailable() && useEpoll) {
-            channelFactory = () -> new RakNetClientChannel(EpollDatagramChannel.class); // RaknetFabric
-            lazy = EPOLL_CLIENT_IO_GROUP;
-        } else {
-            channelFactory = () -> new RakNetClientChannel(NioDatagramChannel.class); // RaknetFabric
-            lazy = CLIENT_IO_GROUP;
+//        // [VanillaCopy] from Lnet/minecraft/network/ClientConnection;connect(Ljava/net/InetSocketAddress;Z)Lnet/minecraft/network/ClientConnection;
+//        final ClientConnection clientConnection = new ClientConnection(NetworkSide.CLIENTBOUND);
+//        ChannelFactory<RakNetClientChannel> channelFactory; // RaknetFabric
+//        @SuppressWarnings("deprecation") Lazy<? extends EventLoopGroup> lazy;
+//        if (Epoll.isAvailable() && useEpoll) {
+//            channelFactory = () -> new RakNetClientChannel(EpollDatagramChannel.class); // RaknetFabric
+//            lazy = EPOLL_CLIENT_IO_GROUP;
+//        } else {
+//            channelFactory = () -> new RakNetClientChannel(NioDatagramChannel.class); // RaknetFabric
+//            lazy = CLIENT_IO_GROUP;
+//        }
+//
+//        (new Bootstrap())
+//                .group(lazy.get())
+//                .handler(
+//                        new ChannelInitializer<>() {
+//                            @Override
+//                            protected void initChannel(Channel channel) {
+//                                // RaknetFabric
+////                                try {
+////                                    channel.config().setOption(ChannelOption.TCP_NODELAY, true);
+////                                } catch (ChannelException var3) {
+////                                }
+//
+//                                RakNet.config(channel).setMaxQueuedBytes(Constants.MAX_QUEUED_SIZE); // RaknetFabric
+//
+//                                channel.pipeline()
+//                                        .addLast("raknet_backend", new UserDataCodec(Constants.RAKNET_PACKET_ID)) // RaknetFabric
+//                                        .addLast("timeout", new ReadTimeoutHandler(30))
+//                                        .addLast("splitter", new SplitterHandler())
+//                                        .addLast("decoder", new DecoderHandler(NetworkSide.CLIENTBOUND))
+//                                        .addLast("prepender", new SizePrepender())
+//                                        .addLast("encoder", new PacketEncoder(NetworkSide.SERVERBOUND))
+//                                        .addLast("packet_handler", clientConnection);
+//                            }
+//                        }
+//                )
+//                .channelFactory(channelFactory) // RaknetFabric
+//                .connect(address.getAddress(), address.getPort())
+//                .syncUninterruptibly();
+//        return clientConnection;
+
+        try {
+            ThreadLocalUtil.setInitializingRaknet(true);
+            return ClientConnection.connect(address, useEpoll);
+        } finally {
+            ThreadLocalUtil.setInitializingRaknet(false);
         }
-
-        (new Bootstrap())
-                .group(lazy.get())
-                .handler(
-                        new ChannelInitializer<>() {
-                            @Override
-                            protected void initChannel(Channel channel) {
-                                // RaknetFabric
-//                                try {
-//                                    channel.config().setOption(ChannelOption.TCP_NODELAY, true);
-//                                } catch (ChannelException var3) {
-//                                }
-
-                                RakNet.config(channel).setMaxQueuedBytes(Constants.MAX_QUEUED_SIZE); // RaknetFabric
-
-                                channel.pipeline()
-                                        .addLast("raknet_backend", new UserDataCodec(Constants.RAKNET_PACKET_ID)) // RaknetFabric
-                                        .addLast("timeout", new ReadTimeoutHandler(30))
-                                        .addLast("splitter", new SplitterHandler())
-                                        .addLast("decoder", new DecoderHandler(NetworkSide.CLIENTBOUND))
-                                        .addLast("prepender", new SizePrepender())
-                                        .addLast("encoder", new PacketEncoder(NetworkSide.SERVERBOUND))
-                                        .addLast("packet_handler", clientConnection);
-                            }
-                        }
-                )
-                .channelFactory(channelFactory) // RaknetFabric
-                .connect(address.getAddress(), address.getPort())
-                .syncUninterruptibly();
-        return clientConnection;
     }
 
     public static void ping(InetSocketAddress address, ServerInfo info) {

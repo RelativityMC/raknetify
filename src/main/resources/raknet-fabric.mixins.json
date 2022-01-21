@@ -5,12 +5,16 @@
   "compatibilityLevel": "JAVA_16",
   "mixins": [
     "access.IClientConnection",
+    "client.MixinConnectionScreen1",
     "client.MixinConnectScreen",
     "client.MixinMultiplayerServerListPinger",
+    "client.MixinMultiplayerServerListPinger1",
     "common.MixinClientConnection",
+    "common.MixinClientConnection1",
     "server.MixinPlayerManager",
     "server.MixinServerLoginNetworkHandler",
-    "server.MixinServerNetworkIo"
+    "server.MixinServerNetworkIo",
+    "server.MixinServerNetworkIo1"
   ],
   "injectors": {
     "defaultRequire": 1
