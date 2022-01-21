@@ -104,6 +104,8 @@ public class RaknetClientConnectionUtil {
 //                        } catch (ChannelException var3) {
 //                        }
 
+                        RakNet.config(channel).setMaxQueuedBytes(Constants.MAX_QUEUED_SIZE); // RaknetFabric
+
                         channel.pipeline()
                                 .addLast("raknet_backend", new UserDataCodec(Constants.RAKNET_PACKET_ID)) // RaknetFabric
                                 .addLast(new SimpleChannelInboundHandler<ByteBuf>() {

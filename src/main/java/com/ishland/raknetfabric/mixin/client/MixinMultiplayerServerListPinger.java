@@ -3,6 +3,7 @@ package com.ishland.raknetfabric.mixin.client;
 import com.google.common.collect.Lists;
 import com.ishland.raknetfabric.Constants;
 import com.ishland.raknetfabric.common.connection.RaknetClientConnectionUtil;
+import com.ishland.raknetfabric.mixin.access.IClientConnection;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.client.gui.screen.ConnectScreen;
 import net.minecraft.client.network.Address;
@@ -24,6 +25,7 @@ import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Util;
+import network.ycc.raknet.RakNet;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -74,7 +76,7 @@ public abstract class MixinMultiplayerServerListPinger {
                             if (this.received) {
                                 clientConnection.disconnect(new TranslatableText("multiplayer.status.unrequested"));
                             } else {
-                                this.received = true;
+//                                this.received = true;
                                 ServerMetadata serverMetadata = packet.getServerMetadata();
                                 if (serverMetadata.getDescription() != null) {
                                     entry.label = serverMetadata.getDescription();
@@ -130,9 +132,14 @@ public abstract class MixinMultiplayerServerListPinger {
                                     runnable.run();
                                 }
 
+                                clientConnection.send(new QueryPingC2SPacket(this.startTime));
+
                                 this.startTime = Util.getMeasuringTimeMs();
                                 clientConnection.send(new QueryPingC2SPacket(this.startTime));
+                                clientConnection.tick(); // RaknetFabric
                                 this.sentQuery = true;
+
+                                entry.ping = RakNet.config(((IClientConnection) clientConnection).getChannel()).getRTTNanos() / 1_000_000; // RaknetFabric start - ping impl
                             }
                         }
 

@@ -4,9 +4,12 @@
   "package": "com.ishland.raknetfabric.mixin",
   "compatibilityLevel": "JAVA_16",
   "mixins": [
+    "access.IClientConnection",
     "client.MixinConnectScreen",
     "client.MixinMultiplayerServerListPinger",
     "common.MixinClientConnection",
+    "server.MixinPlayerManager",
+    "server.MixinServerLoginNetworkHandler",
     "server.MixinServerNetworkIo"
   ],
   "injectors": {
