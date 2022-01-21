@@ -28,7 +28,11 @@ public class MixinClientConnection {
 
     @Redirect(method = "disconnect", at = @At(value = "INVOKE", target = "Lio/netty/channel/ChannelFuture;awaitUninterruptibly()Lio/netty/channel/ChannelFuture;"))
     private ChannelFuture noDisconnectWait(ChannelFuture instance) {
-        return instance; // no-op
+        if (instance.channel().eventLoop().inEventLoop()) {
+            return instance; // no-op
+        } else {
+            return instance.awaitUninterruptibly();
+        }
     }
 
 //    @Inject(method = "channelActive", at = @At("HEAD"))
