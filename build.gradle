@@ -3,6 +3,7 @@ plugins {
 	id 'java-library'
 	id 'fabric-loom' version '0.10-SNAPSHOT'
 	id 'io.github.juuxel.loom-quiltflower-mini' version '1.2.1'
+	id 'com.github.johnrengelman.shadow' version '7.1.0'
 	id 'maven-publish'
 }
 
@@ -23,16 +24,23 @@ repositories {
 	maven { url 'https://jitpack.io' }
 }
 
+configurations {
+	api.extendsFrom includeApi
+	shadowInclude
+}
+
 dependencies {
 	// To change the versions see the gradle.properties file
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
 	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
 	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
-	include implementation("com.github.yesdog.netty-raknet:netty-raknet-common:81c7c51136")
-	include implementation("com.github.yesdog.netty-raknet:netty-raknet-client:81c7c51136")
-	include implementation("com.github.yesdog.netty-raknet:netty-raknet-server:81c7c51136")
-	include implementation("org.apache.commons:commons-math3:3.6.1")
+	shadowInclude api("com.github.yesdog.netty-raknet:netty-raknet-common:81c7c51136") {
+		transitive = false
+	}
+	shadowInclude api("com.github.yesdog.netty-raknet:netty-raknet-client:81c7c51136")
+	shadowInclude api("com.github.yesdog.netty-raknet:netty-raknet-server:81c7c51136")
+	shadowInclude implementation("org.apache.commons:commons-math3:3.6.1")
 
 	// Fabric API. This is technically optional, but you probably want it anyway.
 //	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
@@ -63,10 +71,28 @@ loom {
 }
 
 jar {
-	from("LICENSE") {
-		rename { "${it}_${project.archivesBaseName}"}
-	}
+	from "LICENSE"
 }
+
+shadowJar {
+	dependencies {
+		exclude(dependency('it.unimi.dsi:fastutil'))
+	}
+	minimize()
+	archiveClassifier = "all-dev"
+	configurations = [ project.configurations.shadowInclude ]
+	from "LICENSE"
+}
+
+//noinspection UnnecessaryQualifiedReference
+task("remapShadowJar", type: net.fabricmc.loom.task.RemapJarTask, dependsOn: shadowJar) {
+	input = shadowJar.archiveFile
+	archiveFileName = shadowJar.archiveFileName.get().replaceAll("-dev\\.jar\$", ".jar")
+	addNestedDependencies = true
+	remapAccessWidener = true
+}
+
+assemble.dependsOn(remapShadowJar)
 
 // configure the maven publication
 publishing {
@@ -83,4 +109,9 @@ publishing {
 		// The repositories here will be used for publishing your artifact, not for
 		// retrieving dependencies.
 	}
+}
+
+tasks.withType(AbstractArchiveTask) {
+	preserveFileTimestamps = false
+	reproducibleFileOrder = true
 }

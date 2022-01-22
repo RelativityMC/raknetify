@@ -1,43 +1,16 @@
 package com.ishland.raknetfabric.mixin.client;
 
-import com.google.common.collect.Lists;
 import com.ishland.raknetfabric.Constants;
 import com.ishland.raknetfabric.common.connection.RaknetClientConnectionUtil;
-import com.ishland.raknetfabric.mixin.access.IClientConnection;
-import com.mojang.authlib.GameProfile;
-import net.minecraft.client.gui.screen.ConnectScreen;
-import net.minecraft.client.network.Address;
-import net.minecraft.client.network.AllowedAddressResolver;
 import net.minecraft.client.network.MultiplayerServerListPinger;
 import net.minecraft.client.network.ServerAddress;
 import net.minecraft.client.network.ServerInfo;
 import net.minecraft.network.ClientConnection;
-import net.minecraft.network.NetworkState;
-import net.minecraft.network.listener.ClientQueryPacketListener;
-import net.minecraft.network.packet.c2s.handshake.HandshakeC2SPacket;
-import net.minecraft.network.packet.c2s.query.QueryPingC2SPacket;
-import net.minecraft.network.packet.c2s.query.QueryRequestC2SPacket;
-import net.minecraft.network.packet.s2c.query.QueryPongS2CPacket;
-import net.minecraft.network.packet.s2c.query.QueryResponseS2CPacket;
-import net.minecraft.server.ServerMetadata;
-import net.minecraft.text.LiteralText;
-import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableText;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Util;
-import network.ycc.raknet.RakNet;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.net.InetSocketAddress;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
 
 @Mixin(MultiplayerServerListPinger.class)
 public abstract class MixinMultiplayerServerListPinger {

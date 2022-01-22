@@ -1,46 +1,10 @@
 package com.ishland.raknetfabric.mixin.client;
 
-import com.ishland.raknetfabric.Constants;
-import com.ishland.raknetfabric.common.connection.RaknetClientConnectionUtil;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ConnectScreen;
-import net.minecraft.client.gui.screen.DisconnectedScreen;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.screen.ScreenTexts;
-import net.minecraft.client.network.Address;
-import net.minecraft.client.network.AllowedAddressResolver;
-import net.minecraft.client.network.ClientLoginNetworkHandler;
-import net.minecraft.client.network.ServerAddress;
-import net.minecraft.network.ClientConnection;
-import net.minecraft.network.NetworkState;
-import net.minecraft.network.packet.c2s.handshake.HandshakeC2SPacket;
-import net.minecraft.network.packet.c2s.login.LoginHelloC2SPacket;
-import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableText;
-import org.jetbrains.annotations.Nullable;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-
-import java.net.InetSocketAddress;
-import java.util.Optional;
-import java.util.concurrent.atomic.AtomicInteger;
 
 @Mixin(ConnectScreen.class)
 public abstract class MixinConnectScreen {
-
-    @Shadow @Final private static AtomicInteger CONNECTOR_THREADS_COUNT;
-
-    @Shadow @Final private Screen parent;
-
-    @Shadow private volatile @Nullable ClientConnection connection;
-
-    @Shadow private volatile boolean connectingCancelled;
-
-    @Shadow protected abstract void setStatus(Text status);
 
 //    @Inject(method = "connect(Lnet/minecraft/client/MinecraftClient;Lnet/minecraft/client/network/ServerAddress;)V", at = @At("HEAD"), cancellable = true)
 //    private void interceptRaknet(MinecraftClient client, ServerAddress rawAddress, CallbackInfo ci) {

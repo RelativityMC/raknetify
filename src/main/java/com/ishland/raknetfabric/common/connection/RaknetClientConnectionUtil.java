@@ -7,26 +7,15 @@ import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
-import io.netty.channel.ChannelFactory;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInitializer;
-import io.netty.channel.EventLoopGroup;
 import io.netty.channel.SimpleChannelInboundHandler;
-import io.netty.channel.epoll.Epoll;
-import io.netty.channel.epoll.EpollDatagramChannel;
 import io.netty.channel.socket.nio.NioDatagramChannel;
-import io.netty.handler.timeout.ReadTimeoutHandler;
 import net.minecraft.client.network.MultiplayerServerListPinger;
 import net.minecraft.client.network.ServerInfo;
 import net.minecraft.network.ClientConnection;
-import net.minecraft.network.DecoderHandler;
-import net.minecraft.network.NetworkSide;
-import net.minecraft.network.PacketEncoder;
-import net.minecraft.network.SizePrepender;
-import net.minecraft.network.SplitterHandler;
 import net.minecraft.text.LiteralText;
-import net.minecraft.util.Lazy;
 import net.minecraft.util.math.MathHelper;
 import network.ycc.raknet.RakNet;
 import network.ycc.raknet.client.channel.RakNetClientChannel;
@@ -34,9 +23,6 @@ import network.ycc.raknet.pipeline.UserDataCodec;
 
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
-
-import static net.minecraft.network.ClientConnection.CLIENT_IO_GROUP;
-import static net.minecraft.network.ClientConnection.EPOLL_CLIENT_IO_GROUP;
 
 public class RaknetClientConnectionUtil {
 

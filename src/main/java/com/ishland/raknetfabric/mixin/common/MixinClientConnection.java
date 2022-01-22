@@ -9,8 +9,14 @@ import io.netty.channel.epoll.Epoll;
 import io.netty.channel.epoll.EpollDatagramChannel;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioDatagramChannel;
+import io.netty.util.concurrent.Future;
+import io.netty.util.concurrent.GenericFutureListener;
 import net.minecraft.network.ClientConnection;
+import net.minecraft.network.NetworkSide;
+import net.minecraft.network.Packet;
 import network.ycc.raknet.client.channel.RakNetClientChannel;
+import org.jetbrains.annotations.Nullable;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -20,9 +26,11 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import java.net.InetSocketAddress;
 
 @Mixin(ClientConnection.class)
-public class MixinClientConnection {
+public abstract class MixinClientConnection {
 
-    @Shadow private Channel channel;
+    @Shadow
+    private Channel channel;
+
     @Unique
     private volatile boolean isClosing = false;
 
@@ -36,7 +44,7 @@ public class MixinClientConnection {
         }
     }
 
-    @Redirect(method = "*", at = @At(value = "INVOKE", target = "Lio/netty/channel/Channel;isOpen()Z"))
+    @Redirect(method = "*", at = @At(value = "INVOKE", target = "Lio/netty/channel/Channel;isOpen()Z", remap = false))
     private boolean redirectIsOpen(Channel instance) {
         return this.channel != null && (this.channel.isOpen() && !this.isClosing);
     }

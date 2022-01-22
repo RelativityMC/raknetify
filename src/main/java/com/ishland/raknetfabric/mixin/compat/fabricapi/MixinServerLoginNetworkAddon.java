@@ -1,8 +1,6 @@
 package com.ishland.raknetfabric.mixin.compat.fabricapi;
 
 import net.minecraft.network.ClientConnection;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerLoginNetworkHandler;
 import org.spongepowered.asm.mixin.Dynamic;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;

@@ -10,6 +10,7 @@
     "client.MixinConnectScreen",
     "client.MixinMultiplayerServerListPinger",
     "client.MixinMultiplayerServerListPinger1",
+    "client.hud.MixinDebugHud",
     "common.MixinClientConnection",
     "common.MixinClientConnection1",
     "compat.fabricapi.MixinServerLoginNetworkAddon",
