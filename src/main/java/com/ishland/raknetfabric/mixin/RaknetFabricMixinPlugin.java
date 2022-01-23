@@ -12,7 +12,7 @@ import java.util.Set;
 public class RaknetFabricMixinPlugin implements IMixinConfigPlugin {
     @Override
     public void onLoad(String mixinPackage) {
-
+        System.setProperty("raknetserver.maxPacketLoss", String.valueOf(Integer.MAX_VALUE));
     }
 
     @Override

@@ -61,6 +61,7 @@ public class SimpleMetricsLogger implements RakNet.MetricsLogger {
     @Override
     public void bytesOut(int delta) {
         bytesOut += delta;
+        tick();
     }
 
     @Override
@@ -106,9 +107,16 @@ public class SimpleMetricsLogger implements RakNet.MetricsLogger {
 
     // ========== Calculations ==========
 
+    private long lastMeasureMillis = System.currentTimeMillis();
+
     private synchronized void tick() {
+        final long measureMillis = System.currentTimeMillis();
+        final long deltaTime = measureMillis - lastMeasureMillis;
+        if (deltaTime < 990) return; // throttle
+        this.lastMeasureMillis = measureMillis;
+
         tickErrorRate();
-        tickRXTX();
+        tickRXTX(deltaTime);
     }
 
     private final DescriptiveStatistics errorStats = new DescriptiveStatistics(16);
@@ -136,17 +144,13 @@ public class SimpleMetricsLogger implements RakNet.MetricsLogger {
     private final DescriptiveStatistics txStats = new DescriptiveStatistics(8);
     private long lastFramesIn = 0L;
     private long lastFramesOut = 0L;
-    private long lastMeasureMillis = System.currentTimeMillis();
     private volatile int measureRX = 0;
     private volatile int measureTX = 0;
 
-    private void tickRXTX() {
+    private void tickRXTX(long deltaTime) {
+
         final long framesIn = this.framesIn;
         final long framesOut = this.framesOut;
-        final long measureMillis = System.currentTimeMillis();
-
-        final long deltaTime = measureMillis - lastMeasureMillis;
-        if (deltaTime < 980) return; // throttle
 
         final double timeDeltaS = deltaTime / 1000.0;
 
@@ -158,7 +162,6 @@ public class SimpleMetricsLogger implements RakNet.MetricsLogger {
 
         this.lastFramesIn = framesIn;
         this.lastFramesOut = framesOut;
-        this.lastMeasureMillis = measureMillis;
     }
 
     // ========== Getters ==========
