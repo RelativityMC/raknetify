@@ -4,7 +4,7 @@
   "version": "${version}",
 
   "name": "RaknetFabric",
-  "description": "Use Raknet as Minecraft networking backend. ",
+  "description": "A Fabric mod that allows using RakNet as Minecraft networking backend. ",
   "authors": [
     "ishland"
   ],
