@@ -2,6 +2,7 @@
   "required": true,
   "minVersion": "0.8",
   "package": "com.ishland.raknetfabric.mixin",
+  "plugin": "com.ishland.raknetfabric.mixin.RaknetFabricMixinPlugin",
   "compatibilityLevel": "JAVA_16",
   "mixinPriority": 1010,
   "mixins": [
