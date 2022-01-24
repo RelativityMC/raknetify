@@ -74,6 +74,7 @@ public abstract class MixinClientConnection {
 
     @Inject(method = "exceptionCaught", at = @At("HEAD"))
     private void onExceptionCaught(ChannelHandlerContext context, Throwable ex, CallbackInfo ci) {
+        System.out.println(ex.toString());
         ex.printStackTrace();
     }
 
