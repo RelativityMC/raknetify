@@ -13,6 +13,7 @@ public class RaknetConnectionUtil {
 
     public static void initChannel(Channel channel) {
         if (channel.config() instanceof RakNet.Config config) {
+            config.setMTU(Constants.DEFAULT_MTU);
             config.setMaxQueuedBytes(Constants.MAX_QUEUED_SIZE);
             config.setMetrics(new SimpleMetricsLogger());
             channel.pipeline().addLast("raknet_backend", new UserDataCodec(Constants.RAKNET_PACKET_ID));

@@ -28,15 +28,16 @@ public class ViaFabricCompatInjector {
                 final String handlerEncoderName = (String) commonTransformerClass.getField("HANDLER_ENCODER_NAME").get(null);
                 final String handlerDecoderName = (String) commonTransformerClass.getField("HANDLER_DECODER_NAME").get(null);
 
-                final Class<? extends MessageToMessageEncoder<ByteBuf>> fabricEncodeHandlerClass = (Class<? extends MessageToMessageEncoder<ByteBuf>>) Class.forName("com.viaversion.fabric.common.handler.FabricEncodeHandler");
+                @SuppressWarnings("unchecked") final Class<? extends MessageToMessageEncoder<ByteBuf>> fabricEncodeHandlerClass = (Class<? extends MessageToMessageEncoder<ByteBuf>>) Class.forName("com.viaversion.fabric.common.handler.FabricEncodeHandler");
                 final MessageToMessageEncoder<ByteBuf> fabricEncodeHandler = fabricEncodeHandlerClass.getConstructor(userConnectionClass).newInstance(user);
 
-                final Class<? extends MessageToMessageDecoder<ByteBuf>> fabricDecodeHandlerClass = (Class<? extends MessageToMessageDecoder<ByteBuf>>) Class.forName("com.viaversion.fabric.common.handler.FabricDecodeHandler");
+                @SuppressWarnings("unchecked") final Class<? extends MessageToMessageDecoder<ByteBuf>> fabricDecodeHandlerClass = (Class<? extends MessageToMessageDecoder<ByteBuf>>) Class.forName("com.viaversion.fabric.common.handler.FabricDecodeHandler");
                 final MessageToMessageDecoder<ByteBuf> fabricDecodeHandler = fabricDecodeHandlerClass.getConstructor(userConnectionClass).newInstance(user);
 
                 channel.pipeline().addBefore("encoder", handlerEncoderName, fabricEncodeHandler);
                 channel.pipeline().addBefore("decoder", handlerDecoderName, fabricDecodeHandler);
             } catch (Throwable t) {
+                //noinspection RedundantStringFormatCall
                 System.err.println(String.format("Could not inject ViaVersion compatibility into RakNet channel %s: %s", channel, t));
                 t.printStackTrace();
             }
