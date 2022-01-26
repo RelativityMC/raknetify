@@ -47,9 +47,31 @@ public class RaknetMultiChannel {
             "net/minecraft/class_2736", // ScoreboardDisplayS2C
             "net/minecraft/class_2751", // ScoreboardDisplayObjectiveUpdateS2C
             "net/minecraft/class_2757", // ScoreboardPlayerUpdateS2C
-
             "net/minecraft/class_2641", // CommandTreeS2C
             "net/minecraft/class_2639", // CommandSuggestionsS2C
+
+            "net/minecraft/class_2805", // RequestCommandCompletionsC2S
+            "net/minecraft/class_2811", // ButtonClickC2S
+            "net/minecraft/class_2797", // ChatMessageC2S
+            "net/minecraft/class_2813", // ClickSlotC2S
+            "net/minecraft/class_2848", // ClientCommandC2S
+            "net/minecraft/class_2803", // ClientSettingsC2S
+            "net/minecraft/class_2803", // ClientStatusC2S
+            "net/minecraft/class_4210", // UpdateDifficultyC2S
+            "net/minecraft/class_4211", // UpdateDifficultyLockC2S
+
+            "net/minecraft/class_2846", // PlayerActionC2S
+            "net/minecraft/class_2851", // PlayerInputC2S
+            "net/minecraft/class_2885", // PlayerInteractBlockC2S
+            "net/minecraft/class_2886", // PlayerInteractItemC2S
+            "net/minecraft/class_2824", // PlayerInteractEntityC2S
+            "net/minecraft/class_2828", // PlayerMoveC2S
+            "net/minecraft/class_2795", // QueryBlockNbtC2S
+            "net/minecraft/class_2822", // QueryEntityNbtC2S
+            "net/minecraft/class_2884", // SpectatorTeleportC2S
+            "net/minecraft/class_2793", // TeleportConfirmC2S
+
+            "net/minecraft/class_2774", // NbtQueryResponseS2C
 
             "net/minecraft/class_2645", // CloseScreenS2C
             "net/minecraft/class_2648", // OpenHorseScreenS2C
@@ -57,8 +79,26 @@ public class RaknetMultiChannel {
             "net/minecraft/class_2651", // ScreenHandlerPropertyUpdateS2C
             "net/minecraft/class_2653", // ScreenHandlerSlotUpdateS2C
             "net/minecraft/class_3895", // OpenWrittenBookS2C
-
             "net/minecraft/class_2649", // InventoryS2C
+            "net/minecraft/class_2713", // UnlockRecipesS2C
+            "net/minecraft/class_2735", // UpdateSelectedSlotS2C
+
+            "net/minecraft/class_2853", // RecipeBookDataC2S
+            "net/minecraft/class_5427", // RecipeCategoryOptionsC2S
+            "net/minecraft/class_2855", // RenameItemC2S
+            "net/minecraft/class_2815", // CloseHandledScreenC2S
+            "net/minecraft/class_2873", // CreativeInventoryActionC2S
+            "net/minecraft/class_2840", // CraftRequestC2S
+            "net/minecraft/class_2838", // PickFromInventoryC2S
+            "net/minecraft/class_2863", // SelectMerchantTradeC2S
+            "net/minecraft/class_2866", // UpdateBeaconC2S
+            "net/minecraft/class_2870", // UpdateCommandBlockC2S
+            "net/minecraft/class_2871", // UpdateCommandBlockMinecartC2S
+            "net/minecraft/class_3753", // UpdateJigsawC2S
+            "net/minecraft/class_2842", // UpdatePlayerAbilitiesC2S
+            "net/minecraft/class_2868", // UpdateSelectedSlotC2S
+            "net/minecraft/class_2877", // UpdateSignC2S
+            "net/minecraft/class_2875", // UpdateStructureBlockC2S
 
             "net/minecraft/class_2707", // LookAtS2C
 
@@ -66,10 +106,6 @@ public class RaknetMultiChannel {
 
             "net/minecraft/class_2788", // SynchronizeRecipesS2C
             "net/minecraft/class_2790", // SynchronizeTagsS2C
-            "net/minecraft/class_2713", // UnlockRecipesS2C
-            "net/minecraft/class_2735", // UpdateSelectedSlotS2C
-
-            "net/minecraft/class_2868", // UpdateSelectedSlotC2S
     });
 
     // Primarily for packets not very critical to interactions
@@ -80,8 +116,9 @@ public class RaknetMultiChannel {
             "net/minecraft/class_2765", // PlaySoundFromEntityS2C
             "net/minecraft/class_2767", // PlaySoundS2C
             "net/minecraft/class_2770", // StopSoundS2C
-
     });
+
+    // TODO entity related
 
     private static final Set<Class<?>> unordered = createClassSet(new String[]{
             "net/minecraft/class_2670", // KeepAliveS2C
@@ -94,6 +131,8 @@ public class RaknetMultiChannel {
             "net/minecraft/class_2856", // ResourcePackStatusC2S
 
             "net/minecraft/class_2617", // StatisticsS2C
+            "net/minecraft/class_2859", // AdvancementTabC2S
+            "net/minecraft/class_2729", // SelectAdvancementTabS2C
     });
 
 }
