@@ -1,5 +1,6 @@
 package com.ishland.raknetfabric.common.connection;
 
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.MappingResolver;
 
@@ -180,5 +181,16 @@ public class RaknetMultiChannel {
             "net/minecraft/class_2859", // AdvancementTabC2S
             "net/minecraft/class_2729", // SelectAdvancementTabS2C
     });
+
+    private static final Object2IntOpenHashMap<Class<?>> classToChannelIdOverride = new Object2IntOpenHashMap<>();
+
+    static {
+        channel1.forEach(clazz -> classToChannelIdOverride.put(clazz, 1));
+        channel2.forEach(clazz -> classToChannelIdOverride.put(clazz, 2));
+//        channel3.forEach(clazz -> classToChannelIdOverride.put(clazz, 3)); TODO entity sync
+        unordered.forEach(clazz -> classToChannelIdOverride.put(clazz, -1));
+    }
+
+
 
 }
