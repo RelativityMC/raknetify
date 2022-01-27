@@ -1,5 +1,6 @@
 package com.ishland.raknetfabric.common.connection;
 
+import com.google.common.base.Preconditions;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.MappingResolver;
@@ -170,7 +171,7 @@ public class RaknetMultiChannel {
             "net/minecraft/class_2879", // HandSwingC2S
     });
 
-    private static final Set<Class<?>> unordered = createClassSet(new String[]{
+    private static final Set<Class<?>> channel4 = createClassSet(new String[]{
             "net/minecraft/class_2670", // KeepAliveS2C
             "net/minecraft/class_2827", // KeepAliveC2S
             "net/minecraft/class_2661", // DisconnectS2C
@@ -188,12 +189,38 @@ public class RaknetMultiChannel {
     private static final Object2IntOpenHashMap<Class<?>> classToChannelIdOverride = new Object2IntOpenHashMap<>();
 
     static {
-        channel1.forEach(clazz -> classToChannelIdOverride.put(clazz, 1));
-        channel2.forEach(clazz -> classToChannelIdOverride.put(clazz, 2));
+        classToChannelIdOverride.defaultReturnValue(0);
+//        channel1.forEach(clazz -> classToChannelIdOverride.put(clazz, 1));
+//        channel2.forEach(clazz -> classToChannelIdOverride.put(clazz, 2));
 //        channel3.forEach(clazz -> classToChannelIdOverride.put(clazz, 3)); TODO entity sync
-        unordered.forEach(clazz -> classToChannelIdOverride.put(clazz, -1));
+//        channel4.forEach(clazz -> classToChannelIdOverride.put(clazz, 4));
     }
 
+    private static final ThreadLocal<Class<?>> currentPacketClass = new ThreadLocal<>();
+
+    public static void setCurrentPacketClass(Class<?> clazz) {
+        Preconditions.checkNotNull(clazz, "clazz");
+        if (currentPacketClass.get() != null) throw new IllegalStateException("Already set");
+        currentPacketClass.set(clazz);
+    }
+
+    public static void clearCurrentPacketClass(Class<?> clazz) {
+        Preconditions.checkNotNull(clazz);
+        final Class<?> threadLocalClazz = currentPacketClass.get();
+        if (threadLocalClazz == null) throw new IllegalArgumentException("Not set");
+        if (threadLocalClazz != clazz) throw new IllegalArgumentException("Mismatch");
+        currentPacketClass.set(null);
+    }
+
+
+    public static int getPacketChannelOverride() {
+        final Class<?> clazz = currentPacketClass.get();
+        if (clazz == null) {
+            System.err.println("Warning: Tried to send packet without setting packet class");
+            return 0;
+        }
+        return classToChannelIdOverride.getInt(clazz);
+    }
 
 
 }

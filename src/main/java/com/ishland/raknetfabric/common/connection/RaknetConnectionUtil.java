@@ -16,13 +16,14 @@ public class RaknetConnectionUtil {
             config.setMTU(Constants.DEFAULT_MTU);
             config.setMaxQueuedBytes(Constants.MAX_QUEUED_SIZE);
             config.setMetrics(new SimpleMetricsLogger());
-            channel.pipeline().addLast("raknet_backend", new UserDataCodec(Constants.RAKNET_PACKET_ID));
+            channel.pipeline().addLast("raknetfabric-multi-channel-data-codec", new MultiChannellingDataCodec(Constants.RAKNET_PACKET_ID));
         }
     }
 
     public static void postInitChannel(Channel channel, boolean isClientSide) {
         if (channel.config() instanceof RakNet.Config) {
             ViaFabricCompatInjector.inject(channel, isClientSide);
+            channel.pipeline().addLast("raknetfabric-multi-channel-packet-cature", new MultiChannellingPacketCapture());
         }
     }
 
