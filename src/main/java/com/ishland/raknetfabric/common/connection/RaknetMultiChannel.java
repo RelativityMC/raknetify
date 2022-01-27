@@ -87,6 +87,7 @@ public class RaknetMultiChannel {
             "net/minecraft/class_2735", // UpdateSelectedSlotS2C
             "net/minecraft/class_3943", // SetTradeOffersS2C
 
+            "net/minecraft/class_2820", // BookUpdateC2S
             "net/minecraft/class_2853", // RecipeBookDataC2S
             "net/minecraft/class_5427", // RecipeCategoryOptionsC2S
             "net/minecraft/class_2855", // RenameItemC2S
@@ -164,7 +165,9 @@ public class RaknetMultiChannel {
             "net/minecraft/class_2734", // SetCameraEntityS2C
             "net/minecraft/class_2692", // VehicleMoveS2C
 
+            "net/minecraft/class_2836", // BoatPaddleStateC2S
             "net/minecraft/class_2833", // VehicleMoveC2S
+            "net/minecraft/class_2879", // HandSwingC2S
     });
 
     private static final Set<Class<?>> unordered = createClassSet(new String[]{
