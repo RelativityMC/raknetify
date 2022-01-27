@@ -41,7 +41,7 @@ public class RaknetMultiChannel {
             "net/minecraft/class_2635", // GameMessageS2CPacket
             "net/minecraft/class_5894", // OverlayMessageS2C
             "net/minecraft/class_2748", // ExperienceBarUpdateS2C
-            "net/minecraft/class_2749", // HealthUpdateS2CPacket
+            "net/minecraft/class_2749", // HealthUpdateS2C
             "net/minecraft/class_2772", // PlayerListHeaderS2C
             "net/minecraft/class_2703", // PlayerListS2C
             "net/minecraft/class_2736", // ScoreboardDisplayS2C
@@ -59,6 +59,8 @@ public class RaknetMultiChannel {
             "net/minecraft/class_2803", // ClientStatusC2S
             "net/minecraft/class_4210", // UpdateDifficultyC2S
             "net/minecraft/class_4211", // UpdateDifficultyLockC2S
+            "net/minecraft/class_4463", // PlayerActionResponseS2C
+            "net/minecraft/class_2708", // PlayerPositionLookS2C
 
             "net/minecraft/class_2846", // PlayerActionC2S
             "net/minecraft/class_2851", // PlayerInputC2S
@@ -82,6 +84,7 @@ public class RaknetMultiChannel {
             "net/minecraft/class_2649", // InventoryS2C
             "net/minecraft/class_2713", // UnlockRecipesS2C
             "net/minecraft/class_2735", // UpdateSelectedSlotS2C
+            "net/minecraft/class_3943", // SetTradeOffersS2C
 
             "net/minecraft/class_2853", // RecipeBookDataC2S
             "net/minecraft/class_5427", // RecipeCategoryOptionsC2S
@@ -97,15 +100,26 @@ public class RaknetMultiChannel {
             "net/minecraft/class_3753", // UpdateJigsawC2S
             "net/minecraft/class_2842", // UpdatePlayerAbilitiesC2S
             "net/minecraft/class_2868", // UpdateSelectedSlotC2S
-            "net/minecraft/class_2877", // UpdateSignC2S
+//            "net/minecraft/class_2693", // SignEditorOpenS2C
+//            "net/minecraft/class_2877", // UpdateSignC2S
             "net/minecraft/class_2875", // UpdateStructureBlockC2S
 
             "net/minecraft/class_2707", // LookAtS2C
 
             "net/minecraft/class_2761", // WorldTimeUpdateS2C
+            "net/minecraft/class_2632", // DifficultyS2C
+            "net/minecraft/class_5900", // TeamS2C
 
             "net/minecraft/class_2788", // SynchronizeRecipesS2C
             "net/minecraft/class_2790", // SynchronizeTagsS2C
+            "net/minecraft/class_6682", // SimulationDistanceS2C
+
+            "net/minecraft/class_5889", // WorldBorderInitializeS2C
+            "net/minecraft/class_5895", // WorldBorderCenterChangedS2C
+            "net/minecraft/class_5896", // WorldBorderInterpolateSizeS2C
+            "net/minecraft/class_5897", // WorldBorderSizeChangedS2C
+            "net/minecraft/class_5898", // WorldBorderWarningTimeChangedS2C
+            "net/minecraft/class_5899", // WorldBorderWarningBlockChangedS2C
     });
 
     // Primarily for packets not very critical to interactions
@@ -118,7 +132,39 @@ public class RaknetMultiChannel {
             "net/minecraft/class_2770", // StopSoundS2C
     });
 
-    // TODO entity related
+    // Entities related stuff
+    private static final Set<Class<?>> channel3 = createClassSet(new String[]{
+            "net/minecraft/class_5890", // EndCombatS2C
+            "net/minecraft/class_5891", // EnterCombatS2C
+            "net/minecraft/class_2716", // EntitiesDestroyS2C
+            "net/minecraft/class_2616", // EntityAnimationS2C
+            "net/minecraft/class_2663", // EntityStatusS2C
+            "net/minecraft/class_2684$class_2685", // EntityPacketS2C$MoveRelative
+            "net/minecraft/class_2684$class_2687", // EntityPacketS2C$Rotate
+            "net/minecraft/class_2684$class_2686", // EntityPacketS2C$RotateAndMoveRelative
+            "net/minecraft/class_2726", // EntitySetHeadYawS2C
+            "net/minecraft/class_2739", // EntityTrackerUpdateS2C
+            "net/minecraft/class_2740", // EntityAttachS2C
+            "net/minecraft/class_2743", // EntityVelocityUpdateS2C
+            "net/minecraft/class_2744", // EntityEquipmentUpdateS2C
+            "net/minecraft/class_2752", // EntityPassengerSetS2C
+            "net/minecraft/class_2777", // EntityPositionS2C
+            "net/minecraft/class_2781", // EntityAttributesS2C
+            "net/minecraft/class_2783", // EntityStatusEffectS2C
+            "net/minecraft/class_2718", // RemoveEntityStatusEffectS2C
+            "net/minecraft/class_2610", // MobSpawnS2C
+            "net/minecraft/class_2612", // PaintingSpawnS2C
+
+            "net/minecraft/class_2664", // ExplosionS2C
+            "net/minecraft/class_2678", // GameJoinS2C
+            "net/minecraft/class_2668", // GameStateChangeS2C
+            "net/minecraft/class_2775", // ItemPickupAnimationS2C
+            "net/minecraft/class_2696", // PlayerAbilitiesS2C
+            "net/minecraft/class_2734", // SetCameraEntityS2C
+            "net/minecraft/class_2692", // VehicleMoveS2C
+
+            "net/minecraft/class_2833", // VehicleMoveC2S
+    });
 
     private static final Set<Class<?>> unordered = createClassSet(new String[]{
             "net/minecraft/class_2670", // KeepAliveS2C
