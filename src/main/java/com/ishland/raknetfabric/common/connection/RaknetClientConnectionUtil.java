@@ -57,7 +57,7 @@ public class RaknetClientConnectionUtil {
 //                                RakNet.config(channel).setMaxQueuedBytes(Constants.MAX_QUEUED_SIZE); // RaknetFabric
 //
 //                                channel.pipeline()
-//                                        .addLast("raknet_backend", new UserDataCodec(Constants.RAKNET_PACKET_ID)) // RaknetFabric
+//                                        .addLast("raknet_backend", new UserDataCodec(Constants.RAKNET_GAME_PACKET_ID)) // RaknetFabric
 //                                        .addLast("timeout", new ReadTimeoutHandler(30))
 //                                        .addLast("splitter", new SplitterHandler())
 //                                        .addLast("decoder", new DecoderHandler(NetworkSide.CLIENTBOUND))
@@ -95,7 +95,7 @@ public class RaknetClientConnectionUtil {
                         RakNet.config(channel).setMaxQueuedBytes(Constants.MAX_QUEUED_SIZE); // RaknetFabric
 
                         channel.pipeline()
-                                .addLast("raknet_backend", new UserDataCodec(Constants.RAKNET_PACKET_ID)) // RaknetFabric
+                                .addLast("raknet_backend", new UserDataCodec(Constants.RAKNET_GAME_PACKET_ID)) // RaknetFabric
                                 .addLast(new SimpleChannelInboundHandler<ByteBuf>() {
                                     @Override
                                     public void channelActive(ChannelHandlerContext context) throws Exception {

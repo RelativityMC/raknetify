@@ -63,7 +63,7 @@ public abstract class MixinServerNetworkIo {
 //                                                    RakNet.config(channel).setMaxQueuedBytes(Constants.MAX_QUEUED_SIZE); // RaknetFabric
 //
 //                                                    channel.pipeline()
-//                                                            .addLast("raknet_backend", new UserDataCodec(Constants.RAKNET_PACKET_ID)) // RaknetFabric
+//                                                            .addLast("raknet_backend", new UserDataCodec(Constants.RAKNET_GAME_PACKET_ID)) // RaknetFabric
 //                                                            .addLast("timeout", new ReadTimeoutHandler(30))
 //                                                            .addLast("legacy_query", new LegacyQueryHandler((ServerNetworkIo) (Object) MixinServerNetworkIo.this))
 //                                                            .addLast("splitter", new SplitterHandler())

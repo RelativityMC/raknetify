@@ -4,7 +4,6 @@ import com.ishland.raknetfabric.Constants;
 import com.ishland.raknetfabric.common.compat.viafabric.ViaFabricCompatInjector;
 import io.netty.channel.Channel;
 import network.ycc.raknet.RakNet;
-import network.ycc.raknet.pipeline.UserDataCodec;
 
 public class RaknetConnectionUtil {
 
@@ -16,7 +15,8 @@ public class RaknetConnectionUtil {
             config.setMTU(Constants.DEFAULT_MTU);
             config.setMaxQueuedBytes(Constants.MAX_QUEUED_SIZE);
             config.setMetrics(new SimpleMetricsLogger());
-            channel.pipeline().addLast("raknetfabric-multi-channel-data-codec", new MultiChannellingDataCodec(Constants.RAKNET_PACKET_ID));
+            channel.pipeline().addLast("raknetfabric-synchronization-layer", new SynchronizationLayer());
+            channel.pipeline().addLast("raknetfabric-multi-channel-data-codec", new MultiChannellingDataCodec(Constants.RAKNET_GAME_PACKET_ID));
         }
     }
 
