@@ -1,6 +1,8 @@
 package com.ishland.raknetfabric.mixin.server;
 
+import com.ishland.raknetfabric.common.connection.MultiChannellingDataCodec;
 import com.ishland.raknetfabric.mixin.access.IClientConnection;
+import io.netty.channel.Channel;
 import net.minecraft.network.ClientConnection;
 import net.minecraft.server.PlayerManager;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -18,6 +20,17 @@ public class MixinPlayerManager {
         if (((IClientConnection) connection).getChannel().config() instanceof RakNet.Config config) {
             System.out.println(String.format("%s logged in via RakNet, mtu %d", player.getName().getString(), config.getMTU()));
         }
+    }
+
+    @Inject(method = "onPlayerConnect", at = @At("RETURN"))
+    private void postJoin(ClientConnection connection, ServerPlayerEntity player, CallbackInfo ci) {
+        final Channel channel = ((IClientConnection) connection).getChannel();
+        if (channel == null) {
+            //noinspection RedundantStringFormatCall
+            System.err.println("Warning: %s don't have valid channel when logged in, not sending sync packet".formatted(this));
+            return;
+        }
+        channel.write(MultiChannellingDataCodec.START_MULTICHANNEL);
     }
 
 }

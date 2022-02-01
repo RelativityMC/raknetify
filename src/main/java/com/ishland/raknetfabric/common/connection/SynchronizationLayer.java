@@ -8,6 +8,7 @@ import io.netty.channel.ChannelPromise;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectBidirectionalIterator;
 import it.unimi.dsi.fastutil.objects.ObjectSortedSet;
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceLinkedOpenHashMap;
@@ -156,6 +157,7 @@ public class SynchronizationLayer extends ChannelDuplexHandler {
     }
 
     private final Reference2ReferenceLinkedOpenHashMap<ChannelPromise, Object> queue = new Reference2ReferenceLinkedOpenHashMap<>();
+    private final ObjectArrayList<Frame> queuedFrames = new ObjectArrayList<>();
     private boolean isWaitingForResponse = false;
 
     @Override
@@ -194,18 +196,12 @@ public class SynchronizationLayer extends ChannelDuplexHandler {
     private void dropSenderPackets() {
         int droppedFrames = 0;
 
-        for (ObjectBidirectionalIterator<Frame> iterator = this.reliabilityHandlerFrameQueue.iterator(); iterator.hasNext(); ) {
-            Frame frame = iterator.next();
-            if (frame.getReliability().isOrdered && !channelToIgnore.contains(frame.getOrderChannel())) {
-                final ChannelPromise promise1 = frame.getPromise();
-                if (promise1 != null) promise1.trySuccess();
-                iterator.remove();
-                frame.release();
-                droppedFrames++;
-            }
-        }
-
         ArrayList<Frame> retainedFrameList = new ArrayList<>();
+
+        //noinspection CollectionAddAllCanBeReplacedWithConstructor
+        retainedFrameList.addAll(this.reliabilityHandlerFrameQueue);
+        this.reliabilityHandlerFrameQueue.clear();
+
         for (FrameSet frameSet : this.reliabilityHandlerPendingFrameSets.values()) {
             frameSet.createFrames(retainedFrameList::add);
         }
@@ -220,7 +216,7 @@ public class SynchronizationLayer extends ChannelDuplexHandler {
                 droppedFrames++;
             }
         }
-        this.reliabilityHandlerFrameQueue.addAll(retainedFrameList);
+        this.queuedFrames.addAll(retainedFrameList);
 
         System.out.println("Dropping %d frames".formatted(droppedFrames));
 
@@ -242,8 +238,14 @@ public class SynchronizationLayer extends ChannelDuplexHandler {
             ctx.channel().eventLoop().execute(() -> flushQueue(ctx));
             return;
         }
-        System.out.println("Flushing %d queued packets as synchronization finished".formatted(this.queue.size()));
+
         this.isWaitingForResponse = false;
+
+        System.out.println("Picking up %d queued frames".formatted(this.queuedFrames.size()));
+        this.reliabilityHandlerFrameQueue.addAll(this.queuedFrames);
+        this.queuedFrames.clear();
+
+        System.out.println("Flushing %d queued packets as synchronization finished".formatted(this.queue.size()));
         while (!this.queue.isEmpty()) {
             final ChannelPromise promise = this.queue.firstKey();
             final Object msg = this.queue.removeFirst();

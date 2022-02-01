@@ -32,7 +32,7 @@ public class RaknetMultiChannel {
         return classHashSet; // no read-only wrapper for performance
     }
 
-    // Primarily used for interactions
+    // Primarily used for interactions independent to world
     private static final Set<Class<?>> channel1 = createClassSet(new String[]{
             "net/minecraft/class_2629", // BossBarS2C
             "net/minecraft/class_5888", // ClearTitleS2C
@@ -66,6 +66,20 @@ public class RaknetMultiChannel {
 
             "net/minecraft/class_2846", // PlayerActionC2S
             "net/minecraft/class_2851", // PlayerInputC2S
+
+            "net/minecraft/class_2707", // LookAtS2C
+
+            "net/minecraft/class_2761", // WorldTimeUpdateS2C
+            "net/minecraft/class_2632", // DifficultyS2C
+            "net/minecraft/class_5900", // TeamS2C
+
+            "net/minecraft/class_2788", // SynchronizeRecipesS2C
+            "net/minecraft/class_2790", // SynchronizeTagsS2C
+            "net/minecraft/class_6682", // SimulationDistanceS2C
+    });
+
+    // Primarily used for interactions dependent to world
+    private static final Set<Class<?>> channel2 = createClassSet(new String[]{
             "net/minecraft/class_2885", // PlayerInteractBlockC2S
             "net/minecraft/class_2886", // PlayerInteractItemC2S
             "net/minecraft/class_2824", // PlayerInteractEntityC2S
@@ -107,16 +121,6 @@ public class RaknetMultiChannel {
 //            "net/minecraft/class_2877", // UpdateSignC2S
             "net/minecraft/class_2875", // UpdateStructureBlockC2S
 
-            "net/minecraft/class_2707", // LookAtS2C
-
-            "net/minecraft/class_2761", // WorldTimeUpdateS2C
-            "net/minecraft/class_2632", // DifficultyS2C
-            "net/minecraft/class_5900", // TeamS2C
-
-            "net/minecraft/class_2788", // SynchronizeRecipesS2C
-            "net/minecraft/class_2790", // SynchronizeTagsS2C
-            "net/minecraft/class_6682", // SimulationDistanceS2C
-
             "net/minecraft/class_5889", // WorldBorderInitializeS2C
             "net/minecraft/class_5895", // WorldBorderCenterChangedS2C
             "net/minecraft/class_5896", // WorldBorderInterpolateSizeS2C
@@ -126,7 +130,7 @@ public class RaknetMultiChannel {
     });
 
     // Primarily for packets not very critical to interactions
-    private static final Set<Class<?>> channel2 = createClassSet(new String[]{
+    private static final Set<Class<?>> channel3 = createClassSet(new String[]{
             "net/minecraft/class_2683", // MapUpdateS2C
             "net/minecraft/class_2675", // ParticleS2C
             "net/minecraft/class_2660", // PlaySoundIdS2C
@@ -136,7 +140,7 @@ public class RaknetMultiChannel {
     });
 
     // Entities related stuff
-    private static final Set<Class<?>> channel3 = createClassSet(new String[]{
+    private static final Set<Class<?>> channel4 = createClassSet(new String[]{
             "net/minecraft/class_5890", // EndCombatS2C
             "net/minecraft/class_5891", // EnterCombatS2C
             "net/minecraft/class_2716", // EntitiesDestroyS2C
@@ -171,7 +175,7 @@ public class RaknetMultiChannel {
             "net/minecraft/class_2879", // HandSwingC2S
     });
 
-    private static final Set<Class<?>> channel4 = createClassSet(new String[]{
+    private static final Set<Class<?>> channel5 = createClassSet(new String[]{
             "net/minecraft/class_2670", // KeepAliveS2C
             "net/minecraft/class_2827", // KeepAliveC2S
             "net/minecraft/class_2661", // DisconnectS2C
@@ -194,6 +198,7 @@ public class RaknetMultiChannel {
         channel2.forEach(clazz -> classToChannelIdOverride.put(clazz, 2));
         channel3.forEach(clazz -> classToChannelIdOverride.put(clazz, 3));
         channel4.forEach(clazz -> classToChannelIdOverride.put(clazz, 4));
+        channel5.forEach(clazz -> classToChannelIdOverride.put(clazz, 5));
     }
 
     private static final ThreadLocal<Class<?>> currentPacketClass = new ThreadLocal<>();
