@@ -6,6 +6,7 @@ import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPromise;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
@@ -16,6 +17,7 @@ import network.ycc.raknet.frame.Frame;
 import network.ycc.raknet.frame.FrameData;
 import network.ycc.raknet.packet.FrameSet;
 import network.ycc.raknet.packet.FramedPacket;
+import network.ycc.raknet.pipeline.FrameJoiner;
 import network.ycc.raknet.pipeline.FrameOrderIn;
 import network.ycc.raknet.pipeline.FrameOrderOut;
 import network.ycc.raknet.pipeline.ReliabilityHandler;
@@ -43,17 +45,21 @@ public class SynchronizationLayer extends ChannelDuplexHandler {
     public static final Object SYNC_REQUEST_OBJECT = new Object();
 
     private static final Class<?> CLASS_QUEUE;
+    private static final Class<?> CLASS_FRAME_JOINER_BUILDER;
     private static final Field FIELD_QUEUE_LAST_ORDER_INDEX;
     private static final Field FIELD_RELIABILITY_NEXT_SEND_SEQ_ID;
     private static final Field FIELD_RELIABILITY_LAST_RECEIVED_SEQ_ID;
+    private static final Field FIELD_FRAME_JOINER_BUILDER_SAMPLE_PACKET;
 
     static {
         try {
             CLASS_QUEUE = Class.forName("network.ycc.raknet.pipeline.FrameOrderIn$OrderedChannelPacketQueue");
+            CLASS_FRAME_JOINER_BUILDER = Class.forName("network.ycc.raknet.pipeline.FrameJoiner$Builder");
 
             FIELD_QUEUE_LAST_ORDER_INDEX = accessible(CLASS_QUEUE.getDeclaredField("lastOrderIndex"));
             FIELD_RELIABILITY_NEXT_SEND_SEQ_ID = accessible(ReliabilityHandler.class.getDeclaredField("nextSendSeqId"));
             FIELD_RELIABILITY_LAST_RECEIVED_SEQ_ID = accessible(ReliabilityHandler.class.getDeclaredField("lastReceivedSeqId"));
+            FIELD_FRAME_JOINER_BUILDER_SAMPLE_PACKET = accessible(CLASS_FRAME_JOINER_BUILDER.getDeclaredField("samplePacket"));
 
         } catch (Throwable t) {
             throw new RuntimeException(t);
@@ -79,6 +85,8 @@ public class SynchronizationLayer extends ChannelDuplexHandler {
     private ReliabilityHandler reliabilityHandler;
     private ObjectSortedSet<Frame> reliabilityHandlerFrameQueue;
     private Int2ObjectMap<FrameSet> reliabilityHandlerPendingFrameSets;
+    private FrameJoiner frameJoiner;
+    private Int2ObjectOpenHashMap<?> frameJoinerPendingPackets;
     private int channelsLength;
     private boolean initialized = false;
 
@@ -110,6 +118,9 @@ public class SynchronizationLayer extends ChannelDuplexHandler {
             int originalChannelsLength = this.frameOrderOutNextOrderIndex.length;
             this.channelsLength = (int) (originalChannelsLength - this.channelToIgnore.intStream().filter(value -> value < originalChannelsLength).count());
 
+            this.frameJoiner = ctx.pipeline().get(FrameJoiner.class);
+            this.frameJoinerPendingPackets = (Int2ObjectOpenHashMap<?>) accessible(FrameJoiner.class.getDeclaredField("pendingPackets")).get(this.frameJoiner);
+
             initialized = true;
         } catch (Throwable t) {
             throw new RuntimeException(t);
@@ -139,6 +150,13 @@ public class SynchronizationLayer extends ChannelDuplexHandler {
                                             orderIndex
                                     ));
                             FIELD_QUEUE_LAST_ORDER_INDEX.set(frameOrderInQueues[channel], orderIndex);
+                            this.frameJoinerPendingPackets.values().removeIf(value -> {
+                                try {
+                                    return ((Frame) FIELD_FRAME_JOINER_BUILDER_SAMPLE_PACKET.get(value)).getOrderChannel() == channel;
+                                } catch (IllegalAccessException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            });
                         }
                         final int seqId = byteBuf.readInt();
                         System.out.println("ReliabilityHandler: %d -> %d".formatted(
