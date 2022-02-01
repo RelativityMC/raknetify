@@ -199,8 +199,8 @@ public class SynchronizationLayer extends ChannelDuplexHandler {
             if (frame.getReliability().isOrdered && !channelToIgnore.contains(frame.getOrderChannel())) {
                 final ChannelPromise promise1 = frame.getPromise();
                 if (promise1 != null) promise1.trySuccess();
-                frame.release();
                 iterator.remove();
+                frame.release();
                 droppedFrames++;
             }
         }
@@ -215,8 +215,8 @@ public class SynchronizationLayer extends ChannelDuplexHandler {
             if (frame.getReliability().isOrdered && !channelToIgnore.contains(frame.getOrderChannel())) {
                 final ChannelPromise promise1 = frame.getPromise();
                 if (promise1 != null) promise1.trySuccess();
-                frame.release();
                 iterator.remove();
+                frame.release();
                 droppedFrames++;
             }
         }

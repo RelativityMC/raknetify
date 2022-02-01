@@ -190,9 +190,9 @@ public class RaknetMultiChannel {
 
     static {
         classToChannelIdOverride.defaultReturnValue(0);
-//        channel1.forEach(clazz -> classToChannelIdOverride.put(clazz, 1));
-//        channel2.forEach(clazz -> classToChannelIdOverride.put(clazz, 2));
-//        channel3.forEach(clazz -> classToChannelIdOverride.put(clazz, 3)); TODO entity sync
+        channel1.forEach(clazz -> classToChannelIdOverride.put(clazz, 1));
+        channel2.forEach(clazz -> classToChannelIdOverride.put(clazz, 2));
+        channel3.forEach(clazz -> classToChannelIdOverride.put(clazz, 3));
         channel4.forEach(clazz -> classToChannelIdOverride.put(clazz, 4));
     }
 
