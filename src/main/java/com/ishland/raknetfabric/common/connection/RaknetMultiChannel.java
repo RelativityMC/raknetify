@@ -175,7 +175,7 @@ public class RaknetMultiChannel {
             "net/minecraft/class_2879", // HandSwingC2S
     });
 
-    private static final Set<Class<?>> channel5 = createClassSet(new String[]{
+    private static final Set<Class<?>> unordered = createClassSet(new String[]{
             "net/minecraft/class_2670", // KeepAliveS2C
             "net/minecraft/class_2827", // KeepAliveC2S
             "net/minecraft/class_2661", // DisconnectS2C
@@ -198,7 +198,7 @@ public class RaknetMultiChannel {
         channel2.forEach(clazz -> classToChannelIdOverride.put(clazz, 2));
         channel3.forEach(clazz -> classToChannelIdOverride.put(clazz, 3));
         channel4.forEach(clazz -> classToChannelIdOverride.put(clazz, 4));
-        channel5.forEach(clazz -> classToChannelIdOverride.put(clazz, 5));
+        unordered.forEach(clazz -> classToChannelIdOverride.put(clazz, -1));
     }
 
     private static final ThreadLocal<Class<?>> currentPacketClass = new ThreadLocal<>();

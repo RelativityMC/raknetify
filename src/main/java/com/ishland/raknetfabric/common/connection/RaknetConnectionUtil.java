@@ -15,7 +15,7 @@ public class RaknetConnectionUtil {
             config.setMTU(Constants.DEFAULT_MTU);
             config.setMaxQueuedBytes(Constants.MAX_QUEUED_SIZE);
             config.setMetrics(new SimpleMetricsLogger());
-            channel.pipeline().addLast("raknetfabric-synchronization-layer", new SynchronizationLayer(1, 4));
+            channel.pipeline().addLast("raknetfabric-synchronization-layer", new SynchronizationLayer(1));
             channel.pipeline().addLast("raknetfabric-multi-channel-data-codec", new MultiChannellingDataCodec(Constants.RAKNET_GAME_PACKET_ID));
         }
     }

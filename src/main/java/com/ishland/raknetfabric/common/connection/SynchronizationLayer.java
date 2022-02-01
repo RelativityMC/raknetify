@@ -32,7 +32,6 @@ import java.util.Iterator;
 public class SynchronizationLayer extends ChannelDuplexHandler {
 
     // Request structure:
-    // integer: syncId
     // byte: total channel count `n`
     // next `n` groups: {
     // byte: channel index
@@ -142,17 +141,18 @@ public class SynchronizationLayer extends ChannelDuplexHandler {
                     try {
                         final byte count = byteBuf.readByte();
                         for (int i = 0; i < count; i++) {
-                            final int channel = byteBuf.readByte();
+                            final byte channel = byteBuf.readByte();
                             final int orderIndex = byteBuf.readInt();
                             System.out.println("Channel %d: %d -> %d"
                                     .formatted(channel,
-                                            (int) FIELD_QUEUE_LAST_ORDER_INDEX.get(frameOrderInQueues[i]),
+                                            (int) FIELD_QUEUE_LAST_ORDER_INDEX.get(frameOrderInQueues[channel]),
                                             orderIndex
                                     ));
                             FIELD_QUEUE_LAST_ORDER_INDEX.set(frameOrderInQueues[channel], orderIndex);
                             this.frameJoinerPendingPackets.values().removeIf(value -> {
                                 try {
-                                    return ((Frame) FIELD_FRAME_JOINER_BUILDER_SAMPLE_PACKET.get(value)).getOrderChannel() == channel;
+                                    final Frame frame = (Frame) FIELD_FRAME_JOINER_BUILDER_SAMPLE_PACKET.get(value);
+                                    return frame.getReliability().isOrdered && frame.getOrderChannel() == channel;
                                 } catch (IllegalAccessException e) {
                                     throw new RuntimeException(e);
                                 }
