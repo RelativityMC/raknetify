@@ -3,6 +3,7 @@ package com.ishland.raknetfabric.common.connection;
 import com.ishland.raknetfabric.Constants;
 import com.ishland.raknetfabric.common.compat.viafabric.ViaFabricCompatInjector;
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelDuplexHandler;
 import network.ycc.raknet.RakNet;
 
 public class RaknetConnectionUtil {
@@ -23,6 +24,8 @@ public class RaknetConnectionUtil {
     public static void postInitChannel(Channel channel, boolean isClientSide) {
         if (channel.config() instanceof RakNet.Config) {
             ViaFabricCompatInjector.inject(channel, isClientSide);
+            channel.pipeline().replace("splitter", "splitter", new ChannelDuplexHandler());
+            channel.pipeline().replace("prepender", "prepender", new ChannelDuplexHandler());
             channel.pipeline().addLast("raknetfabric-multi-channel-packet-cature", new MultiChannellingPacketCapture());
         }
     }

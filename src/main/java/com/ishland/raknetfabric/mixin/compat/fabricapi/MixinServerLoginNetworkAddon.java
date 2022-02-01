@@ -22,7 +22,7 @@ public class MixinServerLoginNetworkAddon {
     @Dynamic("Pseudo")
     @Inject(method = "sendCompressionPacket()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/ClientConnection;send(Lnet/minecraft/network/Packet;Lio/netty/util/concurrent/GenericFutureListener;)V", ordinal = 0, shift = At.Shift.AFTER, remap = true), remap = false)
     private void setupDummyCompressionImmediately(CallbackInfo info) {
-        this.connection.setCompressionThreshold(Integer.MAX_VALUE, true);
+        this.connection.setCompressionThreshold(Integer.MAX_VALUE, false);
     }
 
 }

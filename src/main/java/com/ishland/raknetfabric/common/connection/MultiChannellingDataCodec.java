@@ -1,5 +1,6 @@
 package com.ishland.raknetfabric.common.connection;
 
+import com.ishland.raknetfabric.Constants;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
@@ -28,7 +29,7 @@ public class MultiChannellingDataCodec extends MessageToMessageCodec<FrameData, 
     @Override
     public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
         if (msg == START_MULTICHANNEL) {
-            ctx.write(FrameData.create(ctx.alloc(), packetId, ctx.alloc().buffer(1).writeByte(0))).addListener(future -> {
+            ctx.write(FrameData.create(ctx.alloc(), Constants.RAKNET_PING_PACKET_ID, ctx.alloc().buffer(1).writeByte(0))).addListener(future -> {
                 isMultichannelEnabled = true;
                 System.out.println("[MultiChannellingDataCodec] Started multichannel");
             });
