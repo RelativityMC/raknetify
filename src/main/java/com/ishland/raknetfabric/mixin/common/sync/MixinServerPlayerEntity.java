@@ -3,6 +3,7 @@ package com.ishland.raknetfabric.mixin.common.sync;
 import com.ishland.raknetfabric.common.connection.SynchronizationLayer;
 import com.ishland.raknetfabric.mixin.access.IClientConnection;
 import io.netty.channel.Channel;
+import net.minecraft.entity.Entity;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
@@ -12,6 +13,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(ServerPlayerEntity.class)
 public class MixinServerPlayerEntity {
@@ -32,7 +34,7 @@ public class MixinServerPlayerEntity {
     }
 
     @Inject(method = "moveToWorld", at = @At(value = "NEW", target = "net/minecraft/network/packet/s2c/play/PlayerRespawnS2CPacket", shift = At.Shift.BEFORE))
-    private void beforeMoveToAnotherWorld(CallbackInfo ci) {
+    private void beforeMoveToAnotherWorld(CallbackInfoReturnable<Entity> cir) {
         final Channel channel = ((IClientConnection) this.networkHandler.connection).getChannel();
         if (channel == null) {
             //noinspection RedundantStringFormatCall

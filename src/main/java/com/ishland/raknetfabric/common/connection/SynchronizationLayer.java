@@ -6,6 +6,8 @@ import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPromise;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
+import it.unimi.dsi.fastutil.ints.IntSet;
 import it.unimi.dsi.fastutil.objects.ObjectSortedSet;
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceLinkedOpenHashMap;
 import network.ycc.raknet.frame.Frame;
@@ -26,7 +28,9 @@ public class SynchronizationLayer extends ChannelDuplexHandler {
     // Request structure:
     // integer: syncId
     // byte: total channel count `n`
-    // next `n` integers: current orderIndex (or lastOrderIndex, (nextOrderIndex - 1))
+    // next `n` groups:
+    // byte: channel index
+    // integer: current orderIndex (or lastOrderIndex, (nextOrderIndex - 1))
     //
     // Response callback is handled using reliable transport
 
@@ -55,6 +59,8 @@ public class SynchronizationLayer extends ChannelDuplexHandler {
         return method;
     }
 
+    private final IntSet channelToIgnore = new IntOpenHashSet();
+
     private FrameOrderIn frameOrderIn;
     private Object[] frameOrderInQueues;
     private FrameOrderOut frameOrderOut;
@@ -63,6 +69,12 @@ public class SynchronizationLayer extends ChannelDuplexHandler {
     private ObjectSortedSet<Frame> reliabilityHandlerFrameQueue;
     private Int2ObjectMap<FrameSet> reliabilityHandlerPendingFrameSets;
     private boolean initialized = false;
+
+    public SynchronizationLayer(int... channelsToIgnore) {
+        for (int ch : channelsToIgnore) {
+            channelToIgnore.add(ch);
+        }
+    }
 
     @SuppressWarnings("unchecked")
     @Override
@@ -102,12 +114,13 @@ public class SynchronizationLayer extends ChannelDuplexHandler {
                     System.out.println("Received sync packet");
                     final ByteBuf byteBuf = packet.createData().skipBytes(1);
                     try {
-                        final byte channels = byteBuf.readByte();
-                        for (int i = 0; i < channels; i++) {
+                        final byte count = byteBuf.readByte();
+                        for (int i = 0; i < count; i++) {
+                            final int channel = byteBuf.readByte();
                             final int orderIndex = byteBuf.readInt();
                             System.out.println("Channel %d: %d -> %d"
-                                    .formatted(i, (int) FIELD_QUEUE_LAST_ORDER_INDEX.get(frameOrderInQueues[i]), orderIndex));
-                            FIELD_QUEUE_LAST_ORDER_INDEX.set(frameOrderInQueues[i], orderIndex);
+                                    .formatted(channel, (int) FIELD_QUEUE_LAST_ORDER_INDEX.get(frameOrderInQueues[i]), orderIndex));
+                            FIELD_QUEUE_LAST_ORDER_INDEX.set(frameOrderInQueues[channel], orderIndex);
                         }
                     } finally {
                         byteBuf.release();
@@ -144,9 +157,12 @@ public class SynchronizationLayer extends ChannelDuplexHandler {
 
             final int channelsLength = frameOrderOutNextOrderIndex.length;
             final ByteBuf byteBuf = ctx.alloc().buffer(1 + channelsLength * 4);
-            System.out.println("Writing sync packet: %s".formatted(Arrays.toString(this.frameOrderOutNextOrderIndex)));
             byteBuf.writeByte(channelsLength);
-            for (int orderOutNextOrderIndex : frameOrderOutNextOrderIndex) {
+            for (int channel = 0, frameOrderOutNextOrderIndexLength = frameOrderOutNextOrderIndex.length; channel < frameOrderOutNextOrderIndexLength; channel++) {
+                if (channelToIgnore.contains(channel)) continue;
+                int orderOutNextOrderIndex = frameOrderOutNextOrderIndex[channel];
+                System.out.println("Writing sync packet: Channel %d: %d".formatted(channel, orderOutNextOrderIndex - 1));
+                byteBuf.writeByte(channel);
                 byteBuf.writeInt(orderOutNextOrderIndex - 1);
             }
             final FrameData frameData = FrameData.create(ctx.alloc(), Constants.RAKNET_SYNC_PACKET_ID, byteBuf);
