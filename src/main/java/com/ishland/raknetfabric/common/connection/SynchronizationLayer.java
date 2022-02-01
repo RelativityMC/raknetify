@@ -8,6 +8,7 @@ import io.netty.channel.ChannelPromise;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
+import it.unimi.dsi.fastutil.objects.ObjectBidirectionalIterator;
 import it.unimi.dsi.fastutil.objects.ObjectSortedSet;
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceLinkedOpenHashMap;
 import network.ycc.raknet.frame.Frame;
@@ -21,16 +22,20 @@ import network.ycc.raknet.pipeline.ReliabilityHandler;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 
 public class SynchronizationLayer extends ChannelDuplexHandler {
 
     // Request structure:
     // integer: syncId
     // byte: total channel count `n`
-    // next `n` groups:
+    // next `n` groups: {
     // byte: channel index
     // integer: current orderIndex (or lastOrderIndex, (nextOrderIndex - 1))
+    // }
+    // integer: current seqId (or lastReceivedSeqId, (nextSendSeqId - 1))
     //
     // Response callback is handled using reliable transport
 
@@ -38,12 +43,17 @@ public class SynchronizationLayer extends ChannelDuplexHandler {
 
     private static final Class<?> CLASS_QUEUE;
     private static final Field FIELD_QUEUE_LAST_ORDER_INDEX;
+    private static final Field FIELD_RELIABILITY_NEXT_SEND_SEQ_ID;
+    private static final Field FIELD_RELIABILITY_LAST_RECEIVED_SEQ_ID;
 
     static {
         try {
             CLASS_QUEUE = Class.forName("network.ycc.raknet.pipeline.FrameOrderIn$OrderedChannelPacketQueue");
 
             FIELD_QUEUE_LAST_ORDER_INDEX = accessible(CLASS_QUEUE.getDeclaredField("lastOrderIndex"));
+            FIELD_RELIABILITY_NEXT_SEND_SEQ_ID = accessible(ReliabilityHandler.class.getDeclaredField("nextSendSeqId"));
+            FIELD_RELIABILITY_LAST_RECEIVED_SEQ_ID = accessible(ReliabilityHandler.class.getDeclaredField("lastReceivedSeqId"));
+
         } catch (Throwable t) {
             throw new RuntimeException(t);
         }
@@ -68,6 +78,7 @@ public class SynchronizationLayer extends ChannelDuplexHandler {
     private ReliabilityHandler reliabilityHandler;
     private ObjectSortedSet<Frame> reliabilityHandlerFrameQueue;
     private Int2ObjectMap<FrameSet> reliabilityHandlerPendingFrameSets;
+    private int channelsLength;
     private boolean initialized = false;
 
     public SynchronizationLayer(int... channelsToIgnore) {
@@ -95,6 +106,9 @@ public class SynchronizationLayer extends ChannelDuplexHandler {
             this.reliabilityHandlerFrameQueue = (ObjectSortedSet<Frame>) accessible(ReliabilityHandler.class.getDeclaredField("frameQueue")).get(this.reliabilityHandler);
             this.reliabilityHandlerPendingFrameSets = (Int2ObjectMap<FrameSet>) accessible(ReliabilityHandler.class.getDeclaredField("pendingFrameSets")).get(this.reliabilityHandler);
 
+            int originalChannelsLength = this.frameOrderOutNextOrderIndex.length;
+            this.channelsLength = (int) (originalChannelsLength - this.channelToIgnore.intStream().filter(value -> value < originalChannelsLength).count());
+
             initialized = true;
         } catch (Throwable t) {
             throw new RuntimeException(t);
@@ -119,9 +133,18 @@ public class SynchronizationLayer extends ChannelDuplexHandler {
                             final int channel = byteBuf.readByte();
                             final int orderIndex = byteBuf.readInt();
                             System.out.println("Channel %d: %d -> %d"
-                                    .formatted(channel, (int) FIELD_QUEUE_LAST_ORDER_INDEX.get(frameOrderInQueues[i]), orderIndex));
+                                    .formatted(channel,
+                                            (int) FIELD_QUEUE_LAST_ORDER_INDEX.get(frameOrderInQueues[i]),
+                                            orderIndex
+                                    ));
                             FIELD_QUEUE_LAST_ORDER_INDEX.set(frameOrderInQueues[channel], orderIndex);
                         }
+                        final int seqId = byteBuf.readInt();
+                        System.out.println("ReliabilityHandler: %d -> %d".formatted(
+                                (int) FIELD_RELIABILITY_LAST_RECEIVED_SEQ_ID.get(this.reliabilityHandler),
+                                seqId
+                        ));
+                        FIELD_RELIABILITY_LAST_RECEIVED_SEQ_ID.set(this.reliabilityHandler, seqId);
                     } finally {
                         byteBuf.release();
                     }
@@ -140,23 +163,9 @@ public class SynchronizationLayer extends ChannelDuplexHandler {
         if (msg == SYNC_REQUEST_OBJECT) {
             if (isWaitingForResponse) return;
 
-            System.out.println("Dropping %d previously queued frames".formatted(this.reliabilityHandlerFrameQueue.size()));
-            this.reliabilityHandlerFrameQueue.forEach(frame -> {
-                final ChannelPromise promise1 = frame.getPromise();
-                if (promise1 != null) promise1.trySuccess();
-                frame.release();
-            });
-            this.reliabilityHandlerFrameQueue.clear();
+            dropSenderPackets();
 
-            System.out.println("Dropping %d previously pending udp packets".formatted(this.reliabilityHandlerPendingFrameSets.size()));
-            this.reliabilityHandlerPendingFrameSets.values().forEach(frameSet -> {
-                frameSet.succeed();
-                frameSet.release();
-            });
-            this.reliabilityHandlerPendingFrameSets.clear();
-
-            final int channelsLength = frameOrderOutNextOrderIndex.length;
-            final ByteBuf byteBuf = ctx.alloc().buffer(1 + channelsLength * 4);
+            final ByteBuf byteBuf = ctx.alloc().buffer(1 + channelsLength * 5 + 4);
             byteBuf.writeByte(channelsLength);
             for (int channel = 0, frameOrderOutNextOrderIndexLength = frameOrderOutNextOrderIndex.length; channel < frameOrderOutNextOrderIndexLength; channel++) {
                 if (channelToIgnore.contains(channel)) continue;
@@ -165,6 +174,10 @@ public class SynchronizationLayer extends ChannelDuplexHandler {
                 byteBuf.writeByte(channel);
                 byteBuf.writeInt(orderOutNextOrderIndex - 1);
             }
+            int seqId = (int) FIELD_RELIABILITY_NEXT_SEND_SEQ_ID.get(this.reliabilityHandler); // TODO implementation details (probable lib bug): nextSendSeqId == lastReceivedSeqId
+            System.out.println("Writing sync packet: ReliabilityHandler: %d".formatted(seqId));
+            byteBuf.writeInt(seqId);
+
             final FrameData frameData = FrameData.create(ctx.alloc(), Constants.RAKNET_SYNC_PACKET_ID, byteBuf);
             frameData.setReliability(FramedPacket.Reliability.RELIABLE);
             this.isWaitingForResponse = true;
@@ -176,6 +189,42 @@ public class SynchronizationLayer extends ChannelDuplexHandler {
             return;
         }
         super.write(ctx, msg, promise);
+    }
+
+    private void dropSenderPackets() {
+        int droppedFrames = 0;
+
+        for (ObjectBidirectionalIterator<Frame> iterator = this.reliabilityHandlerFrameQueue.iterator(); iterator.hasNext(); ) {
+            Frame frame = iterator.next();
+            if (frame.getReliability().isOrdered && !channelToIgnore.contains(frame.getOrderChannel())) {
+                final ChannelPromise promise1 = frame.getPromise();
+                if (promise1 != null) promise1.trySuccess();
+                frame.release();
+                iterator.remove();
+                droppedFrames++;
+            }
+        }
+
+        ArrayList<Frame> retainedFrameList = new ArrayList<>();
+        for (FrameSet frameSet : this.reliabilityHandlerPendingFrameSets.values()) {
+            frameSet.createFrames(retainedFrameList::add);
+        }
+        this.reliabilityHandlerPendingFrameSets.clear();
+        for (Iterator<Frame> iterator = retainedFrameList.iterator(); iterator.hasNext(); ) {
+            Frame frame = iterator.next();
+            if (frame.getReliability().isOrdered && !channelToIgnore.contains(frame.getOrderChannel())) {
+                final ChannelPromise promise1 = frame.getPromise();
+                if (promise1 != null) promise1.trySuccess();
+                frame.release();
+                iterator.remove();
+                droppedFrames++;
+            }
+        }
+        this.reliabilityHandlerFrameQueue.addAll(retainedFrameList);
+
+        System.out.println("Dropping %d frames".formatted(droppedFrames));
+
+        this.reliabilityHandlerPendingFrameSets.clear();
     }
 
     @Override

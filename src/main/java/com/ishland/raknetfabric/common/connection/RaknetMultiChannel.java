@@ -193,7 +193,7 @@ public class RaknetMultiChannel {
 //        channel1.forEach(clazz -> classToChannelIdOverride.put(clazz, 1));
 //        channel2.forEach(clazz -> classToChannelIdOverride.put(clazz, 2));
 //        channel3.forEach(clazz -> classToChannelIdOverride.put(clazz, 3)); TODO entity sync
-//        channel4.forEach(clazz -> classToChannelIdOverride.put(clazz, 4));
+        channel4.forEach(clazz -> classToChannelIdOverride.put(clazz, 4));
     }
 
     private static final ThreadLocal<Class<?>> currentPacketClass = new ThreadLocal<>();
