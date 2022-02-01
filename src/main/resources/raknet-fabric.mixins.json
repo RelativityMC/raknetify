@@ -15,6 +15,7 @@
     "client.hud.MixinDebugHud",
     "common.MixinClientConnection",
     "common.MixinClientConnection1",
+    "common.encryption.MixinPacketEncryptionManager",
     "common.sync.MixinServerPlayerEntity",
     "compat.fabricapi.MixinServerLoginNetworkAddon",
     "server.MixinPlayerManager",
