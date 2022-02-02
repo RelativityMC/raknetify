@@ -28,13 +28,17 @@ public class MixinDebugHud {
                 if (channel.config() instanceof RakNet.Config config) {
                     if (config.getMetrics() instanceof SimpleMetricsLogger logger) {
                         cir.getReturnValue().add(
-                                "[RaknetFabric] A: true, MTU: %d, ERR: %.4f%%"
-                                        .formatted(config.getMTU(), logger.getMeasureErrorRate() * 100.0)
+                                "[RaknetFabric] A: true, MTU: %d, RTT: %.2f/%.2fms"
+                                        .formatted(config.getMTU(),
+                                                logger.getMeasureRTTns() / 1_000_000.0,
+                                                logger.getMeasureRTTnsStdDev() / 1_000_000.0)
                         );
                         cir.getReturnValue().add(
-                                "[RaknetFabric] RTT: %.2f/%.2fms, %d tx, %d rx"
-                                        .formatted(logger.getMeasureRTTns() / 1_000_000.0,
-                                                logger.getMeasureRTTnsStdDev() / 1_000_000.0,
+                                "[RaknetFabric] C: BUF: %.1fMB, BST: %d, ERR: %.4f%%, %d tx, %d rx"
+                                        .formatted(
+                                                logger.getCurrentQueuedBytes() / 1024.0 / 1024.0,
+                                                logger.getMeasureBurstTokens() + config.getDefaultPendingFrameSets(),
+                                                logger.getMeasureErrorRate() * 100.0,
                                                 logger.getMeasureTX(), logger.getMeasureRX())
                         );
                     } else {

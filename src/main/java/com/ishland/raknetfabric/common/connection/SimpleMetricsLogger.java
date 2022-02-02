@@ -27,6 +27,7 @@ public class SimpleMetricsLogger implements RakNet.MetricsLogger {
     private volatile long measureRTTns = 0L;
     private volatile long measureRTTnsStdDev = 0L;
     private volatile long measureBurstTokens = 0L;
+    private volatile int currentQueuedBytes = 0;
 
     @Override
     public void packetsIn(int delta) {
@@ -103,6 +104,11 @@ public class SimpleMetricsLogger implements RakNet.MetricsLogger {
     @Override
     public void measureBurstTokens(int n) {
         measureBurstTokens = n;
+    }
+
+    @Override
+    public void currentQueuedBytes(int bytes) {
+        currentQueuedBytes = bytes;
     }
 
     // ========== Calculations ==========
@@ -184,5 +190,13 @@ public class SimpleMetricsLogger implements RakNet.MetricsLogger {
 
     public int getMeasureTX() {
         return measureTX;
+    }
+
+    public int getCurrentQueuedBytes() {
+        return currentQueuedBytes;
+    }
+
+    public long getMeasureBurstTokens() {
+        return measureBurstTokens;
     }
 }
