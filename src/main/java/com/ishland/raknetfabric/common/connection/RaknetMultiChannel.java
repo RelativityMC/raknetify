@@ -32,6 +32,23 @@ public class RaknetMultiChannel {
         return classHashSet; // no read-only wrapper for performance
     }
 
+    private static final Set<Class<?>> unordered = createClassSet(new String[]{
+            "net/minecraft/class_2670", // KeepAliveS2C
+            "net/minecraft/class_2827", // KeepAliveC2S
+            "net/minecraft/class_2661", // DisconnectS2C
+            "net/minecraft/class_6373", // PlayPingS2C
+            "net/minecraft/class_6374", // PlayPongC2S
+
+            "net/minecraft/class_2720", // ResourcePackSendS2C
+            "net/minecraft/class_2856", // ResourcePackStatusC2S
+
+            "net/minecraft/class_2617", // StatisticsS2C
+            "net/minecraft/class_2859", // AdvancementTabC2S
+            "net/minecraft/class_2729", // SelectAdvancementTabS2C
+
+            "net/minecraft/class_2675", // ParticleS2C
+    });
+
     // Primarily used for interactions independent to world
     private static final Set<Class<?>> channel1 = createClassSet(new String[]{
             "net/minecraft/class_2629", // BossBarS2C
@@ -45,7 +62,6 @@ public class RaknetMultiChannel {
             "net/minecraft/class_2748", // ExperienceBarUpdateS2C
             "net/minecraft/class_2749", // HealthUpdateS2C
             "net/minecraft/class_2772", // PlayerListHeaderS2C
-            "net/minecraft/class_2703", // PlayerListS2C
             "net/minecraft/class_2736", // ScoreboardDisplayS2C
             "net/minecraft/class_2751", // ScoreboardDisplayObjectiveUpdateS2C
             "net/minecraft/class_2757", // ScoreboardPlayerUpdateS2C
@@ -76,10 +92,49 @@ public class RaknetMultiChannel {
             "net/minecraft/class_2788", // SynchronizeRecipesS2C
             "net/minecraft/class_2790", // SynchronizeTagsS2C
             "net/minecraft/class_6682", // SimulationDistanceS2C
+
+            "net/minecraft/class_2703", // PlayerListS2C
+            "net/minecraft/class_2613", // PlayerSpawnS2C
+    });
+
+    // Entities related stuff
+    private static final Set<Class<?>> channel2 = createClassSet(new String[]{
+            "net/minecraft/class_5890", // EndCombatS2C
+            "net/minecraft/class_5891", // EnterCombatS2C
+            "net/minecraft/class_2716", // EntitiesDestroyS2C
+            "net/minecraft/class_2616", // EntityAnimationS2C
+            "net/minecraft/class_2663", // EntityStatusS2C
+            "net/minecraft/class_2684$class_2685", // EntityPacketS2C$MoveRelative
+            "net/minecraft/class_2684$class_2687", // EntityPacketS2C$Rotate
+            "net/minecraft/class_2684$class_2686", // EntityPacketS2C$RotateAndMoveRelative
+            "net/minecraft/class_2726", // EntitySetHeadYawS2C
+            "net/minecraft/class_2739", // EntityTrackerUpdateS2C
+            "net/minecraft/class_2740", // EntityAttachS2C
+            "net/minecraft/class_2743", // EntityVelocityUpdateS2C
+            "net/minecraft/class_2744", // EntityEquipmentUpdateS2C
+            "net/minecraft/class_2752", // EntityPassengerSetS2C
+            "net/minecraft/class_2777", // EntityPositionS2C
+            "net/minecraft/class_2781", // EntityAttributesS2C
+            "net/minecraft/class_2783", // EntityStatusEffectS2C
+            "net/minecraft/class_2718", // RemoveEntityStatusEffectS2C
+            "net/minecraft/class_2610", // MobSpawnS2C
+            "net/minecraft/class_2612", // PaintingSpawnS2C
+
+            "net/minecraft/class_2664", // ExplosionS2C
+            "net/minecraft/class_2678", // GameJoinS2C
+            "net/minecraft/class_2668", // GameStateChangeS2C
+            "net/minecraft/class_2775", // ItemPickupAnimationS2C
+            "net/minecraft/class_2696", // PlayerAbilitiesS2C
+            "net/minecraft/class_2734", // SetCameraEntityS2C
+            "net/minecraft/class_2692", // VehicleMoveS2C
+
+            "net/minecraft/class_2836", // BoatPaddleStateC2S
+            "net/minecraft/class_2833", // VehicleMoveC2S
+            "net/minecraft/class_2879", // HandSwingC2S
     });
 
     // Primarily used for interactions dependent to world
-    private static final Set<Class<?>> channel2 = createClassSet(new String[]{
+    private static final Set<Class<?>> channel3 = createClassSet(new String[]{
             "net/minecraft/class_2885", // PlayerInteractBlockC2S
             "net/minecraft/class_2886", // PlayerInteractItemC2S
             "net/minecraft/class_2824", // PlayerInteractEntityC2S
@@ -130,75 +185,27 @@ public class RaknetMultiChannel {
     });
 
     // Primarily for packets not very critical to interactions
-    private static final Set<Class<?>> channel3 = createClassSet(new String[]{
+    private static final Set<Class<?>> channel4 = createClassSet(new String[]{
             "net/minecraft/class_2683", // MapUpdateS2C
-            "net/minecraft/class_2675", // ParticleS2C
             "net/minecraft/class_2660", // PlaySoundIdS2C
             "net/minecraft/class_2765", // PlaySoundFromEntityS2C
             "net/minecraft/class_2767", // PlaySoundS2C
             "net/minecraft/class_2770", // StopSoundS2C
     });
 
-    // Entities related stuff
-    private static final Set<Class<?>> channel4 = createClassSet(new String[]{
-            "net/minecraft/class_5890", // EndCombatS2C
-            "net/minecraft/class_5891", // EnterCombatS2C
-            "net/minecraft/class_2716", // EntitiesDestroyS2C
-            "net/minecraft/class_2616", // EntityAnimationS2C
-            "net/minecraft/class_2663", // EntityStatusS2C
-            "net/minecraft/class_2684$class_2685", // EntityPacketS2C$MoveRelative
-            "net/minecraft/class_2684$class_2687", // EntityPacketS2C$Rotate
-            "net/minecraft/class_2684$class_2686", // EntityPacketS2C$RotateAndMoveRelative
-            "net/minecraft/class_2726", // EntitySetHeadYawS2C
-            "net/minecraft/class_2739", // EntityTrackerUpdateS2C
-            "net/minecraft/class_2740", // EntityAttachS2C
-            "net/minecraft/class_2743", // EntityVelocityUpdateS2C
-            "net/minecraft/class_2744", // EntityEquipmentUpdateS2C
-            "net/minecraft/class_2752", // EntityPassengerSetS2C
-            "net/minecraft/class_2777", // EntityPositionS2C
-            "net/minecraft/class_2781", // EntityAttributesS2C
-            "net/minecraft/class_2783", // EntityStatusEffectS2C
-            "net/minecraft/class_2718", // RemoveEntityStatusEffectS2C
-            "net/minecraft/class_2610", // MobSpawnS2C
-            "net/minecraft/class_2612", // PaintingSpawnS2C
-
-            "net/minecraft/class_2664", // ExplosionS2C
-            "net/minecraft/class_2678", // GameJoinS2C
-            "net/minecraft/class_2668", // GameStateChangeS2C
-            "net/minecraft/class_2775", // ItemPickupAnimationS2C
-            "net/minecraft/class_2696", // PlayerAbilitiesS2C
-            "net/minecraft/class_2734", // SetCameraEntityS2C
-            "net/minecraft/class_2692", // VehicleMoveS2C
-
-            "net/minecraft/class_2836", // BoatPaddleStateC2S
-            "net/minecraft/class_2833", // VehicleMoveC2S
-            "net/minecraft/class_2879", // HandSwingC2S
-    });
-
-    private static final Set<Class<?>> unordered = createClassSet(new String[]{
-            "net/minecraft/class_2670", // KeepAliveS2C
-            "net/minecraft/class_2827", // KeepAliveC2S
-            "net/minecraft/class_2661", // DisconnectS2C
-            "net/minecraft/class_6373", // PlayPingS2C
-            "net/minecraft/class_6374", // PlayPongC2S
-
-            "net/minecraft/class_2720", // ResourcePackSendS2C
-            "net/minecraft/class_2856", // ResourcePackStatusC2S
-
-            "net/minecraft/class_2617", // StatisticsS2C
-            "net/minecraft/class_2859", // AdvancementTabC2S
-            "net/minecraft/class_2729", // SelectAdvancementTabS2C
+    private static final Set<Class<?>> unreliable = createClassSet(new String[]{
     });
 
     private static final Object2IntOpenHashMap<Class<?>> classToChannelIdOverride = new Object2IntOpenHashMap<>();
 
     static {
-        classToChannelIdOverride.defaultReturnValue(0);
+        classToChannelIdOverride.defaultReturnValue(7);
+        unordered.forEach(clazz -> classToChannelIdOverride.put(clazz, -1));
         channel1.forEach(clazz -> classToChannelIdOverride.put(clazz, 1));
         channel2.forEach(clazz -> classToChannelIdOverride.put(clazz, 2));
         channel3.forEach(clazz -> classToChannelIdOverride.put(clazz, 3));
         channel4.forEach(clazz -> classToChannelIdOverride.put(clazz, 4));
-        unordered.forEach(clazz -> classToChannelIdOverride.put(clazz, -1));
+        unreliable.forEach(clazz -> classToChannelIdOverride.put(clazz, -2));
     }
 
     private static final ThreadLocal<Class<?>> currentPacketClass = new ThreadLocal<>();

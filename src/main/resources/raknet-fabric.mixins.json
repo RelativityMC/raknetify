@@ -23,7 +23,8 @@
     "server.MixinPlayerManager",
     "server.MixinServerLoginNetworkHandler",
     "server.MixinServerNetworkIo",
-    "server.MixinServerNetworkIo1"
+    "server.MixinServerNetworkIo1",
+    "server.MixinServerPlayNetworkHandler"
   ],
   "injectors": {
     "defaultRequire": 1

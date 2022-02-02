@@ -222,6 +222,7 @@ public class SynchronizationLayer extends ChannelDuplexHandler {
 
         for (FrameSet frameSet : this.reliabilityHandlerPendingFrameSets.values()) {
             frameSet.createFrames(retainedFrameList::add);
+            frameSet.release();
         }
         this.reliabilityHandlerPendingFrameSets.clear();
         for (Iterator<Frame> iterator = retainedFrameList.iterator(); iterator.hasNext(); ) {

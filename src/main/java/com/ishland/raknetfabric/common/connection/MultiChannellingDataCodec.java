@@ -46,6 +46,8 @@ public class MultiChannellingDataCodec extends MessageToMessageCodec<FrameData, 
                 frameData.setOrderChannel(packetChannelOverride);
             else if (packetChannelOverride == -1)
                 frameData.setReliability(FramedPacket.Reliability.RELIABLE);
+            else if (packetChannelOverride == -2)
+                frameData.setReliability(FramedPacket.Reliability.UNRELIABLE);
             out.add(frameData);
         }
     }
