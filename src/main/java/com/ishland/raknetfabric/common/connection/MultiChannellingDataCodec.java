@@ -11,7 +11,6 @@ import network.ycc.raknet.packet.FramedPacket;
 
 import java.util.List;
 
-@ChannelHandler.Sharable
 public class MultiChannellingDataCodec extends MessageToMessageCodec<FrameData, ByteBuf> {
 
     public static final String NAME = "raknetfabric-multi-channel-data-codec";
