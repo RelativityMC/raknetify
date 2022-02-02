@@ -35,11 +35,11 @@ dependencies {
 	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
 	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
-	shadowInclude api("com.github.RelativityMC.netty-raknet:netty-raknet-common:e8502685aa") {
+	shadowInclude api("com.github.RelativityMC.netty-raknet:netty-raknet-common:dfe1a9f") {
 		transitive = false
 	}
-	shadowInclude api("com.github.RelativityMC.netty-raknet:netty-raknet-client:e8502685aa")
-	shadowInclude api("com.github.RelativityMC.netty-raknet:netty-raknet-server:e8502685aa")
+	shadowInclude api("com.github.RelativityMC.netty-raknet:netty-raknet-client:dfe1a9f")
+	shadowInclude api("com.github.RelativityMC.netty-raknet:netty-raknet-server:dfe1a9f")
 	shadowInclude implementation("org.apache.commons:commons-math3:3.6.1")
 
 	// Fabric API. This is technically optional, but you probably want it anyway.
