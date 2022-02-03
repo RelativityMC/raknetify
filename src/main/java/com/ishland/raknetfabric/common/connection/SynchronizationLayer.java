@@ -115,7 +115,7 @@ public class SynchronizationLayer extends ChannelDuplexHandler {
             this.reliabilityHandlerPendingFrameSets = (Int2ObjectMap<FrameSet>) accessible(ReliabilityHandler.class.getDeclaredField("pendingFrameSets")).get(this.reliabilityHandler);
 
             int originalChannelsLength = this.frameOrderOutNextOrderIndex.length;
-            this.channelsLength = (int) (originalChannelsLength - this.channelToIgnore.intStream().filter(value -> value < originalChannelsLength).count());
+            this.channelsLength = (int) (originalChannelsLength - this.channelToIgnore.stream().filter(value -> value < originalChannelsLength).count());
 
             this.frameJoiner = ctx.pipeline().get(FrameJoiner.class);
             this.frameJoinerPendingPackets = (Int2ObjectOpenHashMap<?>) accessible(FrameJoiner.class.getDeclaredField("pendingPackets")).get(this.frameJoiner);

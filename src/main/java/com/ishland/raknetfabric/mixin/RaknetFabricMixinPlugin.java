@@ -1,13 +1,16 @@
 package com.ishland.raknetfabric.mixin;
 
+import com.mojang.bridge.game.GameVersion;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.MinecraftVersion;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
 
 import java.util.List;
 import java.util.Set;
+import java.util.function.IntSupplier;
 
 public class RaknetFabricMixinPlugin implements IMixinConfigPlugin {
     @Override

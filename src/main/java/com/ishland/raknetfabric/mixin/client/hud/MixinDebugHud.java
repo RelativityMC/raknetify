@@ -1,5 +1,6 @@
 package com.ishland.raknetfabric.mixin.client.hud;
 
+import com.ishland.raknetfabric.common.connection.MetricsSynchronizationHandler;
 import com.ishland.raknetfabric.common.connection.SimpleMetricsLogger;
 import com.ishland.raknetfabric.mixin.access.IClientConnection;
 import io.netty.channel.Channel;
@@ -31,16 +32,39 @@ public class MixinDebugHud {
                                 "[RaknetFabric] A: true, MTU: %d, RTT: %.2f/%.2fms"
                                         .formatted(config.getMTU(),
                                                 logger.getMeasureRTTns() / 1_000_000.0,
-                                                logger.getMeasureRTTnsStdDev() / 1_000_000.0)
-                        );
+                                                logger.getMeasureRTTnsStdDev() / 1_000_000.0
+                                        ));
+                        final MetricsSynchronizationHandler serverSync = logger.getMetricsSynchronizationHandler();
+                        if (serverSync != null && serverSync.isServerSupported()) {
+                            cir.getReturnValue().add(
+                                    "[RaknetFabric] C: BUF: %.2fMB; S: BUF: %.2fMB"
+                                            .formatted(
+                                                    logger.getCurrentQueuedBytes() / 1024.0 / 1024.0,
+                                                    serverSync.getQueuedBytes() / 1024.0 / 1024.0
+                                            ));
+                        } else {
+                            cir.getReturnValue().add(
+                                    "[RaknetFabric] C: BUF: %.2fMB"
+                                            .formatted(
+                                                    logger.getCurrentQueuedBytes() / 1024.0 / 1024.0
+                                            ));
+                        }
                         cir.getReturnValue().add(
-                                "[RaknetFabric] C: BUF: %.1fMB, BST: %d, ERR: %.4f%%, %d tx, %d rx"
+                                "[RaknetFabric] C: BST: %d, ERR: %.4f%%, %d tx, %d rx"
                                         .formatted(
-                                                logger.getCurrentQueuedBytes() / 1024.0 / 1024.0,
                                                 logger.getMeasureBurstTokens() + config.getDefaultPendingFrameSets(),
                                                 logger.getMeasureErrorRate() * 100.0,
-                                                logger.getMeasureTX(), logger.getMeasureRX())
-                        );
+                                                logger.getMeasureTX(), logger.getMeasureRX()
+                                        ));
+                        if (serverSync != null && serverSync.isServerSupported()) {
+                            cir.getReturnValue().add(
+                                    "[RaknetFabric] S: BST: %d, ERR: %.4f%%, %d tx, %d rx"
+                                            .formatted(
+                                                    serverSync.getBurst(),
+                                                    serverSync.getErrorRate() * 100.0,
+                                                    serverSync.getTX(), serverSync.getRX()
+                                            ));
+                        }
                     } else {
                         cir.getReturnValue().add(
                                 "[RaknetFabric] A: true, MTU: %d"

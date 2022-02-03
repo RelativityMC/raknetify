@@ -20,10 +20,14 @@ public class RaknetConnectionUtil {
             config.setMTU(Constants.DEFAULT_MTU);
             config.setMaxQueuedBytes(Constants.MAX_QUEUED_SIZE);
             config.setMaxPendingFrameSets(Constants.MAX_PENDING_FRAME_SETS);
-            config.setRetryDelayNanos(TimeUnit.NANOSECONDS.convert(1000, TimeUnit.MILLISECONDS));
-            config.setDefaultPendingFrameSets(32);
-            config.setMetrics(new SimpleMetricsLogger());
+            config.setRetryDelayNanos(TimeUnit.NANOSECONDS.convert(200, TimeUnit.MILLISECONDS));
+            config.setDefaultPendingFrameSets(Constants.DEFAULT_PENDING_FRAME_SETS);
+            final SimpleMetricsLogger simpleMetricsLogger = new SimpleMetricsLogger();
+            config.setMetrics(simpleMetricsLogger);
+            final MetricsSynchronizationHandler metricsSynchronizationHandler = new MetricsSynchronizationHandler();
+            simpleMetricsLogger.setMetricsSynchronizationHandler(metricsSynchronizationHandler);
 //            channel.pipeline().addLast("raknetfabric-flush-enforcer", new FlushEnforcer());
+            channel.pipeline().addLast("raknetfabric-metrics-sync", metricsSynchronizationHandler);
             channel.pipeline().addLast("raknetfabric-flush-consolidation", new FlushConsolidationHandler(Integer.MAX_VALUE, true));
             channel.pipeline().addLast("raknetfabric-synchronization-layer", new SynchronizationLayer(1));
             channel.pipeline().addLast("raknetfabric-multi-channel-data-codec", new MultiChannellingDataCodec(Constants.RAKNET_GAME_PACKET_ID));

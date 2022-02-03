@@ -12,6 +12,7 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioDatagramChannel;
 import net.minecraft.network.ClientConnection;
 import network.ycc.raknet.client.channel.RakNetClientChannel;
+import org.spongepowered.asm.mixin.Dynamic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -57,14 +58,6 @@ public abstract class MixinClientConnection {
 //            }
 //        }
 //    }
-
-    @Redirect(method = "connect", at = @At(value = "INVOKE", target = "Lio/netty/bootstrap/Bootstrap;channel(Ljava/lang/Class;)Lio/netty/bootstrap/AbstractBootstrap;", remap = false))
-    private static AbstractBootstrap<Bootstrap, Channel> redirectChannel(Bootstrap instance, Class<? extends SocketChannel> aClass, InetSocketAddress address, boolean useEpoll) {
-        boolean actuallyUseEpoll = Epoll.isAvailable() && useEpoll;
-        return ThreadLocalUtil.isInitializingRaknet()
-                ? instance.channelFactory(() -> new RakNetClientChannel(actuallyUseEpoll ? EpollDatagramChannel.class : NioDatagramChannel.class))
-                : instance.channel(aClass);
-    }
 
     @Inject(method = "exceptionCaught", at = @At("HEAD"))
     private void onExceptionCaught(ChannelHandlerContext context, Throwable ex, CallbackInfo ci) {

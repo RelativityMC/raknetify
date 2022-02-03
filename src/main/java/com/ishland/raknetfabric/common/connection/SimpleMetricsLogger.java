@@ -199,4 +199,16 @@ public class SimpleMetricsLogger implements RakNet.MetricsLogger {
     public long getMeasureBurstTokens() {
         return measureBurstTokens;
     }
+
+    // ========== Misc ==========
+
+    private MetricsSynchronizationHandler metricsSynchronizationHandler;
+
+    public MetricsSynchronizationHandler getMetricsSynchronizationHandler() {
+        return this.metricsSynchronizationHandler;
+    }
+
+    public void setMetricsSynchronizationHandler(MetricsSynchronizationHandler metricsSynchronizationHandler) {
+        this.metricsSynchronizationHandler = metricsSynchronizationHandler;
+    }
 }

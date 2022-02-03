@@ -13,6 +13,7 @@
     "client.MixinMultiplayerServerListPinger",
     "client.MixinMultiplayerServerListPinger1",
     "client.hud.MixinDebugHud",
+    "common.MixinCCConnect",
     "common.MixinClientConnection",
     "common.MixinClientConnection1",
     "common.encryption.MixinPacketDecryptor",
