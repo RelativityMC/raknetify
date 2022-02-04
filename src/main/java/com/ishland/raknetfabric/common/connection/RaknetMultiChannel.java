@@ -102,6 +102,7 @@ public class RaknetMultiChannel {
             "net/minecraft/class_5890", // EndCombatS2C
             "net/minecraft/class_5891", // EnterCombatS2C
             "net/minecraft/class_2716", // EntitiesDestroyS2C
+            "net/minecraft/class_2604", // EntitySpawnS2C
             "net/minecraft/class_2616", // EntityAnimationS2C
             "net/minecraft/class_2663", // EntityStatusS2C
             "net/minecraft/class_2684$class_2685", // EntityPacketS2C$MoveRelative
