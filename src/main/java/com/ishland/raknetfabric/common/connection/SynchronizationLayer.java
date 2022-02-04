@@ -48,6 +48,7 @@ public class SynchronizationLayer extends ChannelDuplexHandler {
     private static final Field FIELD_QUEUE_LAST_ORDER_INDEX;
     private static final Field FIELD_RELIABILITY_NEXT_SEND_SEQ_ID;
     private static final Field FIELD_RELIABILITY_LAST_RECEIVED_SEQ_ID;
+    private static final Field FIELD_RELIABILITY_QUEUED_BYTES;
     private static final Field FIELD_FRAME_JOINER_BUILDER_SAMPLE_PACKET;
 
     static {
@@ -58,6 +59,7 @@ public class SynchronizationLayer extends ChannelDuplexHandler {
             FIELD_QUEUE_LAST_ORDER_INDEX = accessible(CLASS_QUEUE.getDeclaredField("lastOrderIndex"));
             FIELD_RELIABILITY_NEXT_SEND_SEQ_ID = accessible(ReliabilityHandler.class.getDeclaredField("nextSendSeqId"));
             FIELD_RELIABILITY_LAST_RECEIVED_SEQ_ID = accessible(ReliabilityHandler.class.getDeclaredField("lastReceivedSeqId"));
+            FIELD_RELIABILITY_QUEUED_BYTES = accessible(ReliabilityHandler.class.getDeclaredField("queuedBytes"));
             FIELD_FRAME_JOINER_BUILDER_SAMPLE_PACKET = accessible(CLASS_FRAME_JOINER_BUILDER.getDeclaredField("samplePacket"));
 
         } catch (Throwable t) {
@@ -115,6 +117,7 @@ public class SynchronizationLayer extends ChannelDuplexHandler {
             this.reliabilityHandlerPendingFrameSets = (Int2ObjectMap<FrameSet>) accessible(ReliabilityHandler.class.getDeclaredField("pendingFrameSets")).get(this.reliabilityHandler);
 
             int originalChannelsLength = this.frameOrderOutNextOrderIndex.length;
+            //noinspection deprecation
             this.channelsLength = (int) (originalChannelsLength - this.channelToIgnore.stream().filter(value -> value < originalChannelsLength).count());
 
             this.frameJoiner = ctx.pipeline().get(FrameJoiner.class);
@@ -225,6 +228,8 @@ public class SynchronizationLayer extends ChannelDuplexHandler {
             frameSet.release();
         }
         this.reliabilityHandlerPendingFrameSets.clear();
+
+        int byteSize = 0;
         for (Iterator<Frame> iterator = retainedFrameList.iterator(); iterator.hasNext(); ) {
             Frame frame = iterator.next();
             if (frame.getReliability().isOrdered && !channelToIgnore.contains(frame.getOrderChannel())) {
@@ -233,11 +238,18 @@ public class SynchronizationLayer extends ChannelDuplexHandler {
                 iterator.remove();
                 frame.release();
                 droppedFrames++;
+            } else {
+                byteSize += frame.getRoughPacketSize();
             }
         }
         this.queuedFrames.addAll(retainedFrameList);
 
         System.out.println("Dropping %d frames".formatted(droppedFrames));
+        try {
+            FIELD_RELIABILITY_QUEUED_BYTES.set(this.reliabilityHandler, byteSize);
+        } catch (Throwable t) {
+            throw new RuntimeException(t);
+        }
 
         this.reliabilityHandlerPendingFrameSets.clear();
     }

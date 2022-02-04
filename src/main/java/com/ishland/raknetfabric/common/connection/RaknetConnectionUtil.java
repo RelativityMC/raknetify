@@ -20,8 +20,9 @@ public class RaknetConnectionUtil {
             config.setMTU(Constants.DEFAULT_MTU);
             config.setMaxQueuedBytes(Constants.MAX_QUEUED_SIZE);
             config.setMaxPendingFrameSets(Constants.MAX_PENDING_FRAME_SETS);
-            config.setRetryDelayNanos(TimeUnit.NANOSECONDS.convert(200, TimeUnit.MILLISECONDS));
+            config.setRetryDelayNanos(TimeUnit.NANOSECONDS.convert(25, TimeUnit.MILLISECONDS));
             config.setDefaultPendingFrameSets(Constants.DEFAULT_PENDING_FRAME_SETS);
+            config.setNACKEnabled(false);
             final SimpleMetricsLogger simpleMetricsLogger = new SimpleMetricsLogger();
             config.setMetrics(simpleMetricsLogger);
             final MetricsSynchronizationHandler metricsSynchronizationHandler = new MetricsSynchronizationHandler();

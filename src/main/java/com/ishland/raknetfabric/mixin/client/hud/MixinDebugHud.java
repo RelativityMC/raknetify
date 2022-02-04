@@ -50,19 +50,19 @@ public class MixinDebugHud {
                                             ));
                         }
                         cir.getReturnValue().add(
-                                "[RaknetFabric] C: BST: %d, ERR: %.4f%%, %d tx, %d rx"
+                                "[RaknetFabric] C: ERR: %.4f%%, %d tx, %d rx, BST: %d"
                                         .formatted(
-                                                logger.getMeasureBurstTokens() + config.getDefaultPendingFrameSets(),
                                                 logger.getMeasureErrorRate() * 100.0,
-                                                logger.getMeasureTX(), logger.getMeasureRX()
+                                                logger.getMeasureTX(), logger.getMeasureRX(),
+                                                logger.getMeasureBurstTokens() + config.getDefaultPendingFrameSets()
                                         ));
                         if (serverSync != null && serverSync.isServerSupported()) {
                             cir.getReturnValue().add(
-                                    "[RaknetFabric] S: BST: %d, ERR: %.4f%%, %d tx, %d rx"
+                                    "[RaknetFabric] S: ERR: %.4f%%, %d tx, %d rx, BST: %d"
                                             .formatted(
-                                                    serverSync.getBurst(),
                                                     serverSync.getErrorRate() * 100.0,
-                                                    serverSync.getTX(), serverSync.getRX()
+                                                    serverSync.getTX(), serverSync.getRX(),
+                                                    serverSync.getBurst()
                                             ));
                         }
                     } else {
