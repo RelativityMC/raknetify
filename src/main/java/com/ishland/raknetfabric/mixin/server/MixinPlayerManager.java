@@ -30,7 +30,7 @@ public class MixinPlayerManager {
             System.err.println("Warning: %s don't have valid channel when logged in, not sending sync packet".formatted(this));
             return;
         }
-        channel.write(MultiChannellingDataCodec.START_MULTICHANNEL);
+        channel.eventLoop().execute(() -> channel.write(MultiChannellingDataCodec.START_MULTICHANNEL));
     }
 
 }

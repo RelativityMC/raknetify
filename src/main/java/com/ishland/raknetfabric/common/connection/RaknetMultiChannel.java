@@ -209,25 +209,23 @@ public class RaknetMultiChannel {
         unreliable.forEach(clazz -> classToChannelIdOverride.put(clazz, -2));
     }
 
-    private static final ThreadLocal<Class<?>> currentPacketClass = new ThreadLocal<>();
+//    private static final ThreadLocal<Class<?>> currentPacketClass = new ThreadLocal<>();
+//
+//    public static void setCurrentPacketClass(Class<?> clazz) {
+//        Preconditions.checkNotNull(clazz, "clazz");
+//        if (currentPacketClass.get() != null) throw new IllegalStateException("Already set");
+//        currentPacketClass.set(clazz);
+//    }
+//
+//    public static void clearCurrentPacketClass(Class<?> clazz) {
+//        Preconditions.checkNotNull(clazz);
+//        final Class<?> threadLocalClazz = currentPacketClass.get();
+//        if (threadLocalClazz == null) throw new IllegalArgumentException("Not set");
+//        if (threadLocalClazz != clazz) throw new IllegalArgumentException("Mismatch");
+//        currentPacketClass.set(null);
+//    }
 
-    public static void setCurrentPacketClass(Class<?> clazz) {
-        Preconditions.checkNotNull(clazz, "clazz");
-        if (currentPacketClass.get() != null) throw new IllegalStateException("Already set");
-        currentPacketClass.set(clazz);
-    }
-
-    public static void clearCurrentPacketClass(Class<?> clazz) {
-        Preconditions.checkNotNull(clazz);
-        final Class<?> threadLocalClazz = currentPacketClass.get();
-        if (threadLocalClazz == null) throw new IllegalArgumentException("Not set");
-        if (threadLocalClazz != clazz) throw new IllegalArgumentException("Mismatch");
-        currentPacketClass.set(null);
-    }
-
-
-    public static int getPacketChannelOverride() {
-        final Class<?> clazz = currentPacketClass.get();
+    public static int getPacketChannelOverride(Class<?> clazz) {
         if (clazz == null) {
             System.err.println("Warning: Tried to send packet without setting packet class");
             return 0;

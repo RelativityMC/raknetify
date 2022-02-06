@@ -9,7 +9,7 @@ public class Constants {
     public static final int RAKNET_METRICS_SYNC_PACKET_ID = 0xFB;
     public static final int MAX_QUEUED_SIZE = 256 * 1024 * 1024;
     public static final int DEFAULT_MTU = 1400;
-    public static final int MAX_PENDING_FRAME_SETS = 16 * 1024;
+    public static final int MAX_PENDING_FRAME_SETS = 2 * 1024;
     public static final int DEFAULT_PENDING_FRAME_SETS = 4;
 
     private Constants() {

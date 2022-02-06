@@ -3,18 +3,22 @@ package com.ishland.raknetfabric.common.connection;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelOutboundHandlerAdapter;
 import io.netty.channel.ChannelPromise;
-import net.minecraft.network.Packet;
 
 public class MultiChannellingPacketCapture extends ChannelOutboundHandlerAdapter {
 
+    private Class<?> packetClass = null;
+
     @Override
     public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
-        final Class<?> msgClass = msg.getClass();
-        RaknetMultiChannel.setCurrentPacketClass(msgClass);
+        this.packetClass = msg.getClass();
         try {
-            super.write(ctx, msg, promise);
+            ctx.write(msg, promise);
         } finally {
-            RaknetMultiChannel.clearCurrentPacketClass(msgClass);
+            this.packetClass = null;
         }
+    }
+
+    public Class<?> getPacketClass() {
+        return packetClass;
     }
 }

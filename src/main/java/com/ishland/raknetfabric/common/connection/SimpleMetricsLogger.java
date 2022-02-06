@@ -148,26 +148,26 @@ public class SimpleMetricsLogger implements RakNet.MetricsLogger {
 
     private final DescriptiveStatistics rxStats = new DescriptiveStatistics(8);
     private final DescriptiveStatistics txStats = new DescriptiveStatistics(8);
-    private long lastFramesIn = 0L;
-    private long lastFramesOut = 0L;
+    private long lastPacketsIn = 0L;
+    private long lastPacketsOut = 0L;
     private volatile int measureRX = 0;
     private volatile int measureTX = 0;
 
     private void tickRXTX(long deltaTime) {
 
-        final long framesIn = this.framesIn;
-        final long framesOut = this.framesOut;
+        final long packetsIn = this.packetsIn;
+        final long packetsOut = this.packetsOut;
 
         final double timeDeltaS = deltaTime / 1000.0;
 
-        this.rxStats.addValue((framesIn - this.lastFramesIn) / timeDeltaS);
-        this.txStats.addValue((framesOut - this.lastFramesOut) / timeDeltaS);
+        this.rxStats.addValue((packetsIn - this.lastPacketsIn) / timeDeltaS);
+        this.txStats.addValue((packetsOut - this.lastPacketsOut) / timeDeltaS);
 
         this.measureRX = (int) this.rxStats.getMean();
         this.measureTX = (int) this.txStats.getMean();
 
-        this.lastFramesIn = framesIn;
-        this.lastFramesOut = framesOut;
+        this.lastPacketsIn = packetsIn;
+        this.lastPacketsOut = packetsOut;
     }
 
     // ========== Getters ==========

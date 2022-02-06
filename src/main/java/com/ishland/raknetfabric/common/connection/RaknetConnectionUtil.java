@@ -4,8 +4,8 @@ import com.ishland.raknetfabric.Constants;
 import com.ishland.raknetfabric.common.compat.viafabric.ViaFabricCompatInjector;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelDuplexHandler;
-import io.netty.handler.flush.FlushConsolidationHandler;
 import io.netty.handler.timeout.ReadTimeoutHandler;
+import net.minecraft.server.ServerNetworkIo;
 import network.ycc.raknet.RakNet;
 
 import java.util.concurrent.TimeUnit;
@@ -29,9 +29,11 @@ public class RaknetConnectionUtil {
             simpleMetricsLogger.setMetricsSynchronizationHandler(metricsSynchronizationHandler);
 //            channel.pipeline().addLast("raknetfabric-flush-enforcer", new FlushEnforcer());
             channel.pipeline().addLast("raknetfabric-metrics-sync", metricsSynchronizationHandler);
-            channel.pipeline().addLast("raknetfabric-flush-consolidation", new FlushConsolidationHandler(Integer.MAX_VALUE, true));
+//            channel.pipeline().addLast("raknetfabric-flush-consolidation", new FlushConsolidationHandler(Integer.MAX_VALUE, true));
+            channel.pipeline().addLast("raknetfabric-no-flush", new NoFlush());
             channel.pipeline().addLast("raknetfabric-synchronization-layer", new SynchronizationLayer(1));
             channel.pipeline().addLast("raknetfabric-multi-channel-data-codec", new MultiChannellingDataCodec(Constants.RAKNET_GAME_PACKET_ID));
+            channel.pipeline().addLast("raknetfabric-threading", new ChannelDuplexHandler());
         }
     }
 
@@ -42,7 +44,9 @@ public class RaknetConnectionUtil {
             channel.pipeline().addFirst("raknetfabric-timeout", new ReadTimeoutHandler(15));
             channel.pipeline().replace("splitter", "splitter", new ChannelDuplexHandler()); // no-op
             channel.pipeline().replace("prepender", "prepender", new ChannelDuplexHandler()); // no-op
-            channel.pipeline().addLast("raknetfabric-multi-channel-packet-cature", new MultiChannellingPacketCapture());
+            final MultiChannellingPacketCapture handler = new MultiChannellingPacketCapture();
+            channel.pipeline().addLast("raknetfabric-multi-channel-packet-cature", handler);
+            channel.pipeline().get(MultiChannellingDataCodec.class).setCapture(handler);
         }
     }
 

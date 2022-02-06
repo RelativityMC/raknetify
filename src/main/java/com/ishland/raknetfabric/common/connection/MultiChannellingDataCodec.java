@@ -24,6 +24,11 @@ public class MultiChannellingDataCodec extends MessageToMessageCodec<FrameData, 
     }
 
     private boolean isMultichannelEnabled;
+    private MultiChannellingPacketCapture capture = null;
+
+    void setCapture(MultiChannellingPacketCapture capture) {
+        this.capture = capture;
+    }
 
     @Override
     public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
@@ -40,7 +45,7 @@ public class MultiChannellingDataCodec extends MessageToMessageCodec<FrameData, 
     protected void encode(ChannelHandlerContext ctx, ByteBuf buf, List<Object> out) {
         if (buf.isReadable()) {
             final FrameData frameData = FrameData.create(ctx.alloc(), packetId, buf);
-            final int packetChannelOverride = isMultichannelEnabled ? RaknetMultiChannel.getPacketChannelOverride() : 0;
+            final int packetChannelOverride = isMultichannelEnabled ? RaknetMultiChannel.getPacketChannelOverride(this.capture.getPacketClass()) : 0;
             if (packetChannelOverride >= 0)
                 frameData.setOrderChannel(packetChannelOverride);
             else if (packetChannelOverride == -1)
