@@ -25,6 +25,7 @@ public class RaknetConnectionUtil {
             config.setRetryDelayNanos(TimeUnit.NANOSECONDS.convert(25, TimeUnit.MILLISECONDS));
             config.setDefaultPendingFrameSets(Constants.DEFAULT_PENDING_FRAME_SETS);
             config.setNACKEnabled(false);
+            config.setIgnoreResendGauge(true);
 
             initRaknetChannel(channel);
 
@@ -32,6 +33,7 @@ public class RaknetConnectionUtil {
 //            channel.pipeline().addLast("raknetfabric-flush-consolidation", new FlushConsolidationHandler(Integer.MAX_VALUE, true));
             channel.pipeline().addLast("raknetfabric-no-flush", new NoFlush());
             channel.pipeline().addLast("raknetfabric-multi-channel-data-codec", new MultiChannellingDataCodec(Constants.RAKNET_GAME_PACKET_ID));
+            channel.pipeline().addLast("raknetfabric-frame-data-blocker", new FrameDataBlocker());
         }
     }
 
