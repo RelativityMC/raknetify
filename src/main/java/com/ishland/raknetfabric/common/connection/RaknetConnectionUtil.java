@@ -8,6 +8,7 @@ import io.netty.channel.ChannelInitializer;
 import io.netty.handler.timeout.ReadTimeoutHandler;
 import net.minecraft.server.ServerNetworkIo;
 import network.ycc.raknet.RakNet;
+import network.ycc.raknet.client.channel.RakNetClientThreadedChannel;
 import network.ycc.raknet.server.channel.RakNetApplicationChannel;
 
 import java.util.concurrent.TimeUnit;
@@ -22,7 +23,7 @@ public class RaknetConnectionUtil {
             config.setMTU(Constants.DEFAULT_MTU);
             config.setMaxQueuedBytes(Constants.MAX_QUEUED_SIZE);
             config.setMaxPendingFrameSets(Constants.MAX_PENDING_FRAME_SETS);
-            config.setRetryDelayNanos(TimeUnit.NANOSECONDS.convert(25, TimeUnit.MILLISECONDS));
+            config.setRetryDelayNanos(TimeUnit.NANOSECONDS.convert(50, TimeUnit.MILLISECONDS));
             config.setDefaultPendingFrameSets(Constants.DEFAULT_PENDING_FRAME_SETS);
             config.setNACKEnabled(false);
             config.setIgnoreResendGauge(true);
@@ -39,10 +40,16 @@ public class RaknetConnectionUtil {
 
     private static void initRaknetChannel(Channel appChannel) {
         final Channel channel;
+        final String threadedReadHandlerName;
         if (appChannel instanceof RakNetApplicationChannel) {
             channel = appChannel.parent();
+            threadedReadHandlerName = RakNetApplicationChannel.NAME_SERVER_PARENT_THREADED_READ_HANDLER;
+        } else if (appChannel instanceof RakNetClientThreadedChannel) {
+            channel = appChannel.parent();
+            threadedReadHandlerName = RakNetClientThreadedChannel.NAME_CLIENT_PARENT_THREADED_READ_HANDLER;
         } else {
             channel = appChannel;
+            threadedReadHandlerName = null;
         }
         channel.pipeline().addLast(new ChannelInitializer<>() {
             @Override
@@ -52,8 +59,14 @@ public class RaknetConnectionUtil {
                 config.setMetrics(simpleMetricsLogger);
                 final MetricsSynchronizationHandler metricsSynchronizationHandler = new MetricsSynchronizationHandler();
                 simpleMetricsLogger.setMetricsSynchronizationHandler(metricsSynchronizationHandler);
-                ch.pipeline().addLast("raknetfabric-metrics-sync", metricsSynchronizationHandler);
-                ch.pipeline().addLast("raknetfabric-synchronization-layer", new SynchronizationLayer(1));
+                final SynchronizationLayer synchronizationLayer = new SynchronizationLayer(1);
+                if (threadedReadHandlerName != null) {
+                    ch.pipeline().addBefore(threadedReadHandlerName, "raknetfabric-metrics-sync", metricsSynchronizationHandler);
+                    ch.pipeline().addBefore(threadedReadHandlerName, "raknetfabric-synchronization-layer", synchronizationLayer);
+                } else {
+                    ch.pipeline().addLast("raknetfabric-metrics-sync", metricsSynchronizationHandler);
+                    ch.pipeline().addLast("raknetfabric-synchronization-layer", synchronizationLayer);
+                }
                 ch.pipeline().addFirst("raknetfabric-timeout", new ReadTimeoutHandler(15));
             }
         });

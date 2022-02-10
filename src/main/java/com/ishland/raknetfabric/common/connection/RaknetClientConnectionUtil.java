@@ -19,6 +19,7 @@ import net.minecraft.text.LiteralText;
 import net.minecraft.util.math.MathHelper;
 import network.ycc.raknet.RakNet;
 import network.ycc.raknet.client.channel.RakNetClientChannel;
+import network.ycc.raknet.client.channel.RakNetClientThreadedChannel;
 import network.ycc.raknet.pipeline.UserDataCodec;
 
 import java.net.InetSocketAddress;
@@ -158,7 +159,11 @@ public class RaknetClientConnectionUtil {
                                 });
                     }
                 })
-                .channelFactory(() -> new RakNetClientChannel(NioDatagramChannel.class)) // RaknetFabric
+                .channelFactory(() -> { // RaknetFabric
+                    final RakNetClientThreadedChannel channel = new RakNetClientThreadedChannel(NioDatagramChannel.class);
+                    channel.setProvidedEventLoop(ClientConnection.CLIENT_IO_GROUP.get().next());
+                    return channel;
+                })
                 .connect(address.getAddress(), address.getPort());
     }
 
