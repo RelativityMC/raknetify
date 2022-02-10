@@ -11,10 +11,10 @@ A Fabric mod that allows using RakNet as Minecraft networking backend.
 ## Prerequisites
 - RaknetFabric is currently confirmed to be working on 1.18.1 and 1.17.1, 
   other Minecraft versions are not tested.
-- You need to have a UDP port opened on your server. 
-- Krypton is currently incompatible.
+- You need to have a UDP port opened at the same port number of your normal server port. 
+- Krypton is currently incompatible. 
 
-## Installation
+## Installation and usage
 - Download the latest release from [GitHub](https://github.com/RelativityMC/RaknetFabric/releases) 
   or development builds from [CodeMC](https://ci.codemc.io/job/RelativityMC/job/RaknetFabric/)
 - Install the mod on both client and server.
