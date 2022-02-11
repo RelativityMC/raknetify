@@ -11,8 +11,12 @@ sourceCompatibility = JavaVersion.VERSION_17
 targetCompatibility = JavaVersion.VERSION_17
 
 archivesBaseName = project.archives_base_name
-version = project.mod_version
+version = project.mod_version + "." + getVersionSuffix()
 group = project.maven_group
+
+afterEvaluate {
+	logger.lifecycle("Version String: ${version}")
+}
 
 repositories {
 	// Add repositories to retrieve artifacts from in here.
@@ -113,4 +117,27 @@ publishing {
 tasks.withType(AbstractArchiveTask) {
 	preserveFileTimestamps = false
 	reproducibleFileOrder = true
+}
+
+String getVersionSuffix() {
+	def stdout = new ByteArrayOutputStream()
+	exec {
+		commandLine 'git', 'describe', '--tags', '--dirty', '--broken'
+		standardOutput = stdout
+	}
+	stdout = stdout.toString().strip()
+	def suffix = ""
+	if (stdout.endsWith("-dirty")) {
+		stdout = stdout.substring(0, stdout.length() - "-dirty".length())
+		suffix = "-dirty"
+	}
+	if (stdout.endsWith("-broken")) {
+		stdout = stdout.substring(0, stdout.length() - "-broken".length())
+		suffix = "-broken"
+	}
+	if (stdout.indexOf('-') < 0) {
+		return "0" + suffix;
+	}
+	def split = stdout.split('-')
+	return split[split.length - 2] + suffix
 }
