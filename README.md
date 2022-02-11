@@ -5,6 +5,7 @@ A Fabric mod that allows using RakNet as Minecraft networking backend.
 - Higher reliability and lower latency under unreliable and rate-limited client connections.
 - Uses RakNet's multiple channels to achieve higher responsiveness. 
 - Supports ViaVersion client-side and ViaVersion server-side. (MultiConnect compatibility is unknown)
+- Currently, the networking behavior is similar to TCP Slow Start.
 
 # How to use it?
 
