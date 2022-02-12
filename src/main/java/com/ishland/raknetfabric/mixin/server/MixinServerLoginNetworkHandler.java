@@ -1,5 +1,6 @@
 package com.ishland.raknetfabric.mixin.server;
 
+import com.ishland.raknetfabric.mixin.access.IClientConnection;
 import net.minecraft.network.ClientConnection;
 import net.minecraft.server.network.ServerLoginNetworkHandler;
 import org.spongepowered.asm.mixin.Final;
@@ -18,14 +19,20 @@ public class MixinServerLoginNetworkHandler {
 
     @Inject(method = "acceptPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/ClientConnection;send(Lnet/minecraft/network/Packet;Lio/netty/util/concurrent/GenericFutureListener;)V", ordinal = 0, shift = At.Shift.AFTER))
     private void setupDummyCompressionImmediately(CallbackInfo ci) throws Throwable {
-        try {
-            this.connection.setCompressionThreshold(Integer.MAX_VALUE, false);
-        } catch (NoSuchMethodError e) {
-            System.out.println("An error occurred when starting compression, using alternative method");
-            //noinspection JavaReflectionMemberAccess
-            final Method method_10760 = ClientConnection.class.getMethod("method_10760", int.class);
-            method_10760.invoke(this.connection, Integer.MAX_VALUE);
-        }
+        ((IClientConnection) this.connection).getChannel().eventLoop().execute(() -> {
+            try {
+                try {
+                    this.connection.setCompressionThreshold(512, false);
+                } catch (NoSuchMethodError e) {
+                    System.out.println("An error occurred when starting compression, using alternative method: ");
+                    //noinspection JavaReflectionMemberAccess
+                    final Method method_10760 = ClientConnection.class.getMethod("method_10760", int.class);
+                    method_10760.invoke(this.connection, 512);
+                }
+            } catch (Throwable t) {
+                t.printStackTrace();
+            }
+        });
     }
 
 }
