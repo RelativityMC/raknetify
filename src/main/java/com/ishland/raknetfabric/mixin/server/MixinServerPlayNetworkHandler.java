@@ -48,7 +48,9 @@ public class MixinServerPlayNetworkHandler {
 
     @Redirect(method = "onKeepAlive", at = @At(value = "FIELD", target = "Lnet/minecraft/server/network/ServerPlayerEntity;pingMilliseconds:I", opcode = Opcodes.PUTFIELD))
     private void redirectPingStoring(ServerPlayerEntity instance, int value) {
-        // no-op
+        if (!(((IClientConnection) this.connection).getChannel().config() instanceof RakNet.Config)) {
+            instance.pingMilliseconds = value;
+        }
     }
 
     @Inject(method = "tick", at = @At("HEAD"))
