@@ -12,7 +12,6 @@
   },
 
   "license": "MIT",
-  "icon": "assets/raknet-fabric/icon.png",
 
   "environment": "*",
   "entrypoints": {
