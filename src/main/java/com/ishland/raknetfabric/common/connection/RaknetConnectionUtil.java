@@ -20,7 +20,6 @@ public class RaknetConnectionUtil {
 
     public static void initChannel(Channel channel) {
         if (channel.config() instanceof RakNet.Config config) {
-            config.setMTU(Constants.DEFAULT_MTU);
             config.setMaxQueuedBytes(Constants.MAX_QUEUED_SIZE);
             config.setMaxPendingFrameSets(Constants.MAX_PENDING_FRAME_SETS);
             config.setRetryDelayNanos(TimeUnit.NANOSECONDS.convert(50, TimeUnit.MILLISECONDS));

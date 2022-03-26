@@ -2,6 +2,7 @@ package com.ishland.raknetfabric.mixin.client;
 
 import com.ishland.raknetfabric.Constants;
 import com.ishland.raknetfabric.common.connection.RaknetClientConnectionUtil;
+import com.ishland.raknetfabric.common.util.PrefixUtil;
 import net.minecraft.client.network.MultiplayerServerListPinger;
 import net.minecraft.client.network.ServerAddress;
 import net.minecraft.client.network.ServerInfo;
@@ -146,12 +147,14 @@ public abstract class MixinMultiplayerServerListPinger {
 
     @Redirect(method = "add", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ServerAddress;parse(Ljava/lang/String;)Lnet/minecraft/client/network/ServerAddress;"))
     private ServerAddress modifyRaknetAddress(String address) {
-        return ServerAddress.parse(address.startsWith(Constants.RAKNET_PREFIX) ? address.substring(Constants.RAKNET_PREFIX.length()) : address);
+        final PrefixUtil.Info info = PrefixUtil.getInfo(address);
+        return ServerAddress.parse(info.stripped());
     }
 
     @Redirect(method = "add", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/ClientConnection;connect(Ljava/net/InetSocketAddress;Z)Lnet/minecraft/network/ClientConnection;"))
     private ClientConnection redirectConnect(InetSocketAddress address, boolean useEpoll, ServerInfo entry, Runnable runnable) {
-        return entry.address.startsWith(Constants.RAKNET_PREFIX) ? RaknetClientConnectionUtil.connect(address, useEpoll) : ClientConnection.connect(address, useEpoll);
+        final PrefixUtil.Info info = PrefixUtil.getInfo(entry.address);
+        return info.useRakNet() ? RaknetClientConnectionUtil.connect(address, useEpoll, info.largeMTU()) : ClientConnection.connect(address, useEpoll);
     }
 
 }

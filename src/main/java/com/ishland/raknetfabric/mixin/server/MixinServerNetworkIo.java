@@ -1,11 +1,14 @@
 package com.ishland.raknetfabric.mixin.server;
 
+import com.ishland.raknetfabric.Constants;
 import com.ishland.raknetfabric.common.util.ThreadLocalUtil;
 import io.netty.bootstrap.AbstractBootstrap;
 import io.netty.bootstrap.ServerBootstrap;
+import io.netty.channel.FixedRecvByteBufAllocator;
 import io.netty.channel.ServerChannel;
 import io.netty.channel.epoll.Epoll;
 import io.netty.channel.epoll.EpollDatagramChannel;
+import io.netty.channel.socket.DatagramChannel;
 import io.netty.channel.socket.ServerSocketChannel;
 import io.netty.channel.socket.nio.NioDatagramChannel;
 import net.minecraft.server.MinecraftServer;
@@ -106,7 +109,11 @@ public abstract class MixinServerNetworkIo {
     private AbstractBootstrap<ServerBootstrap, ServerChannel> redirectChannel(ServerBootstrap instance, Class<? extends ServerSocketChannel> aClass) {
         final boolean useEpoll = Epoll.isAvailable() && this.server.isUsingNativeTransport();
         return ThreadLocalUtil.isInitializingRaknet()
-                ? instance.channelFactory(() -> new RakNetServerChannel(useEpoll ? EpollDatagramChannel.class : NioDatagramChannel.class))
+                ? instance.channelFactory(() -> new RakNetServerChannel(() -> {
+                    final DatagramChannel channel = useEpoll ? new EpollDatagramChannel() : new NioDatagramChannel();
+                    channel.config().setRecvByteBufAllocator(new FixedRecvByteBufAllocator(Constants.LARGE_MTU + 512));
+                    return channel;
+                }))
                 : instance.channel(aClass);
     }
 

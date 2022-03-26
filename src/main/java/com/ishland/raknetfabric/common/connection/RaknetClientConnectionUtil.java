@@ -18,7 +18,6 @@ import net.minecraft.network.ClientConnection;
 import net.minecraft.text.LiteralText;
 import net.minecraft.util.math.MathHelper;
 import network.ycc.raknet.RakNet;
-import network.ycc.raknet.client.channel.RakNetClientChannel;
 import network.ycc.raknet.client.channel.RakNetClientThreadedChannel;
 import network.ycc.raknet.pipeline.UserDataCodec;
 
@@ -30,7 +29,7 @@ public class RaknetClientConnectionUtil {
     private RaknetClientConnectionUtil() {
     }
 
-    public static ClientConnection connect(InetSocketAddress address, boolean useEpoll) {
+    public static ClientConnection connect(InetSocketAddress address, boolean useEpoll, boolean largeMTU) {
 //        // [VanillaCopy] from Lnet/minecraft/network/ClientConnection;connect(Ljava/net/InetSocketAddress;Z)Lnet/minecraft/network/ClientConnection;
 //        final ClientConnection clientConnection = new ClientConnection(NetworkSide.CLIENTBOUND);
 //        ChannelFactory<RakNetClientChannel> channelFactory; // RaknetFabric
@@ -75,9 +74,11 @@ public class RaknetClientConnectionUtil {
 
         try {
             ThreadLocalUtil.setInitializingRaknet(true);
+            ThreadLocalUtil.setInitializingRaknetLargeMTU(largeMTU);
             return ClientConnection.connect(address, useEpoll);
         } finally {
             ThreadLocalUtil.setInitializingRaknet(false);
+            ThreadLocalUtil.setInitializingRaknetLargeMTU(false);
         }
     }
 

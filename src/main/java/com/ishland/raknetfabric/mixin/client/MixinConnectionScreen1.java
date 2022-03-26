@@ -2,6 +2,7 @@ package com.ishland.raknetfabric.mixin.client;
 
 import com.ishland.raknetfabric.Constants;
 import com.ishland.raknetfabric.common.connection.RaknetClientConnectionUtil;
+import com.ishland.raknetfabric.common.util.PrefixUtil;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ConnectScreen;
 import net.minecraft.client.network.ServerAddress;
@@ -29,17 +30,22 @@ public class MixinConnectionScreen1 extends Thread {
     @Unique
     private boolean isRaknet = false;
 
+    @Unique
+    private boolean raknetLargeMTU = false;
+
     @Inject(method = "<init>(Lnet/minecraft/client/gui/screen/ConnectScreen;Ljava/lang/String;Lnet/minecraft/client/network/ServerAddress;Lnet/minecraft/client/MinecraftClient;)V", at = @At("RETURN"))
     private void onInit(ConnectScreen connectScreen, String string, ServerAddress serverAddress, MinecraftClient minecraftClient, CallbackInfo ci) {
-        if (serverAddress.getAddress().startsWith(Constants.RAKNET_PREFIX)) {
+        final PrefixUtil.Info info = PrefixUtil.getInfo(serverAddress.getAddress());
+        if (info.useRakNet()) {
             this.isRaknet = true;
-            this.field_33737 = new ServerAddress(serverAddress.getAddress().substring(Constants.RAKNET_PREFIX.length()), serverAddress.getPort());
+            this.raknetLargeMTU = info.largeMTU();
+            this.field_33737 = new ServerAddress(info.stripped(), serverAddress.getPort());
         }
     }
 
     @Redirect(method = "run()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/ClientConnection;connect(Ljava/net/InetSocketAddress;Z)Lnet/minecraft/network/ClientConnection;"))
     private ClientConnection connectRaknet(InetSocketAddress address, boolean useEpoll) {
-        return this.isRaknet ? RaknetClientConnectionUtil.connect(address, useEpoll) : ClientConnection.connect(address, useEpoll);
+        return this.isRaknet ? RaknetClientConnectionUtil.connect(address, useEpoll, this.raknetLargeMTU) : ClientConnection.connect(address, useEpoll);
     }
 
 }
