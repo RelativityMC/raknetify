@@ -22,6 +22,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.net.InetSocketAddress;
+import java.nio.channels.ClosedChannelException;
 
 @Mixin(ClientConnection.class)
 public abstract class MixinClientConnection {
@@ -61,6 +62,7 @@ public abstract class MixinClientConnection {
 
     @Inject(method = "exceptionCaught", at = @At("HEAD"))
     private void onExceptionCaught(ChannelHandlerContext context, Throwable ex, CallbackInfo ci) {
+        if (ex instanceof ClosedChannelException) return;
         System.err.println(ex.toString());
     }
 
