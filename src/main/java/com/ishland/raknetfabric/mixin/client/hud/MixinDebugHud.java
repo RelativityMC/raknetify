@@ -1,6 +1,7 @@
 package com.ishland.raknetfabric.mixin.client.hud;
 
 import com.ishland.raknetfabric.common.connection.MetricsSynchronizationHandler;
+import com.ishland.raknetfabric.common.connection.MultiChannelingStreamingCompression;
 import com.ishland.raknetfabric.common.connection.SimpleMetricsLogger;
 import com.ishland.raknetfabric.mixin.access.IClientConnection;
 import io.netty.channel.Channel;
@@ -71,6 +72,15 @@ public class MixinDebugHud {
                                         .formatted(config.getMTU())
                         );
                     }
+
+                    final MultiChannelingStreamingCompression compression = channel.pipeline().get(MultiChannelingStreamingCompression.class);
+                    if (compression != null && compression.isActive()) {
+                        cir.getReturnValue().add(
+                                "[RaknetFabric] CRatio: I: %.2f%%, O: %.2f%%"
+                                        .formatted(compression.getInCompressionRatio() * 100, compression.getOutCompressionRatio() * 100)
+                        );
+                    }
+
                     return;
                 }
             }

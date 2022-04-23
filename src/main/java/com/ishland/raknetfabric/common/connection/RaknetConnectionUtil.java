@@ -32,6 +32,7 @@ public class RaknetConnectionUtil {
 //            channel.pipeline().addLast("raknetfabric-flush-enforcer", new FlushEnforcer());
 //            channel.pipeline().addLast("raknetfabric-flush-consolidation", new FlushConsolidationHandler(Integer.MAX_VALUE, true));
             channel.pipeline().addLast("raknetfabric-no-flush", new NoFlush());
+            channel.pipeline().addLast("raknetfabric-streaming-compression", new MultiChannelingStreamingCompression(Constants.RAKNET_GAME_PACKET_ID, Constants.RAKNET_STREAMING_COMPRESSION_PACKET_ID));
             channel.pipeline().addLast("raknetfabric-multi-channel-data-codec", new MultiChannellingDataCodec(Constants.RAKNET_GAME_PACKET_ID));
             channel.pipeline().addLast("raknetfabric-frame-data-blocker", new FrameDataBlocker());
         }
