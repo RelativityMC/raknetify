@@ -50,6 +50,14 @@ public class MixinDebugHud {
                                                     logger.getCurrentQueuedBytes() / 1024.0 / 1024.0
                                             ));
                         }
+
+                        cir.getReturnValue().add(
+                                "[RaknetFabric] C: I: %s, O: %s"
+                                        .formatted(
+                                                logger.getMeasureTrafficInFormatted(),
+                                                logger.getMeasureTrafficOutFormatted()
+                                        ));
+
                         cir.getReturnValue().add(
                                 "[RaknetFabric] C: ERR: %.4f%%, %d tx, %d rx, BST: %d"
                                         .formatted(

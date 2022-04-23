@@ -1,5 +1,6 @@
 package com.ishland.raknetfabric.common.connection;
 
+import com.ishland.raknetfabric.common.util.MathUtil;
 import network.ycc.raknet.RakNet;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
@@ -150,13 +151,21 @@ public class SimpleMetricsLogger implements RakNet.MetricsLogger {
     private final DescriptiveStatistics txStats = new DescriptiveStatistics(8);
     private long lastPacketsIn = 0L;
     private long lastPacketsOut = 0L;
+    private long lastBytesIn = 0L;
+    private long lastBytesOut = 0L;
     private volatile int measureRX = 0;
     private volatile int measureTX = 0;
+    private volatile long measureBytesInRate = 0;
+    private volatile long measureBytesOutRate = 0;
+    private volatile String measureTrafficInFormatted = "...";
+    private volatile String measureTrafficOutFormatted = "...";
 
     private void tickRXTX(long deltaTime) {
 
         final long packetsIn = this.packetsIn;
         final long packetsOut = this.packetsOut;
+        final long bytesIn = this.bytesIn;
+        final long bytesOut = this.bytesOut;
 
         final double timeDeltaS = deltaTime / 1000.0;
 
@@ -166,8 +175,16 @@ public class SimpleMetricsLogger implements RakNet.MetricsLogger {
         this.measureRX = (int) this.rxStats.getMean();
         this.measureTX = (int) this.txStats.getMean();
 
+        this.measureBytesInRate = (long) ((bytesIn - this.lastBytesIn) / timeDeltaS);
+        this.measureBytesOutRate = (long) ((bytesOut - this.lastBytesOut) / timeDeltaS);
+
+        this.measureTrafficInFormatted = MathUtil.humanReadableByteCountBin(this.measureBytesInRate) + "/s";
+        this.measureTrafficOutFormatted = MathUtil.humanReadableByteCountBin(this.measureBytesOutRate) + "/s";
+
         this.lastPacketsIn = packetsIn;
         this.lastPacketsOut = packetsOut;
+        this.lastBytesIn = bytesIn;
+        this.lastBytesOut = bytesOut;
     }
 
     // ========== Getters ==========
@@ -198,6 +215,22 @@ public class SimpleMetricsLogger implements RakNet.MetricsLogger {
 
     public long getMeasureBurstTokens() {
         return measureBurstTokens;
+    }
+
+    public long getMeasureBytesInRate() {
+        return measureBytesInRate;
+    }
+
+    public long getMeasureBytesOutRate() {
+        return measureBytesOutRate;
+    }
+
+    public String getMeasureTrafficInFormatted() {
+        return measureTrafficInFormatted;
+    }
+
+    public String getMeasureTrafficOutFormatted() {
+        return measureTrafficOutFormatted;
     }
 
     // ========== Misc ==========
