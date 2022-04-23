@@ -7,6 +7,7 @@
   "mixinPriority": 1010,
   "mixins": [
     "access.IClientConnection",
+    "access.INetworkState",
     "client.MixinClientPlayNetworkHandler",
     "client.MixinConnectionScreen1",
     "client.MixinConnectScreen",

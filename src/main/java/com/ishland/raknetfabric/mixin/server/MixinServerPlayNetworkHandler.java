@@ -6,7 +6,8 @@ import net.minecraft.network.ClientConnection;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableText;
+import net.minecraft.text.TranslatableTextContent;
+import net.minecraft.util.Util;
 import network.ycc.raknet.RakNet;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Final;
@@ -26,21 +27,19 @@ public class MixinServerPlayNetworkHandler {
 
     @Shadow public ServerPlayerEntity player;
 
-    @Redirect(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerPlayNetworkHandler;disconnect(Lnet/minecraft/text/Text;)V"))
-    private void stopTimeoutPlayers(ServerPlayNetworkHandler instance, Text reason) {
-        if (reason instanceof TranslatableText translatableText &&
-                ((IClientConnection) this.connection).getChannel().config() instanceof RakNet.Config &&
-                translatableText.getKey().hashCode() == "disconnect.timeout".hashCode()) {
-            return;
+    @Shadow private long lastKeepAliveTime;
+
+    @Redirect(method = "tick", at = @At(value = "FIELD", target = "Lnet/minecraft/server/network/ServerPlayNetworkHandler;lastKeepAliveTime:J", opcode = Opcodes.GETFIELD))
+    private long disableKeepAlive(ServerPlayNetworkHandler instance) {
+        if (((IClientConnection) this.connection).getChannel().config() instanceof RakNet.Config) {
+            return Util.getMeasuringTimeMs();
         }
-        instance.disconnect(reason);
+        return this.lastKeepAliveTime;
     }
 
     @Redirect(method = "onKeepAlive", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerPlayNetworkHandler;disconnect(Lnet/minecraft/text/Text;)V"))
     private void stopTimeoutPlayersOnKeepAlive(ServerPlayNetworkHandler instance, Text reason) {
-        if (reason instanceof TranslatableText translatableText &&
-                ((IClientConnection) this.connection).getChannel().config() instanceof RakNet.Config &&
-                translatableText.getKey().hashCode() == "disconnect.timeout".hashCode()) {
+        if (((IClientConnection) this.connection).getChannel().config() instanceof RakNet.Config) {
             return;
         }
         instance.disconnect(reason);

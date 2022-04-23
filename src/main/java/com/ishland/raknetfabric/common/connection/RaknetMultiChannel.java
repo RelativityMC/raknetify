@@ -1,11 +1,16 @@
 package com.ishland.raknetfabric.common.connection;
 
-import com.google.common.base.Preconditions;
+import com.google.common.collect.Sets;
+import com.ishland.raknetfabric.mixin.access.INetworkState;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.MappingResolver;
+import net.minecraft.network.NetworkSide;
+import net.minecraft.network.NetworkState;
+import net.minecraft.network.Packet;
 
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 public class RaknetMultiChannel {
@@ -61,10 +66,12 @@ public class RaknetMultiChannel {
             "net/minecraft/class_5894", // OverlayMessageS2C
             "net/minecraft/class_2748", // ExperienceBarUpdateS2C
             "net/minecraft/class_2749", // HealthUpdateS2C
+            "net/minecraft/class_2656", // CooldownUpdateS2CPacket
             "net/minecraft/class_2772", // PlayerListHeaderS2C
             "net/minecraft/class_2736", // ScoreboardDisplayS2C
             "net/minecraft/class_2751", // ScoreboardDisplayObjectiveUpdateS2C
             "net/minecraft/class_2757", // ScoreboardPlayerUpdateS2C
+            "net/minecraft/class_2779", // AdvancementUpdateS2CPacket
             "net/minecraft/class_2641", // CommandTreeS2C
             "net/minecraft/class_2639", // CommandSuggestionsS2C
 
@@ -91,7 +98,6 @@ public class RaknetMultiChannel {
 
             "net/minecraft/class_2788", // SynchronizeRecipesS2C
             "net/minecraft/class_2790", // SynchronizeTagsS2C
-            "net/minecraft/class_6682", // SimulationDistanceS2C
 
             "net/minecraft/class_2703", // PlayerListS2C
             "net/minecraft/class_2613", // PlayerSpawnS2C
@@ -120,10 +126,12 @@ public class RaknetMultiChannel {
             "net/minecraft/class_2718", // RemoveEntityStatusEffectS2C
             "net/minecraft/class_2610", // MobSpawnS2C
             "net/minecraft/class_2612", // PaintingSpawnS2C
+            "net/minecraft/class_2606", // ExperienceOrbSpawnS2CPacket
 
             "net/minecraft/class_2664", // ExplosionS2C
             "net/minecraft/class_2678", // GameJoinS2C
             "net/minecraft/class_2668", // GameStateChangeS2C
+            "net/minecraft/class_2759", // PlayerSpawnPositionS2CPacket
             "net/minecraft/class_2775", // ItemPickupAnimationS2C
             "net/minecraft/class_2696", // PlayerAbilitiesS2C
             "net/minecraft/class_2734", // SetCameraEntityS2C
@@ -140,6 +148,10 @@ public class RaknetMultiChannel {
             "net/minecraft/class_2886", // PlayerInteractItemC2S
             "net/minecraft/class_2824", // PlayerInteractEntityC2S
             "net/minecraft/class_2828", // PlayerMoveC2S
+            "net/minecraft/class_2828$class_5911", // PlayerMoveC2SPacket$OnGroundOnly
+            "net/minecraft/class_2828$class_2829", // PlayerMoveC2SPacket$PositionAndOnGround
+            "net/minecraft/class_2828$class_2830", // PlayerMoveC2SPacket$Full
+            "net/minecraft/class_2828$class_2831", // PlayerMoveC2SPacket$LookAndOnGround
             "net/minecraft/class_2795", // QueryBlockNbtC2S
             "net/minecraft/class_2822", // QueryEntityNbtC2S
             "net/minecraft/class_2884", // SpectatorTeleportC2S
@@ -173,9 +185,8 @@ public class RaknetMultiChannel {
             "net/minecraft/class_3753", // UpdateJigsawC2S
             "net/minecraft/class_2842", // UpdatePlayerAbilitiesC2S
             "net/minecraft/class_2868", // UpdateSelectedSlotC2S
-//            "net/minecraft/class_2693", // SignEditorOpenS2C
-//            "net/minecraft/class_2877", // UpdateSignC2S
             "net/minecraft/class_2875", // UpdateStructureBlockC2S
+            "net/minecraft/class_2695", // CraftFailedResponseS2CPacket
 
             "net/minecraft/class_5889", // WorldBorderInitializeS2C
             "net/minecraft/class_5895", // WorldBorderCenterChangedS2C
@@ -183,6 +194,13 @@ public class RaknetMultiChannel {
             "net/minecraft/class_5897", // WorldBorderSizeChangedS2C
             "net/minecraft/class_5898", // WorldBorderWarningTimeChangedS2C
             "net/minecraft/class_5899", // WorldBorderWarningBlockChangedS2C
+
+            "net/minecraft/class_2799", // ClientStatusC2SPacket
+            "net/minecraft/class_2724", // PlayerRespawnS2CPacket
+
+            "net/minecraft/class_2817", // CustomPayloadC2SPacket
+            "net/minecraft/class_2658", // CustomPayloadS2CPacket
+
     });
 
     // Primarily for packets not very critical to interactions
@@ -194,18 +212,39 @@ public class RaknetMultiChannel {
             "net/minecraft/class_2770", // StopSoundS2C
     });
 
+    // Used for worlds
+    private static final Set<Class<?>> channel7 = createClassSet(new String[]{
+            "net/minecraft/class_5194", // JigsawGeneratingC2S
+            "net/minecraft/class_2693", // SignEditorOpenS2C
+            "net/minecraft/class_2877", // UpdateSignC2S
+
+            "net/minecraft/class_2623", // BlockEventS2CPacket
+            "net/minecraft/class_4282", // ChunkRenderDistanceCenterS2CPacket
+            "net/minecraft/class_4273", // ChunkLoadDistanceS2CPacket
+            "net/minecraft/class_6682", // SimulationDistanceS2C
+            "net/minecraft/class_2666", // UnloadChunkS2CPacket
+            "net/minecraft/class_2626", // BlockUpdateS2CPacket
+            "net/minecraft/class_2637", // ChunkDeltaUpdateS2CPacket
+            "net/minecraft/class_2673", // WorldEventS2CPacket
+            "net/minecraft/class_2620", // BlockBreakingProgressS2CPacket
+            "net/minecraft/class_2672", // ChunkDataS2CPacket
+            "net/minecraft/class_2622", // BlockEntityUpdateS2CPacket
+            "net/minecraft/class_2676", // LightUpdateS2CPacket
+    });
+
     private static final Set<Class<?>> unreliable = createClassSet(new String[]{
     });
 
     private static final Object2IntOpenHashMap<Class<?>> classToChannelIdOverride = new Object2IntOpenHashMap<>();
 
     static {
-        classToChannelIdOverride.defaultReturnValue(7);
+        classToChannelIdOverride.defaultReturnValue(Integer.MAX_VALUE);
         unordered.forEach(clazz -> classToChannelIdOverride.put(clazz, -1));
         channel1.forEach(clazz -> classToChannelIdOverride.put(clazz, 1));
         channel2.forEach(clazz -> classToChannelIdOverride.put(clazz, 2));
         channel3.forEach(clazz -> classToChannelIdOverride.put(clazz, 3));
         channel4.forEach(clazz -> classToChannelIdOverride.put(clazz, 4));
+        channel7.forEach(clazz -> classToChannelIdOverride.put(clazz, 7));
         unreliable.forEach(clazz -> classToChannelIdOverride.put(clazz, -2));
     }
 
@@ -225,12 +264,34 @@ public class RaknetMultiChannel {
 //        currentPacketClass.set(null);
 //    }
 
+    private static final Set<Class<?>> foundUnknownClasses = Sets.newConcurrentHashSet();
+
     public static int getPacketChannelOverride(Class<?> clazz) {
         if (clazz == null) {
             System.err.println("Warning: Tried to send packet without setting packet class");
             return 0;
         }
-        return classToChannelIdOverride.getInt(clazz);
+        int channelOverride = classToChannelIdOverride.getInt(clazz);
+        if (channelOverride == Integer.MAX_VALUE) {
+            if (foundUnknownClasses.add(clazz)) {
+                final MappingResolver mappingResolver = FabricLoader.getInstance().getMappingResolver();
+                final String intermediary = mappingResolver.unmapClassName("intermediary", clazz.getName());
+                System.err.println("Warning: unknown packet type %s (%s) for raknet multi-channel".formatted(intermediary.replace('.', '/'), clazz.getName()));
+            }
+            channelOverride = 7;
+        }
+        return channelOverride;
+    }
+
+    static {
+        for (Map.Entry<NetworkSide, ? extends NetworkState.PacketHandler<?>> entry : ((INetworkState) (Object) NetworkState.PLAY).getPacketHandlers().entrySet()) {
+            for (Class<? extends Packet<?>> type : entry.getValue().getPacketTypes()) {
+                getPacketChannelOverride(type);
+            }
+        }
+    }
+
+    public static void init() {
     }
 
 
