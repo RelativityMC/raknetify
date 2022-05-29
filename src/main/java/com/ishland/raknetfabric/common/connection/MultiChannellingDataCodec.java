@@ -33,7 +33,9 @@ public class MultiChannellingDataCodec extends MessageToMessageCodec<FrameData, 
     @Override
     public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
         if (msg == START_MULTICHANNEL) {
-            ctx.write(FrameData.create(ctx.alloc(), Constants.RAKNET_PING_PACKET_ID, ctx.alloc().buffer(1).writeByte(0))).addListener(future -> {
+            final FrameData frameData = FrameData.create(ctx.alloc(), Constants.RAKNET_PING_PACKET_ID, ctx.alloc().buffer(1).writeByte(0));
+            frameData.setOrderChannel(7);
+            ctx.write(frameData).addListener(future -> {
                 isMultichannelEnabled = true;
                 System.out.println("[MultiChannellingDataCodec] Started multichannel");
             });

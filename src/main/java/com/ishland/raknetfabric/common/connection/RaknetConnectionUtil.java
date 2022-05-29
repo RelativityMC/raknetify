@@ -9,14 +9,29 @@ import io.netty.handler.timeout.ReadTimeoutHandler;
 import net.minecraft.server.ServerNetworkIo;
 import network.ycc.raknet.RakNet;
 import network.ycc.raknet.client.channel.RakNetClientThreadedChannel;
+import network.ycc.raknet.frame.Frame;
+import network.ycc.raknet.pipeline.ReliabilityHandler;
 import network.ycc.raknet.server.channel.RakNetApplicationChannel;
 
+import java.lang.reflect.Field;
+import java.util.Comparator;
+import java.util.Comparator;
+import java.util.PriorityQueue;
 import java.util.concurrent.TimeUnit;
+
+import static com.ishland.raknetfabric.common.connection.SynchronizationLayer.accessible;
 
 public class RaknetConnectionUtil {
 
     private RaknetConnectionUtil() {
     }
+
+    private static final Comparator<Frame> cmp =
+            Comparator
+                    .comparingInt((Frame frame) -> frame.getReliability().isReliable ? 1 : 0) // unreliable then reliable
+                    .thenComparingInt(frame -> frame.getReliability().isOrdered ? 1 : 0) // unordered then ordered
+                    .thenComparingInt(Frame::getOrderChannel) // lower channel first
+                    .thenComparingInt(Frame::getOrderIndex); // lower index first
 
     public static void initChannel(Channel channel) {
         if (channel.config() instanceof RakNet.Config config) {
@@ -59,7 +74,8 @@ public class RaknetConnectionUtil {
                 config.setMetrics(simpleMetricsLogger);
                 final MetricsSynchronizationHandler metricsSynchronizationHandler = new MetricsSynchronizationHandler();
                 simpleMetricsLogger.setMetricsSynchronizationHandler(metricsSynchronizationHandler);
-                final SynchronizationLayer synchronizationLayer = new SynchronizationLayer(1);
+                final SynchronizationLayer synchronizationLayer = new SynchronizationLayer(Constants.SYNC_IGNORE_CHANNELS);
+                reInitChannelForOrdering(channel);
                 if (threadedReadHandlerName != null) {
                     ch.pipeline().addBefore(threadedReadHandlerName, "raknetfabric-metrics-sync", metricsSynchronizationHandler);
                     ch.pipeline().addBefore(threadedReadHandlerName, "raknetfabric-synchronization-layer", synchronizationLayer);
@@ -81,6 +97,26 @@ public class RaknetConnectionUtil {
             final MultiChannellingPacketCapture handler = new MultiChannellingPacketCapture();
             channel.pipeline().addLast("raknetfabric-multi-channel-packet-cature", handler);
             channel.pipeline().get(MultiChannellingDataCodec.class).setCapture(handler);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private static void reInitChannelForOrdering(Channel channel) {
+        if (channel.config() instanceof RakNet.Config config) {
+            try {
+                final ReliabilityHandler reliabilityHandler = channel.pipeline().get(ReliabilityHandler.class);
+                final Field frameQueueField = accessible(ReliabilityHandler.class.getDeclaredField("frameQueue"));
+                PriorityQueue<Frame> reliabilityHandlerFrameQueue = (PriorityQueue<Frame>) frameQueueField.get(reliabilityHandler);
+
+                final PriorityQueue<Frame> newSet = new PriorityQueue<>(cmp);
+                newSet.addAll(reliabilityHandlerFrameQueue);
+
+                frameQueueField.set(reliabilityHandler, newSet);
+
+            } catch (Throwable t) {
+                System.err.println("Error occurred while reinitializing channel ordering");
+                t.printStackTrace();
+            }
         }
     }
 

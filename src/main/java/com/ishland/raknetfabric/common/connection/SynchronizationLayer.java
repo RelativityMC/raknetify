@@ -41,13 +41,13 @@ public class SynchronizationLayer extends ChannelDuplexHandler {
 
     public static final Object SYNC_REQUEST_OBJECT = new Object();
 
-    private static final Class<?> CLASS_QUEUE;
-    private static final Class<?> CLASS_FRAME_JOINER_BUILDER;
-    private static final Field FIELD_QUEUE_LAST_ORDER_INDEX;
-    private static final Field FIELD_RELIABILITY_NEXT_SEND_SEQ_ID;
-    private static final Field FIELD_RELIABILITY_LAST_RECEIVED_SEQ_ID;
-    private static final Field FIELD_RELIABILITY_QUEUED_BYTES;
-    private static final Field FIELD_FRAME_JOINER_BUILDER_SAMPLE_PACKET;
+    static final Class<?> CLASS_QUEUE;
+    static final Class<?> CLASS_FRAME_JOINER_BUILDER;
+    static final Field FIELD_QUEUE_LAST_ORDER_INDEX;
+    static final Field FIELD_RELIABILITY_NEXT_SEND_SEQ_ID;
+    static final Field FIELD_RELIABILITY_LAST_RECEIVED_SEQ_ID;
+    static final Field FIELD_RELIABILITY_QUEUED_BYTES;
+    static final Field FIELD_FRAME_JOINER_BUILDER_SAMPLE_PACKET;
 
     static {
         try {
@@ -65,12 +65,12 @@ public class SynchronizationLayer extends ChannelDuplexHandler {
         }
     }
 
-    private static Field accessible(Field field) {
+    static Field accessible(Field field) {
         field.setAccessible(true);
         return field;
     }
 
-    private static Method accessible(Method method) {
+    static Method accessible(Method method) {
         method.setAccessible(true);
         return method;
     }
@@ -133,6 +133,7 @@ public class SynchronizationLayer extends ChannelDuplexHandler {
             // read
             {
                 System.out.println("Received sync packet");
+                ctx.fireChannelRead(SYNC_REQUEST_OBJECT);
                 final ByteBuf byteBuf = packet.createData().skipBytes(1);
                 try {
                     final byte count = byteBuf.readByte();

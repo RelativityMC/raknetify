@@ -5,6 +5,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPromise;
+import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import network.ycc.raknet.frame.FrameData;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
@@ -20,15 +21,10 @@ public class MultiChannelingStreamingCompression extends ChannelDuplexHandler {
     private final Inflater[] inflaters = new Inflater[8];
     private final Deflater[] deflaters = new Deflater[8];
 
+    private final IntOpenHashSet channelsToIgnoreWhenReinit = new IntOpenHashSet();
+
     private final byte[] inflateBuffer = new byte[8192];
     private final byte[] deflateBuffer = new byte[8192];
-
-    {
-        for (int i = 0; i < 8; i ++) {
-            inflaters[i] = new Inflater();
-            deflaters[i] = new Deflater();
-        }
-    }
 
     private final int rawPacketId;
     private final int compressedPacketId;
@@ -43,6 +39,21 @@ public class MultiChannelingStreamingCompression extends ChannelDuplexHandler {
     public MultiChannelingStreamingCompression(int rawPacketId, int compressedPacketId) {
         this.rawPacketId = rawPacketId;
         this.compressedPacketId = compressedPacketId;
+        for (int i = 0; i < 8; i++) {
+            inflaters[i] = new Inflater();
+            deflaters[i] = new Deflater();
+        }
+    }
+
+    private void reInit() {
+        System.out.println("Reinitializing streaming compression");
+        for (int i = 0; i < 8; i++) {
+            if (channelsToIgnoreWhenReinit.contains(i)) continue;
+            if (inflaters[i] != null) inflaters[i].end();
+            inflaters[i] = new Inflater();
+            if (deflaters[i] != null) deflaters[i].end();
+            deflaters[i] = new Deflater();
+        }
     }
 
     @Override
@@ -55,7 +66,9 @@ public class MultiChannelingStreamingCompression extends ChannelDuplexHandler {
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        if (msg instanceof FrameData compressedFrameData) {
+        if (msg == SynchronizationLayer.SYNC_REQUEST_OBJECT) {
+            reInit();
+        } else if (msg instanceof FrameData compressedFrameData) {
             if (compressedFrameData.getPacketId() == compressedPacketId && compressedFrameData.getReliability().isReliable && compressedFrameData.getReliability().isOrdered && !compressedFrameData.getReliability().isSequenced) {
                 if (!active) {
                     ByteBuf payload = null;
@@ -112,7 +125,9 @@ public class MultiChannelingStreamingCompression extends ChannelDuplexHandler {
 
     @Override
     public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
-        if (active && msg instanceof FrameData rawFrameData) {
+        if (msg == SynchronizationLayer.SYNC_REQUEST_OBJECT) {
+            reInit();
+        } else if (active && msg instanceof FrameData rawFrameData) {
             if (rawFrameData.getPacketId() == rawPacketId && rawFrameData.getReliability().isReliable && rawFrameData.getReliability().isOrdered && !rawFrameData.getReliability().isSequenced) {
 
                 if (rawFrameData.getDataSize() < 16 + 1) {
@@ -189,6 +204,10 @@ public class MultiChannelingStreamingCompression extends ChannelDuplexHandler {
     @Override
     public void handlerRemoved(ChannelHandlerContext ctx) {
         if (future != null) future.cancel(false);
+        for (int i = 0; i < 8; i++) {
+            if (inflaters[i] != null) inflaters[i].end();
+            if (deflaters[i] != null) deflaters[i].end();
+        }
     }
 
     private long lastInBytesCompressed;
