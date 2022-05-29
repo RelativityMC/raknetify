@@ -15,14 +15,14 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.lang.reflect.Method;
 
-@Mixin(ServerLoginNetworkHandler.class)
+@Mixin(value = ServerLoginNetworkHandler.class, priority = 900)
 public class MixinServerLoginNetworkHandler {
 
     @Shadow @Final public ClientConnection connection;
 
     @Shadow @Final private MinecraftServer server;
 
-    @Redirect(method = "acceptPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;getNetworkCompressionThreshold()I"))
+    @Redirect(method = "acceptPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;getNetworkCompressionThreshold()I"), require = 0)
     private int stopCompressionIfStreamingCompressionExists(MinecraftServer server) {
         final MultiChannelingStreamingCompression compression = ((IClientConnection) this.connection).getChannel().pipeline().get(MultiChannelingStreamingCompression.class);
         if (compression != null && compression.isActive()) {
