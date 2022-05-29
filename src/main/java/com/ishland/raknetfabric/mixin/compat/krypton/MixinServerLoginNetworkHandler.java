@@ -43,9 +43,6 @@ public class MixinServerLoginNetworkHandler {
 
             // TODO [VanillaCopy]
             PrivateKey privateKey = this.server.getKeyPair().getPrivate();
-            if (!Arrays.equals(this.nonce, packet.decryptNonce(privateKey))) {
-                throw new IllegalStateException("Protocol error");
-            }
 
             SecretKey secretKey = packet.decryptSecretKey(privateKey);
             Cipher cipher = NetworkEncryptionUtils.cipherFromKey(2, secretKey);

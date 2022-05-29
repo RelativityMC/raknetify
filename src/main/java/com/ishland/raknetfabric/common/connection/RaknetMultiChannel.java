@@ -63,6 +63,11 @@ public class RaknetMultiChannel {
             "net/minecraft/class_5905", // TitleFadeS2C
             "net/minecraft/class_5892", // DeathMessageS2C
             "net/minecraft/class_2635", // GameMessageS2CPacket
+            "net/minecraft/class_7439", // GameMessageS2CPacket
+            "net/minecraft/class_7519", // ChatPreviewStateChangeS2CPacket
+            "net/minecraft/class_7438", // ChatMessageS2CPacket
+            "net/minecraft/class_7494", // ChatPreviewS2CPacket
+            "net/minecraft/class_7495", // ServerMetadataS2CPacket
             "net/minecraft/class_5894", // OverlayMessageS2C
             "net/minecraft/class_2748", // ExperienceBarUpdateS2C
             "net/minecraft/class_2749", // HealthUpdateS2C
@@ -76,6 +81,8 @@ public class RaknetMultiChannel {
             "net/minecraft/class_2639", // CommandSuggestionsS2C
 
             "net/minecraft/class_2805", // RequestCommandCompletionsC2S
+            "net/minecraft/class_7472", // CommandExecutionC2SPacket
+            "net/minecraft/class_7496", // RequestChatPreviewC2SPacket
             "net/minecraft/class_2811", // ButtonClickC2S
             "net/minecraft/class_2797", // ChatMessageC2S
             "net/minecraft/class_2813", // ClickSlotC2S
