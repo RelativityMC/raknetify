@@ -1,5 +1,6 @@
 package com.ishland.raknetfabric.mixin.server;
 
+import com.ishland.raknetfabric.common.connection.MultiChannelingStreamingCompression;
 import com.ishland.raknetfabric.mixin.access.IClientConnection;
 import net.minecraft.network.ClientConnection;
 import net.minecraft.server.MinecraftServer;
@@ -9,6 +10,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.lang.reflect.Method;
@@ -19,6 +21,16 @@ public class MixinServerLoginNetworkHandler {
     @Shadow @Final public ClientConnection connection;
 
     @Shadow @Final private MinecraftServer server;
+
+    @Redirect(method = "acceptPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;getNetworkCompressionThreshold()I"))
+    private int stopCompressionIfStreamingCompressionExists(MinecraftServer server) {
+        final MultiChannelingStreamingCompression compression = ((IClientConnection) this.connection).getChannel().pipeline().get(MultiChannelingStreamingCompression.class);
+        if (compression != null && compression.isActive()) {
+            System.out.println("Preventing vanilla compression as streaming compression is enabled");
+            return -1;
+        }
+        return server.getNetworkCompressionThreshold();
+    }
 
     @Inject(method = "acceptPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/ClientConnection;send(Lnet/minecraft/network/Packet;Lio/netty/util/concurrent/GenericFutureListener;)V", ordinal = 0, shift = At.Shift.AFTER))
     private void setupDummyCompressionImmediately(CallbackInfo ci) throws Throwable {
