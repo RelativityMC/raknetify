@@ -44,4 +44,4 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: Artifacts
-          path: /**/build/libs/*-all.jar
+          path: ./**/build/libs/*-all.jar
