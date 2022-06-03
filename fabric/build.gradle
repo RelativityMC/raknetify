@@ -1,0 +1,100 @@
+plugins {
+	id 'fabric-loom'
+	id 'io.github.juuxel.loom-quiltflower'
+	id 'com.github.johnrengelman.shadow'
+}
+
+archivesBaseName = project.archives_base_name + "-fabric"
+group = project.maven_group + ".fabric"
+
+configurations {
+	api.extendsFrom includeApi
+	shadowInclude
+}
+
+dependencies {
+	// To change the versions see the gradle.properties file
+	minecraft "com.mojang:minecraft:${project.minecraft_version}"
+	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
+	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+
+	shadowInclude implementation(project(":common"))
+
+	// Fabric API. This is technically optional, but you probably want it anyway.
+//	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+}
+
+processResources {
+	inputs.property "version", project.version
+
+	filesMatching("fabric.mod.json") {
+		expand "version": project.version
+	}
+}
+
+tasks.withType(JavaCompile).configureEach {
+	// Minecraft 1.18 (1.18-pre2) upwards uses Java 17.
+	it.options.release = 17
+}
+
+java {
+	// Loom will automatically attach sourcesJar to a RemapSourcesJar task and to the "build" task
+	// if it is present.
+	// If you remove this line, sources will not be generated.
+	withSourcesJar()
+}
+
+loom {
+	accessWidenerPath = file("src/main/resources/raknetify-fabric.accesswidener")
+}
+
+jar {
+	from "LICENSE"
+}
+
+shadowJar {
+	dependencies {
+		exclude(dependency('it.unimi.dsi:fastutil'))
+	}
+	minimize()
+	archiveClassifier = "all-dev"
+	configurations = [ project.configurations.shadowInclude ]
+	from "LICENSE"
+}
+
+//noinspection UnnecessaryQualifiedReference
+task("remapShadowJar", type: net.fabricmc.loom.task.RemapJarTask, dependsOn: shadowJar) {
+	input = shadowJar.archiveFile
+	archiveFileName = shadowJar.archiveFileName.get().replaceAll("-dev\\.jar\$", ".jar")
+	addNestedDependencies = true
+}
+
+assemble.dependsOn(remapShadowJar)
+
+afterEvaluate {
+	migrateMappings.configure {
+		outputDir = project.file("src/main/java")
+	}
+}
+
+// configure the maven publication
+publishing {
+	publications {
+		mavenJava(MavenPublication) {
+			from components.java
+		}
+	}
+
+	// See https://docs.gradle.org/current/userguide/publishing_maven.html for information on how to set up publishing.
+	repositories {
+		// Add repositories to publish to here.
+		// Notice: This block does NOT have the same function as the block in the top level.
+		// The repositories here will be used for publishing your artifact, not for
+		// retrieving dependencies.
+	}
+}
+
+tasks.withType(AbstractArchiveTask) {
+	preserveFileTimestamps = false
+	reproducibleFileOrder = true
+}

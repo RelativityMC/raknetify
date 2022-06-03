@@ -1,0 +1,37 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.ishland.raknetify.fabric.mixin",
+  "plugin": "com.ishland.raknetify.fabric.mixin.RaknetifyFabricMixinPlugin",
+  "compatibilityLevel": "JAVA_16",
+  "mixinPriority": 1010,
+  "mixins": [
+    "access.IClientConnection",
+    "access.INetworkState",
+    "access.IPacketEncryptionManager",
+    "client.MixinClientPlayNetworkHandler",
+    "client.MixinConnectionScreen1",
+    "client.MixinConnectScreen",
+    "client.MixinMultiplayerServerListPinger",
+    "client.MixinMultiplayerServerListPinger1",
+    "client.hud.MixinDebugHud",
+    "common.MixinCCConnect",
+    "common.MixinClientConnection",
+    "common.MixinClientConnection1",
+    "common.encryption.MixinClientConnection",
+    "common.encryption.MixinPacketDecryptor",
+    "common.encryption.MixinPacketEncryptionManager",
+    "common.encryption.MixinPacketEncryptor",
+    "common.sync.MixinPlayerManager",
+    "common.sync.MixinServerPlayerEntity",
+    "compat.fabricapi.MixinServerLoginNetworkAddon",
+    "server.MixinPlayerManager",
+    "server.MixinServerLoginNetworkHandler",
+    "server.MixinServerNetworkIo",
+    "server.MixinServerNetworkIo1",
+    "server.MixinServerPlayNetworkHandler"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

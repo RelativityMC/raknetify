@@ -1,107 +1,39 @@
 plugins {
 	id 'java'
 	id 'java-library'
-	id 'fabric-loom' version '0.12-SNAPSHOT'
-	id 'io.github.juuxel.loom-quiltflower' version '1.7.1'
-	id 'com.github.johnrengelman.shadow' version '7.1.0'
+	id 'fabric-loom' version '0.12-SNAPSHOT' apply false
+	id 'io.github.juuxel.loom-quiltflower' version '1.7.1' apply false
+	id 'com.github.johnrengelman.shadow' version '7.1.0' apply false
 	id 'maven-publish'
 }
 
-sourceCompatibility = JavaVersion.VERSION_17
-targetCompatibility = JavaVersion.VERSION_17
+allprojects {
+	apply plugin: 'java'
+	apply plugin: 'java-library'
+	apply plugin: 'maven-publish'
+
+	sourceCompatibility = JavaVersion.VERSION_17
+	targetCompatibility = JavaVersion.VERSION_17
+
+	version = project.mod_version + "." + getVersionSuffix()
+
+	repositories {
+		maven { url 'https://jitpack.io' }
+	}
+}
 
 archivesBaseName = project.archives_base_name
-version = project.mod_version + "." + getVersionSuffix()
 group = project.maven_group
 
 afterEvaluate {
 	logger.lifecycle("Version String: ${version}")
 }
 
-repositories {
-	// Add repositories to retrieve artifacts from in here.
-	// You should only use this when depending on other mods because
-	// Loom adds the essential maven repositories to download Minecraft and libraries from automatically.
-	// See https://docs.gradle.org/current/userguide/declaring_repositories.html
-	// for more information about repositories.
-
-	maven { url 'https://jitpack.io' }
-}
-
-configurations {
-	api.extendsFrom includeApi
-	shadowInclude
-}
-
 dependencies {
-	// To change the versions see the gradle.properties file
-	minecraft "com.mojang:minecraft:${project.minecraft_version}"
-	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
-	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
-	shadowInclude api("com.github.RelativityMC.netty-raknet:netty-raknet-common:${project.netty_raknet_version}") {
-		transitive = false
-	}
-	shadowInclude api("com.github.RelativityMC.netty-raknet:netty-raknet-client:${project.netty_raknet_version}")
-	shadowInclude api("com.github.RelativityMC.netty-raknet:netty-raknet-server:${project.netty_raknet_version}")
-	shadowInclude implementation("org.apache.commons:commons-math3:3.6.1")
-
-	// Fabric API. This is technically optional, but you probably want it anyway.
-//	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 }
 
-processResources {
-	inputs.property "version", project.version
-
-	filesMatching("fabric.mod.json") {
-		expand "version": project.version
-	}
-}
-
-tasks.withType(JavaCompile).configureEach {
-	// Minecraft 1.18 (1.18-pre2) upwards uses Java 17.
-	it.options.release = 17
-}
-
-java {
-	// Loom will automatically attach sourcesJar to a RemapSourcesJar task and to the "build" task
-	// if it is present.
-	// If you remove this line, sources will not be generated.
-	withSourcesJar()
-}
-
-loom {
-	accessWidenerPath = file("src/main/resources/raknetify-fabric.accesswidener")
-}
-
-jar {
-	from "LICENSE"
-}
-
-shadowJar {
-	dependencies {
-		exclude(dependency('it.unimi.dsi:fastutil'))
-	}
-	minimize()
-	archiveClassifier = "all-dev"
-	configurations = [ project.configurations.shadowInclude ]
-	from "LICENSE"
-}
-
-//noinspection UnnecessaryQualifiedReference
-task("remapShadowJar", type: net.fabricmc.loom.task.RemapJarTask, dependsOn: shadowJar) {
-	input = shadowJar.archiveFile
-	archiveFileName = shadowJar.archiveFileName.get().replaceAll("-dev\\.jar\$", ".jar")
-	addNestedDependencies = true
-}
-
-assemble.dependsOn(remapShadowJar)
-
-afterEvaluate {
-	migrateMappings.configure {
-		outputDir = project.file("src/main/java")
-	}
-}
+jar.enabled = false
 
 // configure the maven publication
 publishing {
