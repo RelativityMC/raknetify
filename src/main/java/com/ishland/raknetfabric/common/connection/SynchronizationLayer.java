@@ -10,6 +10,7 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import it.unimi.dsi.fastutil.objects.ObjectIterator;
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceLinkedOpenHashMap;
 import network.ycc.raknet.frame.Frame;
 import network.ycc.raknet.frame.FrameData;
@@ -44,6 +45,8 @@ public class SynchronizationLayer extends ChannelDuplexHandler {
     static final Class<?> CLASS_QUEUE;
     static final Class<?> CLASS_FRAME_JOINER_BUILDER;
     static final Field FIELD_QUEUE_LAST_ORDER_INDEX;
+    static final Method METHOD_QUEUE_BUILDER_RELEASE;
+    static final Method METHOD_QUEUE_CLEAR;
     static final Field FIELD_RELIABILITY_NEXT_SEND_SEQ_ID;
     static final Field FIELD_RELIABILITY_LAST_RECEIVED_SEQ_ID;
     static final Field FIELD_RELIABILITY_QUEUED_BYTES;
@@ -59,6 +62,9 @@ public class SynchronizationLayer extends ChannelDuplexHandler {
             FIELD_RELIABILITY_LAST_RECEIVED_SEQ_ID = accessible(ReliabilityHandler.class.getDeclaredField("lastReceivedSeqId"));
             FIELD_RELIABILITY_QUEUED_BYTES = accessible(ReliabilityHandler.class.getDeclaredField("queuedBytes"));
             FIELD_FRAME_JOINER_BUILDER_SAMPLE_PACKET = accessible(CLASS_FRAME_JOINER_BUILDER.getDeclaredField("samplePacket"));
+
+            METHOD_QUEUE_BUILDER_RELEASE = accessible(CLASS_FRAME_JOINER_BUILDER.getDeclaredMethod("release"));
+            METHOD_QUEUE_CLEAR = accessible(CLASS_QUEUE.getDeclaredMethod("clear"));
 
         } catch (Throwable t) {
             throw new RuntimeException(t);
@@ -146,14 +152,19 @@ public class SynchronizationLayer extends ChannelDuplexHandler {
                                         orderIndex
                                 ));
                         FIELD_QUEUE_LAST_ORDER_INDEX.set(frameOrderInQueues[channel], orderIndex);
-                        this.frameJoinerPendingPackets.values().removeIf(value -> {
+                        final ObjectIterator<?> iterator = this.frameJoinerPendingPackets.values().iterator();
+                        while (iterator.hasNext()) {
+                            final Object next = iterator.next();
                             try {
-                                final Frame frame = (Frame) FIELD_FRAME_JOINER_BUILDER_SAMPLE_PACKET.get(value);
-                                return frame.getReliability().isOrdered && frame.getOrderChannel() == channel;
+                                final Frame frame = (Frame) FIELD_FRAME_JOINER_BUILDER_SAMPLE_PACKET.get(next);
+                                if (frame.getReliability().isOrdered && frame.getOrderChannel() == channel) {
+                                    METHOD_QUEUE_BUILDER_RELEASE.invoke(next);
+                                    iterator.remove();
+                                }
                             } catch (IllegalAccessException e) {
                                 throw new RuntimeException(e);
                             }
-                        });
+                        }
                     }
                     final int seqId = byteBuf.readInt();
                     System.out.println("ReliabilityHandler: %d -> %d".formatted(
