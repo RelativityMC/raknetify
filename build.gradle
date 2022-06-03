@@ -71,7 +71,7 @@ java {
 }
 
 loom {
-	accessWidenerPath = file("src/main/resources/raknet-fabric.accesswidener")
+	accessWidenerPath = file("src/main/resources/raknetify-fabric.accesswidener")
 }
 
 jar {

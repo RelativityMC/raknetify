@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
-  "id": "raknet-fabric",
+  "id": "raknetify",
   "version": "${version}",
 
-  "name": "RaknetFabric",
+  "name": "Raknetify (Fabric)",
   "description": "A Fabric mod that allows using RakNet as Minecraft networking backend. ",
   "authors": [
     "ishland"
@@ -16,19 +16,18 @@
   "environment": "*",
   "entrypoints": {
     "main": [
-      "com.ishland.raknetfabric.RaknetFabric"
+      "com.ishland.raknetify.fabric.RaknetifyFabric"
     ]
   },
 
-  "accessWidener" : "raknet-fabric.accesswidener",
+  "accessWidener" : "raknetify-fabric.accesswidener",
 
   "mixins": [
-    "raknet-fabric.mixins.json"
+    "raknetify-fabric.mixins.json"
   ],
 
   "depends": {
     "fabricloader": ">=0.12.12",
-    "minecraft": ">=1.18",
     "java": ">=17"
   },
   "suggests": {

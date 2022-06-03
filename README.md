@@ -1,4 +1,4 @@
-# RaknetFabric
+# Raknetify
 A Fabric mod that allows using RakNet as Minecraft networking backend.
 
 # Features
@@ -10,8 +10,9 @@ A Fabric mod that allows using RakNet as Minecraft networking backend.
 # How to use it?
 
 ## Prerequisites
-- RaknetFabric is currently confirmed to be working on 1.18.2, 1.18.1 and 1.17.1, 
-  other Minecraft versions are not tested.
+- RaknetFabric is currently confirmed to be working on 1.19, 1.18.2, 1.18.1 and 1.17.1, 
+  other Minecraft versions are not tested.  
+  It may work on newer Minecraft versions. If it doesn't, feel free to report to us. 
 - You need to have a UDP port opened at the same port number of your normal server port. 
 
 ## Installation and usage
