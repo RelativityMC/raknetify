@@ -16,8 +16,8 @@ A Fabric mod that allows using RakNet as Minecraft networking backend.
 - You need to have a UDP port opened at the same port number of your normal server port. 
 
 ## Installation and usage
-- Download the latest release from [GitHub](https://github.com/RelativityMC/RaknetFabric/releases) 
-  or development builds from [CodeMC](https://ci.codemc.io/job/RelativityMC/job/RaknetFabric/)
+- Download the latest release from [GitHub](https://github.com/RelativityMC/raknetify/releases) 
+  or development builds from [CodeMC](https://ci.codemc.io/job/RelativityMC/job/raknetify/)
 - Install the mod on both client and server.
 - Prefix your server address with `raknet;` (or `raknetl;` to use high mtu) and save or connect directly. 
   (e.g. `raknet;example.com`)
