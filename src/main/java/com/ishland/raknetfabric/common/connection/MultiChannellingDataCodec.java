@@ -41,6 +41,10 @@ public class MultiChannellingDataCodec extends MessageToMessageCodec<FrameData, 
             });
             return;
         }
+        if (msg == SynchronizationLayer.SYNC_REQUEST_OBJECT) {
+            System.out.println("[MultiChannellingDataCodec] Stopped multichannel");
+            this.isMultichannelEnabled = false;
+        }
         super.write(ctx, msg, promise);
     }
 

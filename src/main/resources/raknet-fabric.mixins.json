@@ -20,6 +20,7 @@
     "common.encryption.MixinPacketDecryptor",
     "common.encryption.MixinPacketEncryptionManager",
     "common.encryption.MixinPacketEncryptor",
+    "common.sync.MixinPlayerManager",
     "common.sync.MixinServerPlayerEntity",
     "compat.fabricapi.MixinServerLoginNetworkAddon",
     "compat.krypton.MixinServerLoginNetworkHandler",
