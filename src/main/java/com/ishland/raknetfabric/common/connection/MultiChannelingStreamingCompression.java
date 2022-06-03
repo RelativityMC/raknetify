@@ -9,7 +9,6 @@ import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import network.ycc.raknet.frame.FrameData;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
-import java.nio.charset.StandardCharsets;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.zip.Deflater;
@@ -17,7 +16,8 @@ import java.util.zip.Inflater;
 
 public class MultiChannelingStreamingCompression extends ChannelDuplexHandler {
 
-    public static final long IDENTIFIER = 0x40000000;
+    public static final long SERVER_HANDSHAKE = 0x40000010;
+    public static final long CHANNEL_START = 0x40000012;
     private final Inflater[] inflaters = new Inflater[8];
     private final Deflater[] deflaters = new Deflater[8];
 
@@ -34,57 +34,73 @@ public class MultiChannelingStreamingCompression extends ChannelDuplexHandler {
     private volatile long inBytesCompressed = 0L;
     private volatile long inBytesRaw = 0L;
 
-    private boolean active;
+    private boolean active = false;
 
     public MultiChannelingStreamingCompression(int rawPacketId, int compressedPacketId) {
         this.rawPacketId = rawPacketId;
         this.compressedPacketId = compressedPacketId;
+    }
+
+    private void doServerHandshake(ChannelHandlerContext ctx) {
+        final FrameData data = FrameData.create(ctx.alloc(), Constants.RAKNET_STREAMING_COMPRESSION_HANDSHAKE_PACKET_ID,
+                ctx.alloc().buffer().writeLong(SERVER_HANDSHAKE));
+        ctx.write(data);
+    }
+
+    private void doChannelStart(ChannelHandlerContext ctx) {
+        if (!active) return;
         for (int i = 0; i < 8; i++) {
-            inflaters[i] = new Inflater();
-            deflaters[i] = new Deflater();
+            final FrameData data = FrameData.create(ctx.alloc(), Constants.RAKNET_STREAMING_COMPRESSION_HANDSHAKE_PACKET_ID,
+                    ctx.alloc().buffer().writeLong(CHANNEL_START));
+            data.setOrderChannel(i);
+            ctx.write(data);
+            initDeflater(i);
         }
     }
 
-    private void reInit() {
-        System.out.println("Reinitializing streaming compression");
-        for (int i = 0; i < 8; i++) {
-            if (channelsToIgnoreWhenReinit.contains(i)) continue;
-            if (inflaters[i] != null) inflaters[i].end();
-            inflaters[i] = new Inflater();
-            if (deflaters[i] != null) deflaters[i].end();
-            deflaters[i] = new Deflater();
-        }
+    private void initDeflater(int channel) {
+        if (!active) return;
+        if (deflaters[channel] != null) deflaters[channel].end();
+        deflaters[channel] = new Deflater();
+        System.out.println("Streaming compression deflater for ch%d is ready".formatted(channel));
+    }
+
+    private void initInflater(int channel) {
+        if (!active) return;
+        if (inflaters[channel] != null) inflaters[channel].end();
+        inflaters[channel] = new Inflater();
+        System.out.println("Streaming compression inflater for ch%d is ready".formatted(channel));
     }
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
         super.channelActive(ctx);
-
-        ctx.write(FrameData.create(ctx.alloc(), Constants.RAKNET_STREAMING_COMPRESSION_PACKET_ID,
-                ctx.alloc().buffer().writeLong(IDENTIFIER)));
+        doServerHandshake(ctx);
     }
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        if (msg == SynchronizationLayer.SYNC_REQUEST_OBJECT) {
-            reInit();
-        } else if (msg instanceof FrameData compressedFrameData) {
-            if (compressedFrameData.getPacketId() == compressedPacketId && compressedFrameData.getReliability().isReliable && compressedFrameData.getReliability().isOrdered && !compressedFrameData.getReliability().isSequenced) {
-                if (!active) {
-                    ByteBuf payload = null;
-                    try {
-                        payload = compressedFrameData.createData().skipBytes(1);
-                        if (payload.readableBytes() == 8 && payload.readLong() == IDENTIFIER) {
-//                            System.out.println("[MultiChannellingStreamingCompression] starting streaming compression");
+        if (msg instanceof FrameData compressedFrameData) {
+            if (compressedFrameData.getPacketId() == Constants.RAKNET_STREAMING_COMPRESSION_HANDSHAKE_PACKET_ID) {
+                final int orderChannel = compressedFrameData.getOrderChannel();
+                ByteBuf payload = null;
+                try {
+                    payload = compressedFrameData.createData().skipBytes(1);
+                    if (payload.readableBytes() == 8) {
+                        final long l = payload.readLong();
+                        if (l == CHANNEL_START) {
+                            initInflater(orderChannel);
+                            return;
+                        } else if (l == SERVER_HANDSHAKE) {
                             active = true;
+                            doChannelStart(ctx);
                             return;
                         }
-                    } finally {
-                        if (payload != null) payload.release();
                     }
-
+                } finally {
+                    if (payload != null) payload.release();
                 }
-
+            } else if (compressedFrameData.getPacketId() == compressedPacketId && compressedFrameData.getReliability().isReliable && compressedFrameData.getReliability().isOrdered && !compressedFrameData.getReliability().isSequenced && inflaters[compressedFrameData.getOrderChannel()] != null) {
                 final int orderChannel = compressedFrameData.getOrderChannel();
                 final Inflater inflater = inflaters[orderChannel];
                 final ByteBuf data = compressedFrameData.createData().skipBytes(1);
@@ -126,9 +142,11 @@ public class MultiChannelingStreamingCompression extends ChannelDuplexHandler {
     @Override
     public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
         if (msg == SynchronizationLayer.SYNC_REQUEST_OBJECT) {
-            reInit();
-        } else if (active && msg instanceof FrameData rawFrameData) {
-            if (rawFrameData.getPacketId() == rawPacketId && rawFrameData.getReliability().isReliable && rawFrameData.getReliability().isOrdered && !rawFrameData.getReliability().isSequenced) {
+            super.write(ctx, msg, promise);
+            doChannelStart(ctx);
+            return;
+        } else if (msg instanceof FrameData rawFrameData) {
+            if (rawFrameData.getPacketId() == rawPacketId && rawFrameData.getReliability().isReliable && rawFrameData.getReliability().isOrdered && !rawFrameData.getReliability().isSequenced && deflaters[rawFrameData.getOrderChannel()] != null) {
 
                 if (rawFrameData.getDataSize() < 16 + 1) {
                     outBytesRaw += rawFrameData.getDataSize() - 1;
