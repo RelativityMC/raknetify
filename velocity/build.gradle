@@ -45,7 +45,7 @@ shadowJar {
         exclude(dependency('it.unimi.dsi:fastutil'))
     }
     minimize()
-    archiveClassifier = "all-dev"
+    archiveClassifier = "all"
     configurations = [ project.configurations.shadowInclude ]
     from "LICENSE"
 }
