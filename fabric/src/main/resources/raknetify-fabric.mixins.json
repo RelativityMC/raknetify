@@ -8,6 +8,7 @@
   "mixins": [
     "access.IClientConnection",
     "access.INetworkState",
+    "access.INetworkStatePacketHandler",
     "access.IPacketEncryptionManager",
     "client.MixinClientPlayNetworkHandler",
     "client.MixinConnectionScreen1",

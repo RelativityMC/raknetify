@@ -1,14 +1,25 @@
 package com.ishland.raknetify.fabric.common.connection;
 
 import com.google.common.collect.Sets;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.ishland.raknetify.fabric.mixin.access.INetworkState;
+import com.ishland.raknetify.fabric.mixin.access.INetworkStatePacketHandler;
+import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.MappingResolver;
+import net.minecraft.MinecraftVersion;
 import net.minecraft.network.NetworkSide;
 import net.minecraft.network.NetworkState;
 import net.minecraft.network.Packet;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -291,15 +302,51 @@ public class RakNetMultiChannel {
     }
 
     static {
+        Int2IntOpenHashMap s2c = new Int2IntOpenHashMap();
+        Int2IntOpenHashMap c2s = new Int2IntOpenHashMap();
         for (Map.Entry<NetworkSide, ? extends NetworkState.PacketHandler<?>> entry : ((INetworkState) (Object) NetworkState.PLAY).getPacketHandlers().entrySet()) {
-            for (Class<? extends Packet<?>> type : entry.getValue().getPacketTypes()) {
-                getPacketChannelOverride(type);
+            for (Object2IntMap.Entry<Class<? extends Packet<?>>> type : ((INetworkStatePacketHandler) entry.getValue()).getPacketIds().object2IntEntrySet()) {
+                if (entry.getKey() == NetworkSide.CLIENTBOUND)
+                    s2c.put(type.getIntValue(), getPacketChannelOverride(type.getKey()));
+                else if (entry.getKey() == NetworkSide.SERVERBOUND)
+                    c2s.put(type.getIntValue(), getPacketChannelOverride(type.getKey()));
             }
+        }
+        if (Boolean.getBoolean("raknetify.saveChannelMappings")) {
+            final Gson gson = new GsonBuilder()
+                    .setPrettyPrinting()
+                    .create();
+            ProtocolMultiChannelMappings mappings = new ProtocolMultiChannelMappings();
+            Path path = Path.of("channelMappings.json");
+            try {
+                mappings = gson.fromJson(Files.readString(path), ProtocolMultiChannelMappings.class);
+            } catch (IOException e) {
+                System.out.println("Error reading previously generated mappings: " + e.toString());
+            }
+            final ProtocolMultiChannelMappings.VersionMapping versionMapping = new ProtocolMultiChannelMappings.VersionMapping();
+            versionMapping.c2s = c2s;
+            versionMapping.s2c = s2c;
+            mappings.mappings.put(MinecraftVersion.CURRENT.getProtocolVersion(), versionMapping);
+            try {
+                Files.writeString(path, gson.toJson(mappings), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+            } catch (IOException e) {
+                System.out.println("Error writing generated mappings: " + e.toString());
+            }
+            if (Boolean.getBoolean("raknetify.saveChannelMappings.exit")) System.exit(0);
         }
     }
 
     public static void init() {
     }
 
+    public static class ProtocolMultiChannelMappings {
+        public Int2ObjectArrayMap<VersionMapping> mappings = new Int2ObjectArrayMap<>();
+
+        public static class VersionMapping {
+            public Int2IntOpenHashMap s2c = new Int2IntOpenHashMap();
+            public Int2IntOpenHashMap c2s = new Int2IntOpenHashMap();
+        }
+
+    }
 
 }
