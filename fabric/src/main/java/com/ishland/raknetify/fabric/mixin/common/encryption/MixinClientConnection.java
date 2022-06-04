@@ -31,9 +31,15 @@ public class MixinClientConnection {
         if (this.channel.config() instanceof RakNet.Config) {
             ci.cancel();
             this.encrypted = true;
-            this.channel.pipeline().remove("decrypt");
-            this.channel.pipeline().remove("encrypt");
-            this.channel.pipeline().remove(MultiChannellingEncryption.NAME);
+            try {
+                this.channel.pipeline().remove("decrypt");
+                this.channel.pipeline().remove("encrypt");
+            } catch (Throwable ignored) {
+            }
+            try {
+                this.channel.pipeline().remove(MultiChannellingEncryption.NAME);
+            } catch (Throwable ignored) {
+            }
             this.channel.pipeline().addAfter(MultiChannelingStreamingCompression.NAME, MultiChannellingEncryption.NAME,
                     new MultiChannellingEncryption(new PacketEncryptionManager(decryptionCipher), new PacketEncryptionManager(encryptionCipher)));
         }

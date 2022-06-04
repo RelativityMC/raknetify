@@ -63,7 +63,7 @@ public class MultiChannelingStreamingCompression extends ChannelDuplexHandler {
     private void initDeflater(int channel) {
         if (!active) return;
         if (deflaters[channel] != null) deflaters[channel].end();
-        deflaters[channel] = new Deflater();
+        deflaters[channel] = new Deflater(Deflater.BEST_COMPRESSION);
         System.out.println("Streaming compression deflater for ch%d is ready".formatted(channel));
     }
 

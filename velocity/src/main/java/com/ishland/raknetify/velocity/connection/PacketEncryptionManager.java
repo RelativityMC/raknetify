@@ -4,7 +4,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 
 import javax.crypto.Cipher;
-import javax.crypto.ShortBufferException;
+import java.security.GeneralSecurityException;
 
 // TODO [VanillaCopy] from fabric
 public class PacketEncryptionManager {
@@ -26,15 +26,15 @@ public class PacketEncryptionManager {
         return this.conversionBuffer;
     }
 
-    public ByteBuf decrypt(ChannelHandlerContext context, ByteBuf buf) throws ShortBufferException {
+    public ByteBuf decrypt(ChannelHandlerContext context, ByteBuf buf) throws GeneralSecurityException {
         int i = buf.readableBytes();
         byte[] bs = this.toByteArray(buf);
         ByteBuf byteBuf = context.alloc().heapBuffer(this.cipher.getOutputSize(i));
-        byteBuf.writerIndex(this.cipher.update(bs, 0, i, byteBuf.array(), byteBuf.arrayOffset()));
+        byteBuf.writerIndex(this.cipher.doFinal(bs, 0, i, byteBuf.array(), byteBuf.arrayOffset()));
         return byteBuf;
     }
 
-    public void encrypt(ByteBuf buf, ByteBuf result) throws ShortBufferException {
+    public void encrypt(ByteBuf buf, ByteBuf result) throws GeneralSecurityException {
         int i = buf.readableBytes();
         byte[] bs = this.toByteArray(buf);
         int j = this.cipher.getOutputSize(i);
@@ -42,7 +42,7 @@ public class PacketEncryptionManager {
             this.encryptionBuffer = new byte[j];
         }
 
-        result.writeBytes(this.encryptionBuffer, 0, this.cipher.update(bs, 0, i, this.encryptionBuffer));
+        result.writeBytes(this.encryptionBuffer, 0, this.cipher.doFinal(bs, 0, i, this.encryptionBuffer));
     }
 }
 

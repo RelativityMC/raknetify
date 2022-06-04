@@ -30,7 +30,8 @@ public class RakNetVelocityConnectionUtil {
             channel.pipeline().replace(Connections.FRAME_ENCODER, Connections.FRAME_ENCODER, new ChannelDuplexHandler()); // no-op
             if (channel.pipeline().get(HAProxyMessageDecoder.class) != null)
                 channel.pipeline().remove(HAProxyMessageDecoder.class);
-            channel.pipeline().addLast(RakNetVelocityChannelEventListener.NAME, new RakNetVelocityChannelEventListener());
+            channel.pipeline().addBefore(Connections.HANDLER, RakNetVelocityChannelEventListener.NAME, new RakNetVelocityChannelEventListener());
+//            System.out.println(channel.pipeline().names());
 //            final MultiChannellingPacketCapture handler = new MultiChannellingPacketCapture();
 //            channel.pipeline().addLast("raknetify-multi-channel-packet-cature", handler);
 //            channel.pipeline().get(MultiChannellingDataCodec.class).setCapture(handler);

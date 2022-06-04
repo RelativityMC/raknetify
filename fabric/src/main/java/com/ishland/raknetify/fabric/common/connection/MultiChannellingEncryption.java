@@ -23,10 +23,10 @@ public class MultiChannellingEncryption extends ChannelDuplexHandler {
     }
 
     @Override
-    public void channelActive(@NotNull ChannelHandlerContext ctx) throws Exception {
+    public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
         ((PacketEncryptionManagerInterface) decryption).setContext(ctx);
         ((PacketEncryptionManagerInterface) encryption).setContext(ctx);
-        super.channelActive(ctx);
+        super.handlerAdded(ctx);
     }
 
     @Override
