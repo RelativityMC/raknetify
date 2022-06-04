@@ -6,6 +6,9 @@ plugins {
     id 'com.github.johnrengelman.shadow'
 }
 
+archivesBaseName = project.archives_base_name + "-velocity"
+group = project.maven_group + ".velocity"
+
 repositories {
     maven {
         name 'papermc'
@@ -37,6 +40,8 @@ dependencies {
 }
 
 jar {
+    exclude "META-INF/LICENSE.txt"
+    exclude "META-INF/NOTICE.txt"
     from "../LICENSE"
 }
 
@@ -44,6 +49,8 @@ shadowJar {
     dependencies {
         exclude(dependency('it.unimi.dsi:fastutil'))
     }
+    exclude "META-INF/LICENSE.txt"
+    exclude "META-INF/NOTICE.txt"
     minimize()
     archiveClassifier = "all"
     configurations = [ project.configurations.shadowInclude ]

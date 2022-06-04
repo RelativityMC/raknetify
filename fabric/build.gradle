@@ -48,6 +48,8 @@ loom {
 }
 
 jar {
+	exclude "META-INF/LICENSE.txt"
+	exclude "META-INF/NOTICE.txt"
 	from "../LICENSE"
 }
 
@@ -55,10 +57,12 @@ shadowJar {
 	dependencies {
 		exclude(dependency('it.unimi.dsi:fastutil'))
 	}
+	exclude "META-INF/LICENSE.txt"
+	exclude "META-INF/NOTICE.txt"
 	minimize()
 	archiveClassifier = "all-dev"
 	configurations = [ project.configurations.shadowInclude ]
-	from "LICENSE"
+	from "../LICENSE"
 }
 
 //noinspection UnnecessaryQualifiedReference
