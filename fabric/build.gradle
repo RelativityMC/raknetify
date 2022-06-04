@@ -8,7 +8,6 @@ archivesBaseName = project.archives_base_name + "-fabric"
 group = project.maven_group + ".fabric"
 
 configurations {
-	api.extendsFrom includeApi
 	shadowInclude
 }
 
@@ -49,7 +48,7 @@ loom {
 }
 
 jar {
-	from "LICENSE"
+	from "../LICENSE"
 }
 
 shadowJar {

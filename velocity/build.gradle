@@ -1,0 +1,81 @@
+import java.nio.file.Files
+import java.nio.file.Paths
+import java.nio.file.StandardCopyOption
+
+plugins {
+    id 'com.github.johnrengelman.shadow'
+}
+
+repositories {
+    maven {
+        name 'papermc'
+        url 'https://repo.papermc.io/repository/maven-public/'
+    }
+    ivy {
+        url 'https://api.papermc.io/v2/projects/'
+        patternLayout {
+            artifact "[organization]/versions/[module]/builds/[revision]/downloads/[organization]-[module]-[revision](.[ext])"
+        }
+        metadataSources {
+            it.artifact()
+        }
+    }
+}
+
+configurations {
+    shadowInclude
+}
+
+dependencies {
+//    api 'com.velocitypowered:velocity-api:3.1.1'
+//    annotationProcessor 'com.velocitypowered:velocity-api:3.1.1'
+
+    api 'velocity:3.1.2-SNAPSHOT:139'
+    annotationProcessor 'velocity:3.1.2-SNAPSHOT:139'
+
+    shadowInclude implementation(project(":common"))
+}
+
+jar {
+    from "../LICENSE"
+}
+
+shadowJar {
+    dependencies {
+        exclude(dependency('it.unimi.dsi:fastutil'))
+    }
+    minimize()
+    archiveClassifier = "all-dev"
+    configurations = [ project.configurations.shadowInclude ]
+    from "LICENSE"
+}
+
+assemble.dependsOn(shadowJar)
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+        }
+    }
+
+    // See https://docs.gradle.org/current/userguide/publishing_maven.html for information on how to set up publishing.
+    repositories {
+        // Add repositories to publish to here.
+        // Notice: This block does NOT have the same function as the block in the top level.
+        // The repositories here will be used for publishing your artifact, not for
+        // retrieving dependencies.
+    }
+}
+
+tasks.withType(AbstractArchiveTask) {
+    preserveFileTimestamps = false
+    reproducibleFileOrder = true
+}
+
+task("prepareRunVelocity", dependsOn: shadowJar) {
+    doFirst {
+        Files.createDirectories(rootProject.projectDir.toPath().resolve("run-velocity").resolve("plugins"))
+        Files.copy(shadowJar.archiveFile.getAsFile().get().toPath(), rootProject.projectDir.toPath().resolve("run-velocity").resolve("plugins").resolve("raknetify-velocity-devlaunch.jar"), StandardCopyOption.REPLACE_EXISTING)
+    }
+}

@@ -1,15 +1,7 @@
-package com.ishland.raknetify.fabric.common.connection;
+package com.ishland.raknetify.common.connection;
 
 import com.ishland.raknetify.common.Constants;
-import com.ishland.raknetify.common.connection.FrameDataBlocker;
-import com.ishland.raknetify.common.connection.MetricsSynchronizationHandler;
-import com.ishland.raknetify.common.connection.MultiChannelingStreamingCompression;
-import com.ishland.raknetify.common.connection.NoFlush;
-import com.ishland.raknetify.common.connection.SimpleMetricsLogger;
-import com.ishland.raknetify.common.connection.SynchronizationLayer;
-import com.ishland.raknetify.fabric.common.compat.viafabric.ViaFabricCompatInjector;
 import io.netty.channel.Channel;
-import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelInitializer;
 import io.netty.handler.timeout.ReadTimeoutHandler;
 import network.ycc.raknet.RakNet;
@@ -52,7 +44,7 @@ public class RakNetConnectionUtil {
 //            channel.pipeline().addLast("raknetify-flush-consolidation", new FlushConsolidationHandler(Integer.MAX_VALUE, true));
             channel.pipeline().addLast("raknetify-no-flush", new NoFlush());
             channel.pipeline().addLast(MultiChannelingStreamingCompression.NAME, new MultiChannelingStreamingCompression(Constants.RAKNET_GAME_PACKET_ID, Constants.RAKNET_STREAMING_COMPRESSION_PACKET_ID));
-            channel.pipeline().addLast(MultiChannellingDataCodec.NAME, new MultiChannellingDataCodec(Constants.RAKNET_GAME_PACKET_ID));
+//            channel.pipeline().addLast(MultiChannellingDataCodec.NAME, new MultiChannellingDataCodec(Constants.RAKNET_GAME_PACKET_ID));
             channel.pipeline().addLast("raknetify-frame-data-blocker", new FrameDataBlocker());
         }
     }
@@ -92,17 +84,17 @@ public class RakNetConnectionUtil {
         });
     }
 
-    public static void postInitChannel(Channel channel, boolean isClientSide) {
-        if (channel.config() instanceof RakNet.Config) {
-            ViaFabricCompatInjector.inject(channel, isClientSide);
-            channel.pipeline().replace("timeout", "timeout", new ChannelDuplexHandler()); // no-op
-            channel.pipeline().replace("splitter", "splitter", new ChannelDuplexHandler()); // no-op
-            channel.pipeline().replace("prepender", "prepender", new ChannelDuplexHandler()); // no-op
-            final MultiChannellingPacketCapture handler = new MultiChannellingPacketCapture();
-            channel.pipeline().addLast("raknetify-multi-channel-packet-cature", handler);
-            channel.pipeline().get(MultiChannellingDataCodec.class).setCapture(handler);
-        }
-    }
+//    public static void postInitChannel(Channel channel, boolean isClientSide) {
+//        if (channel.config() instanceof RakNet.Config) {
+//            ViaFabricCompatInjector.inject(channel, isClientSide);
+//            channel.pipeline().replace("timeout", "timeout", new ChannelDuplexHandler()); // no-op
+//            channel.pipeline().replace("splitter", "splitter", new ChannelDuplexHandler()); // no-op
+//            channel.pipeline().replace("prepender", "prepender", new ChannelDuplexHandler()); // no-op
+//            final MultiChannellingPacketCapture handler = new MultiChannellingPacketCapture();
+//            channel.pipeline().addLast("raknetify-multi-channel-packet-cature", handler);
+//            channel.pipeline().get(MultiChannellingDataCodec.class).setCapture(handler);
+//        }
+//    }
 
     @SuppressWarnings("unchecked")
     private static void reInitChannelForOrdering(Channel channel) {
