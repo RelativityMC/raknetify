@@ -3,15 +3,16 @@ package com.ishland.raknetify.fabric.common.connection;
 import com.google.common.collect.Sets;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.ishland.raknetify.common.data.ProtocolMultiChannelMappings;
 import com.ishland.raknetify.fabric.mixin.access.INetworkState;
 import com.ishland.raknetify.fabric.mixin.access.INetworkStatePacketHandler;
 import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
-import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.MappingResolver;
 import net.minecraft.MinecraftVersion;
+import net.minecraft.SharedConstants;
 import net.minecraft.network.NetworkSide;
 import net.minecraft.network.NetworkState;
 import net.minecraft.network.Packet;
@@ -61,8 +62,6 @@ public class RakNetMultiChannel {
             "net/minecraft/class_2617", // StatisticsS2C
             "net/minecraft/class_2859", // AdvancementTabC2S
             "net/minecraft/class_2729", // SelectAdvancementTabS2C
-
-            "net/minecraft/class_2675", // ParticleS2C
     });
 
     // Primarily used for interactions independent to world
@@ -119,6 +118,11 @@ public class RakNetMultiChannel {
 
             "net/minecraft/class_2703", // PlayerListS2C
             "net/minecraft/class_2613", // PlayerSpawnS2C
+
+            // 1.16.5
+            "net/minecraft/class_2755", // TeamS2CPacket
+            "net/minecraft/class_2762", // TitleS2CPacket
+
     });
 
     // Entities related stuff
@@ -158,6 +162,10 @@ public class RakNetMultiChannel {
             "net/minecraft/class_2836", // BoatPaddleStateC2S
             "net/minecraft/class_2833", // VehicleMoveC2S
             "net/minecraft/class_2879", // HandSwingC2S
+
+            // 1.16.5
+            "net/minecraft/class_2684", // EntityS2CPacket
+            "net/minecraft/class_2698", // CombatEventS2CPacket
     });
 
     // Primarily used for interactions dependent to world
@@ -219,6 +227,11 @@ public class RakNetMultiChannel {
             "net/minecraft/class_2817", // CustomPayloadC2SPacket
             "net/minecraft/class_2658", // CustomPayloadS2CPacket
 
+            // 1.16.5
+            "net/minecraft/class_2809", // ConfirmScreenActionC2SPacket
+            "net/minecraft/class_2644", // ConfirmScreenActionS2CPacket
+            "net/minecraft/class_2730", // WorldBorderS2CPacket
+
     });
 
     // Primarily for packets not very critical to interactions
@@ -228,6 +241,9 @@ public class RakNetMultiChannel {
             "net/minecraft/class_2765", // PlaySoundFromEntityS2C
             "net/minecraft/class_2767", // PlaySoundS2C
             "net/minecraft/class_2770", // StopSoundS2C
+
+            "net/minecraft/class_2675", // ParticleS2C
+            "net/minecraft/class_5747", // VibrationS2C
     });
 
     // Used for worlds
@@ -326,7 +342,7 @@ public class RakNetMultiChannel {
             final ProtocolMultiChannelMappings.VersionMapping versionMapping = new ProtocolMultiChannelMappings.VersionMapping();
             versionMapping.c2s = c2s;
             versionMapping.s2c = s2c;
-            mappings.mappings.put(MinecraftVersion.CURRENT.getProtocolVersion(), versionMapping);
+            mappings.mappings.put(SharedConstants.getProtocolVersion(), versionMapping);
             try {
                 Files.writeString(path, gson.toJson(mappings), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
             } catch (IOException e) {
@@ -337,16 +353,6 @@ public class RakNetMultiChannel {
     }
 
     public static void init() {
-    }
-
-    public static class ProtocolMultiChannelMappings {
-        public Int2ObjectArrayMap<VersionMapping> mappings = new Int2ObjectArrayMap<>();
-
-        public static class VersionMapping {
-            public Int2IntOpenHashMap s2c = new Int2IntOpenHashMap();
-            public Int2IntOpenHashMap c2s = new Int2IntOpenHashMap();
-        }
-
     }
 
 }

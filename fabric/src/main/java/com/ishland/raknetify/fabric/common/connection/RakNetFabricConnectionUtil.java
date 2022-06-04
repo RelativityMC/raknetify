@@ -18,7 +18,7 @@ public class RakNetFabricConnectionUtil {
     public static void initChannel(Channel channel) {
         if (channel.config() instanceof RakNet.Config) {
             RakNetConnectionUtil.initChannel(channel);
-            channel.pipeline().addAfter(MultiChannelingStreamingCompression.NAME, MultiChannellingDataCodec.NAME, new MultiChannellingDataCodec(Constants.RAKNET_GAME_PACKET_ID));
+            channel.pipeline().addAfter(MultiChannelingStreamingCompression.NAME, RakNetFabricMultiChannelCodec.NAME, new RakNetFabricMultiChannelCodec(Constants.RAKNET_GAME_PACKET_ID));
         }
     }
 
@@ -30,7 +30,7 @@ public class RakNetFabricConnectionUtil {
             channel.pipeline().replace("prepender", "prepender", new ChannelDuplexHandler()); // no-op
             final MultiChannellingPacketCapture handler = new MultiChannellingPacketCapture();
             channel.pipeline().addLast("raknetify-multi-channel-packet-cature", handler);
-            channel.pipeline().get(MultiChannellingDataCodec.class).setCapture(handler);
+            channel.pipeline().get(RakNetFabricMultiChannelCodec.class).setCapture(handler);
         }
     }
 

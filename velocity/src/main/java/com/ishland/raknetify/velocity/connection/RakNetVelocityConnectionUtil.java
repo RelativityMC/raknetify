@@ -3,6 +3,11 @@ package com.ishland.raknetify.velocity.connection;
 import com.ishland.raknetify.common.Constants;
 import com.ishland.raknetify.common.connection.MultiChannelingStreamingCompression;
 import com.ishland.raknetify.common.connection.RakNetConnectionUtil;
+import com.ishland.raknetify.common.connection.RakNetSimpleMultiChannelCodec;
+import com.ishland.raknetify.common.data.ProtocolMultiChannelMappings;
+import com.velocitypowered.api.event.connection.LoginEvent;
+import com.velocitypowered.api.network.ProtocolVersion;
+import com.velocitypowered.proxy.connection.client.ConnectedPlayer;
 import com.velocitypowered.proxy.network.Connections;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelDuplexHandler;
@@ -19,7 +24,7 @@ public class RakNetVelocityConnectionUtil {
         if (channel.config() instanceof RakNet.Config) {
             RakNetConnectionUtil.initChannel(channel);
 //            channel.pipeline().addAfter(MultiChannelingStreamingCompression.NAME, MultiChannellingDataCodec.NAME, new MultiChannellingDataCodec(Constants.RAKNET_GAME_PACKET_ID));
-            channel.pipeline().addAfter(MultiChannelingStreamingCompression.NAME, UserDataCodec.NAME, new UserDataCodec(Constants.RAKNET_GAME_PACKET_ID));
+            channel.pipeline().addAfter(MultiChannelingStreamingCompression.NAME, RakNetSimpleMultiChannelCodec.NAME, new RakNetSimpleMultiChannelCodec(Constants.RAKNET_GAME_PACKET_ID));
         }
     }
 
@@ -35,6 +40,19 @@ public class RakNetVelocityConnectionUtil {
 //            final MultiChannellingPacketCapture handler = new MultiChannellingPacketCapture();
 //            channel.pipeline().addLast("raknetify-multi-channel-packet-cature", handler);
 //            channel.pipeline().get(MultiChannellingDataCodec.class).setCapture(handler);
+        }
+    }
+
+    public static void onPlayerLogin(LoginEvent evt) {
+        final ConnectedPlayer player = (ConnectedPlayer) evt.getPlayer();
+        final Channel channel = player.getConnection().getChannel();
+        if (channel != null && channel.config() instanceof RakNet.Config) {
+            final RakNetSimpleMultiChannelCodec multiChannelCodec = channel.pipeline().get(RakNetSimpleMultiChannelCodec.class);
+            if (multiChannelCodec != null) {
+                final ProtocolVersion protocolVersion = player.getProtocolVersion();
+                multiChannelCodec.setDescriptiveProtocolStatus("%s (%d)".formatted(protocolVersion.getVersionIntroducedIn(), protocolVersion.getProtocol()));
+                multiChannelCodec.setSimpleChannelMapping(ProtocolMultiChannelMappings.INSTANCE.mappings.get(protocolVersion.getProtocol()).s2c);
+            }
         }
     }
 

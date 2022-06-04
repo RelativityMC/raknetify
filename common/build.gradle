@@ -8,4 +8,6 @@ dependencies {
 
     //noinspection GradlePackageUpdate
     compileOnly("io.netty:netty-all:4.1.25.Final")
+
+    compileOnly("com.google.code.gson:gson:2.9.0")
 }

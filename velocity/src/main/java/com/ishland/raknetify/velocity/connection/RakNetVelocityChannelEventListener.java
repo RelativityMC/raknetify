@@ -2,11 +2,16 @@ package com.ishland.raknetify.velocity.connection;
 
 import com.google.common.base.Preconditions;
 import com.ishland.raknetify.common.connection.MultiChannelingStreamingCompression;
+import com.ishland.raknetify.common.connection.RakNetSimpleMultiChannelCodec;
+import com.ishland.raknetify.common.connection.SynchronizationLayer;
 import com.ishland.raknetify.velocity.RaknetifyVelocityPlugin;
 import com.velocitypowered.proxy.VelocityServer;
 import com.velocitypowered.proxy.network.Connections;
 import com.velocitypowered.proxy.protocol.VelocityConnectionEvent;
+import com.velocitypowered.proxy.protocol.packet.AvailableCommands;
 import com.velocitypowered.proxy.protocol.packet.EncryptionResponse;
+import com.velocitypowered.proxy.protocol.packet.JoinGame;
+import com.velocitypowered.proxy.protocol.packet.Respawn;
 import com.velocitypowered.proxy.protocol.packet.SetCompression;
 import com.velocitypowered.proxy.util.EncryptionUtils;
 import io.netty.channel.ChannelDuplexHandler;
@@ -31,6 +36,14 @@ public class RakNetVelocityChannelEventListener extends ChannelDuplexHandler {
                 promise.setSuccess(); // swallow SetCompression packet
                 return;
             }
+        } else if (msg instanceof Respawn || msg instanceof JoinGame) {
+            ctx.write(SynchronizationLayer.SYNC_REQUEST_OBJECT); // sync
+            super.write(ctx, msg, promise);
+            return;
+        } else if (msg instanceof AvailableCommands) {
+            ctx.write(RakNetSimpleMultiChannelCodec.SIGNAL_START_MULTICHANNEL);
+            super.write(ctx, msg, promise);
+            return;
         }
         super.write(ctx, msg, promise);
     }

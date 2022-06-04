@@ -1,9 +1,13 @@
 package com.ishland.raknetify.velocity;
 
 import com.google.inject.Inject;
+import com.ishland.raknetify.common.connection.RakNetSimpleMultiChannelCodec;
+import com.ishland.raknetify.common.data.ProtocolMultiChannelMappings;
+import com.ishland.raknetify.velocity.connection.RakNetVelocityConnectionUtil;
 import com.ishland.raknetify.velocity.init.VelocityRaknetifyServer;
 import com.velocitypowered.api.event.PostOrder;
 import com.velocitypowered.api.event.Subscribe;
+import com.velocitypowered.api.event.connection.LoginEvent;
 import com.velocitypowered.api.event.proxy.ListenerBoundEvent;
 import com.velocitypowered.api.event.proxy.ListenerCloseEvent;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
@@ -29,6 +33,9 @@ public class RaknetifyVelocityPlugin {
         PROXY = this.proxy;
         LOGGER = this.logger;
 
+        ProtocolMultiChannelMappings.init();
+
+        PROXY.getEventManager().register(this, LoginEvent.class, PostOrder.LAST, RakNetVelocityConnectionUtil::onPlayerLogin);
         PROXY.getEventManager().register(this, ListenerBoundEvent.class, PostOrder.LAST, VelocityRaknetifyServer::start);
         PROXY.getEventManager().register(this, ListenerCloseEvent.class, PostOrder.LAST, VelocityRaknetifyServer::stop);
     }

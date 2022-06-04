@@ -1,6 +1,6 @@
 package com.ishland.raknetify.fabric.mixin.common.sync;
 
-import com.ishland.raknetify.fabric.common.connection.MultiChannellingDataCodec;
+import com.ishland.raknetify.fabric.common.connection.RakNetFabricMultiChannelCodec;
 import com.ishland.raknetify.common.connection.SynchronizationLayer;
 import com.ishland.raknetify.fabric.mixin.access.IClientConnection;
 import io.netty.channel.Channel;
@@ -37,7 +37,7 @@ public class MixinPlayerManager {
             return;
         }
         if (channel.config() instanceof RakNet.Config) {
-            channel.write(MultiChannellingDataCodec.START_MULTICHANNEL);
+            channel.write(RakNetFabricMultiChannelCodec.SIGNAL_START_MULTICHANNEL);
 
 
         }
