@@ -47,7 +47,7 @@ jar {
 
 shadowJar {
     dependencies {
-        exclude(dependency('it.unimi.dsi:fastutil'))
+//        exclude(dependency('it.unimi.dsi:fastutil'))
     }
     exclude "META-INF/LICENSE.txt"
     exclude "META-INF/NOTICE.txt"
