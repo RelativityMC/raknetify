@@ -37,6 +37,13 @@ dependencies {
     annotationProcessor 'velocity:3.1.2-SNAPSHOT:139'
 
     shadowInclude implementation(project(":common"))
+
+    // copied here to workaround incomplete fastutil in velocity
+    api("com.github.RelativityMC.netty-raknet:netty-raknet-common:${project.netty_raknet_version}") {
+        transitive = false
+    }
+    api("com.github.RelativityMC.netty-raknet:netty-raknet-client:${project.netty_raknet_version}")
+    api("com.github.RelativityMC.netty-raknet:netty-raknet-server:${project.netty_raknet_version}")
 }
 
 jar {
