@@ -3,6 +3,7 @@ package com.ishland.raknetify.common.data;
 import com.google.gson.Gson;
 import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -34,7 +35,7 @@ public class ProtocolMultiChannelMappings {
     public static void init() {
     }
 
-    public Int2ObjectArrayMap<VersionMapping> mappings = new Int2ObjectArrayMap<>();
+    public Int2ObjectOpenHashMap<VersionMapping> mappings = new Int2ObjectOpenHashMap<>();
 
     public static class VersionMapping {
         public Int2IntOpenHashMap s2c = new Int2IntOpenHashMap();
