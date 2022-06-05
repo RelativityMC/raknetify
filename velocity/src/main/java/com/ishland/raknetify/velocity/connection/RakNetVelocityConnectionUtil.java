@@ -52,7 +52,8 @@ public class RakNetVelocityConnectionUtil {
             if (multiChannelCodec != null) {
                 final ProtocolVersion protocolVersion = player.getProtocolVersion();
                 multiChannelCodec.setDescriptiveProtocolStatus("%s (%d)".formatted(protocolVersion.getVersionIntroducedIn(), protocolVersion.getProtocol()));
-                multiChannelCodec.setSimpleChannelMapping(ProtocolMultiChannelMappings.INSTANCE.mappings.get(protocolVersion.getProtocol()).s2c);
+                final ProtocolMultiChannelMappings.VersionMapping versionMapping = ProtocolMultiChannelMappings.INSTANCE.mappings.get(protocolVersion.getProtocol());
+                if (versionMapping != null) multiChannelCodec.setSimpleChannelMapping(versionMapping.s2c);
             }
             RaknetifyVelocityPlugin.LOGGER.info(String.format("Raknetify: %s logged in via RakNet, mtu %d", evt.getPlayer().getGameProfile().getName(), config.getMTU()));
         }

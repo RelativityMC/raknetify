@@ -66,7 +66,6 @@ public class VelocityRaknetifyServer {
                             RakNetVelocityConnectionUtil.postInitChannel(channel, false);
                         }
                     })
-                    .childOption(ChannelOption.IP_TOS, 0x18)
                     .localAddress(evt.getAddress())
                     .bind()
                     .syncUninterruptibly();
