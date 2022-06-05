@@ -44,19 +44,19 @@ public class RakNetSimpleMultiChannelCodec extends MessageToMessageCodec<FrameDa
     public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
         if (msg == SIGNAL_START_MULTICHANNEL && !this.isMultichannelEnabled) {
             if (!this.isMultichannelAvailable()) {
-                System.out.println("[MultiChannellingDataCodec] Failed to start multichannel: not available for %s".formatted(this.descriptiveProtocolStatus));
+                System.out.println("Raknetify: [MultiChannellingDataCodec] Failed to start multichannel: not available for %s".formatted(this.descriptiveProtocolStatus));
                 return;
             }
             final FrameData frameData = FrameData.create(ctx.alloc(), Constants.RAKNET_PING_PACKET_ID, ctx.alloc().buffer(1).writeByte(0));
             frameData.setOrderChannel(7);
             ctx.write(frameData).addListener(future -> {
                 isMultichannelEnabled = true;
-                System.out.println("[MultiChannellingDataCodec] Started multichannel");
+                if (Constants.DEBUG) System.out.println("Raknetify: [MultiChannellingDataCodec] Started multichannel");
             });
             return;
         }
         if (msg == SynchronizationLayer.SYNC_REQUEST_OBJECT && this.isMultichannelEnabled) {
-            System.out.println("[MultiChannellingDataCodec] Stopped multichannel");
+            if (Constants.DEBUG) System.out.println("Raknetify: [MultiChannellingDataCodec] Stopped multichannel");
             this.isMultichannelEnabled = false;
             return;
         }

@@ -2,6 +2,8 @@ package com.ishland.raknetify.common;
 
 public class Constants {
 
+    public static final boolean DEBUG = Boolean.getBoolean("raknetify.debug");
+
     public static final String RAKNET_PREFIX = "raknet;";
     public static final String RAKNET_LARGE_MTU_PREFIX = "raknetl;";
     public static final int RAKNET_PING_PACKET_ID = 0xFE;

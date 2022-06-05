@@ -33,7 +33,7 @@ public class MixinServerLoginNetworkAddon {
     private int stopCompressionIfStreamingCompressionExists(MinecraftServer server) {
         final MultiChannelingStreamingCompression compression = ((IClientConnection) this.connection).getChannel().pipeline().get(MultiChannelingStreamingCompression.class);
         if (compression != null && compression.isActive()) {
-            System.out.println("Preventing vanilla compression as streaming compression is enabled");
+            System.out.println("Raknetify: Preventing vanilla compression as streaming compression is enabled");
             return -1;
         }
         return server.getNetworkCompressionThreshold();
@@ -48,7 +48,7 @@ public class MixinServerLoginNetworkAddon {
                 try {
                     this.connection.setCompressionThreshold(this.server.getNetworkCompressionThreshold(), false);
                 } catch (NoSuchMethodError e) {
-                    System.out.println("An error occurred when starting compression, using alternative method: " + e.toString());
+                    System.out.println("Raknetify: An error occurred when starting compression, using alternative method: " + e.toString());
                     //noinspection JavaReflectionMemberAccess
                     final Method method_10760 = ClientConnection.class.getMethod("method_10760", int.class);
                     method_10760.invoke(this.connection, this.server.getNetworkCompressionThreshold());

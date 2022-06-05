@@ -5,6 +5,7 @@ import com.ishland.raknetify.common.connection.MultiChannelingStreamingCompressi
 import com.ishland.raknetify.common.connection.RakNetConnectionUtil;
 import com.ishland.raknetify.common.connection.RakNetSimpleMultiChannelCodec;
 import com.ishland.raknetify.common.data.ProtocolMultiChannelMappings;
+import com.ishland.raknetify.velocity.RaknetifyVelocityPlugin;
 import com.velocitypowered.api.event.connection.LoginEvent;
 import com.velocitypowered.api.network.ProtocolVersion;
 import com.velocitypowered.proxy.connection.client.ConnectedPlayer;
@@ -46,13 +47,14 @@ public class RakNetVelocityConnectionUtil {
     public static void onPlayerLogin(LoginEvent evt) {
         final ConnectedPlayer player = (ConnectedPlayer) evt.getPlayer();
         final Channel channel = player.getConnection().getChannel();
-        if (channel != null && channel.config() instanceof RakNet.Config) {
+        if (channel != null && channel.config() instanceof RakNet.Config config) {
             final RakNetSimpleMultiChannelCodec multiChannelCodec = channel.pipeline().get(RakNetSimpleMultiChannelCodec.class);
             if (multiChannelCodec != null) {
                 final ProtocolVersion protocolVersion = player.getProtocolVersion();
                 multiChannelCodec.setDescriptiveProtocolStatus("%s (%d)".formatted(protocolVersion.getVersionIntroducedIn(), protocolVersion.getProtocol()));
                 multiChannelCodec.setSimpleChannelMapping(ProtocolMultiChannelMappings.INSTANCE.mappings.get(protocolVersion.getProtocol()).s2c);
             }
+            RaknetifyVelocityPlugin.LOGGER.info(String.format("Raknetify: %s logged in via RakNet, mtu %d", evt.getPlayer().getGameProfile().getName(), config.getMTU()));
         }
     }
 

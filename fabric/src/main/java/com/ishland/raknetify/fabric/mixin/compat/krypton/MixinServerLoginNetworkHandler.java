@@ -38,7 +38,7 @@ public class MixinServerLoginNetworkHandler {
         final ChannelPipeline pipeline = ((IClientConnection) this.connection).getChannel().pipeline();
         if (pipeline.get("decrypt").getClass().getName().equals("me.steinborn.krypton.mod.shared.network.pipeline.MinecraftCipherDecoder") &&
                 pipeline.get("encrypt").getClass().getName().equals("me.steinborn.krypton.mod.shared.network.pipeline.MinecraftCipherEncoder")) {
-            System.out.println("Krypton detected, applying compatibility");
+            System.out.println("Raknetify: Krypton detected, applying compatibility");
 
             pipeline.remove("decrypt");
             pipeline.remove("encrypt");

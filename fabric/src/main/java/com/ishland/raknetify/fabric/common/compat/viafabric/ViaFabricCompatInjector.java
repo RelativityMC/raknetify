@@ -38,7 +38,7 @@ public class ViaFabricCompatInjector {
                 channel.pipeline().addBefore("decoder", handlerDecoderName, fabricDecodeHandler);
             } catch (Throwable t) {
                 //noinspection RedundantStringFormatCall
-                System.err.println(String.format("Could not inject ViaVersion compatibility into RakNet channel %s: %s", channel, t));
+                System.err.println(String.format("Raknetify: Could not inject ViaVersion compatibility into RakNet channel %s: %s", channel, t));
                 t.printStackTrace();
             }
         }

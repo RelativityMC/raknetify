@@ -110,7 +110,7 @@ public class RakNetConnectionUtil {
                 frameQueueField.set(reliabilityHandler, newSet);
 
             } catch (Throwable t) {
-                System.err.println("Error occurred while reinitializing channel ordering");
+                System.err.println("Raknetify: Error occurred while reinitializing channel ordering");
                 t.printStackTrace();
             }
         }

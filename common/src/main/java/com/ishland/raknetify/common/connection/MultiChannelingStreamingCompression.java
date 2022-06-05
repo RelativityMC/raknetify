@@ -64,14 +64,14 @@ public class MultiChannelingStreamingCompression extends ChannelDuplexHandler {
         if (!active) return;
         if (deflaters[channel] != null) deflaters[channel].end();
         deflaters[channel] = new Deflater(Deflater.BEST_COMPRESSION);
-        System.out.println("Streaming compression deflater for ch%d is ready".formatted(channel));
+        if (Constants.DEBUG) System.out.println("Raknetify: Streaming compression deflater for ch%d is ready".formatted(channel));
     }
 
     private void initInflater(int channel) {
         if (!active) return;
         if (inflaters[channel] != null) inflaters[channel].end();
         inflaters[channel] = new Inflater();
-        System.out.println("Streaming compression inflater for ch%d is ready".formatted(channel));
+        if (Constants.DEBUG) System.out.println("Raknetify: Streaming compression inflater for ch%d is ready".formatted(channel));
     }
 
     @Override

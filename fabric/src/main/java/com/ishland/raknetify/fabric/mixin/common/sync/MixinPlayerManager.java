@@ -20,7 +20,7 @@ public class MixinPlayerManager {
         final Channel channel = ((IClientConnection) player.networkHandler.connection).getChannel();
         if (channel == null) {
             //noinspection RedundantStringFormatCall
-            System.err.println("Warning: %s don't have valid channel when teleporting to another dimension, not sending sync packet".formatted(this));
+            System.err.println("Raknetify: Warning: %s don't have valid channel when teleporting to another dimension, not sending sync packet".formatted(this));
             return;
         }
         if (channel.config() instanceof RakNet.Config) {
@@ -33,7 +33,7 @@ public class MixinPlayerManager {
         final Channel channel = ((IClientConnection) player.networkHandler.connection).getChannel();
         if (channel == null) {
             //noinspection RedundantStringFormatCall
-            System.err.println("Warning: %s don't have valid channel when teleporting to another dimension, not starting multichannel".formatted(this));
+            System.err.println("Raknetify: Warning: %s don't have valid channel when teleporting to another dimension, not starting multichannel".formatted(this));
             return;
         }
         if (channel.config() instanceof RakNet.Config) {

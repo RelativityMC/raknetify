@@ -16,7 +16,7 @@ public class ProtocolMultiChannelMappings {
     static {
         final InputStream resource = ProtocolMultiChannelMappings.class.getClassLoader().getResourceAsStream("raknetify-channel-mappings.json");
         if (resource == null) {
-            System.err.println("Failed to load raknetify channel mappings");
+            System.err.println("Raknetify: Failed to load raknetify channel mappings");
             INSTANCE = new ProtocolMultiChannelMappings();
         } else {
             ProtocolMultiChannelMappings read = new ProtocolMultiChannelMappings();
@@ -25,7 +25,7 @@ public class ProtocolMultiChannelMappings {
                 final Gson gson = new Gson();
                 read = gson.fromJson(reader, ProtocolMultiChannelMappings.class);
             } catch (IOException e) {
-                System.err.println("Failed to load raknetify channel mappings");
+                System.err.println("Raknetify: Failed to load raknetify channel mappings");
                 e.printStackTrace();
             }
             INSTANCE = read;

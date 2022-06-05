@@ -101,7 +101,7 @@ public class SynchronizationLayer extends ChannelDuplexHandler {
             this.frameOrderIn = ctx.pipeline().get(FrameOrderIn.class);
             Object frameOrderInQueueArray = accessible(FrameOrderIn.class.getDeclaredField("channels")).get(this.frameOrderIn);
             this.frameOrderInQueues = new Object[Array.getLength(frameOrderInQueueArray)];
-            for (int i = 0; i < this.frameOrderInQueues.length; i ++) {
+            for (int i = 0; i < this.frameOrderInQueues.length; i++) {
                 this.frameOrderInQueues[i] = Array.get(frameOrderInQueueArray, i);
             }
 
@@ -130,7 +130,7 @@ public class SynchronizationLayer extends ChannelDuplexHandler {
         if (initialized && msg instanceof FrameData packet && packet.getPacketId() == Constants.RAKNET_SYNC_PACKET_ID) {
             // read
             {
-                System.out.println("Received sync packet");
+                if (Constants.DEBUG) System.out.println("Raknetify: Received sync packet");
                 ctx.fireChannelRead(SYNC_REQUEST_OBJECT);
                 final ByteBuf byteBuf = packet.createData().skipBytes(1);
                 try {
@@ -138,11 +138,12 @@ public class SynchronizationLayer extends ChannelDuplexHandler {
                     for (int i = 0; i < count; i++) {
                         final byte channel = byteBuf.readByte();
                         final int orderIndex = byteBuf.readInt();
-                        System.out.println("Channel %d: %d -> %d"
-                                .formatted(channel,
-                                        (int) FIELD_QUEUE_LAST_ORDER_INDEX.get(frameOrderInQueues[channel]),
-                                        orderIndex
-                                ));
+                        if (Constants.DEBUG)
+                            System.out.println("Raknetify: Channel %d: %d -> %d"
+                                    .formatted(channel,
+                                            (int) FIELD_QUEUE_LAST_ORDER_INDEX.get(frameOrderInQueues[channel]),
+                                            orderIndex
+                                    ));
                         FIELD_QUEUE_LAST_ORDER_INDEX.set(frameOrderInQueues[channel], orderIndex);
                         final ObjectIterator<?> iterator = this.frameJoinerPendingPackets.values().iterator();
                         while (iterator.hasNext()) {
@@ -159,10 +160,11 @@ public class SynchronizationLayer extends ChannelDuplexHandler {
                         }
                     }
                     final int seqId = byteBuf.readInt();
-                    System.out.println("ReliabilityHandler: %d -> %d".formatted(
-                            (int) FIELD_RELIABILITY_LAST_RECEIVED_SEQ_ID.get(this.reliabilityHandler),
-                            seqId
-                    ));
+                    if (Constants.DEBUG)
+                        System.out.println("Raknetify: ReliabilityHandler: %d -> %d".formatted(
+                                (int) FIELD_RELIABILITY_LAST_RECEIVED_SEQ_ID.get(this.reliabilityHandler),
+                                seqId
+                        ));
                     FIELD_RELIABILITY_LAST_RECEIVED_SEQ_ID.set(this.reliabilityHandler, seqId);
                 } finally {
                     byteBuf.release();
@@ -189,12 +191,14 @@ public class SynchronizationLayer extends ChannelDuplexHandler {
             for (int channel = 0, frameOrderOutNextOrderIndexLength = frameOrderOutNextOrderIndex.length; channel < frameOrderOutNextOrderIndexLength; channel++) {
                 if (channelToIgnore.contains(channel)) continue;
                 int orderOutNextOrderIndex = frameOrderOutNextOrderIndex[channel];
-                System.out.println("Writing sync packet: Channel %d: %d".formatted(channel, orderOutNextOrderIndex - 1));
+                if (Constants.DEBUG)
+                    System.out.println("Raknetify: Writing sync packet: Channel %d: %d".formatted(channel, orderOutNextOrderIndex - 1));
                 byteBuf.writeByte(channel);
                 byteBuf.writeInt(orderOutNextOrderIndex - 1);
             }
             int seqId = (int) FIELD_RELIABILITY_NEXT_SEND_SEQ_ID.get(this.reliabilityHandler); // TODO implementation details (probable lib bug): nextSendSeqId == lastReceivedSeqId
-            System.out.println("Writing sync packet: ReliabilityHandler: %d".formatted(seqId));
+            if (Constants.DEBUG)
+                System.out.println("Raknetify: Writing sync packet: ReliabilityHandler: %d".formatted(seqId));
             byteBuf.writeInt(seqId);
 
             final FrameData frameData = FrameData.create(ctx.alloc(), Constants.RAKNET_SYNC_PACKET_ID, byteBuf);
@@ -240,7 +244,7 @@ public class SynchronizationLayer extends ChannelDuplexHandler {
         }
         this.queuedFrames.addAll(retainedFrameList);
 
-        System.out.println("Dropping %d frames".formatted(droppedFrames));
+        if (Constants.DEBUG) System.out.println("Raknetify: Dropping %d frames".formatted(droppedFrames));
         try {
             FIELD_RELIABILITY_QUEUED_BYTES.set(this.reliabilityHandler, byteSize);
         } catch (Throwable t) {
@@ -258,7 +262,7 @@ public class SynchronizationLayer extends ChannelDuplexHandler {
 
     private void flushQueue(ChannelHandlerContext ctx) {
         if (!isWaitingForResponse) {
-            System.out.println("Ignoring duplicate call to flushQueue()");
+            if (Constants.DEBUG) System.out.println("Raknetify: Ignoring duplicate call to flushQueue()");
             return;
         }
         if (!ctx.channel().eventLoop().inEventLoop()) {
@@ -268,11 +272,11 @@ public class SynchronizationLayer extends ChannelDuplexHandler {
 
         this.isWaitingForResponse = false;
 
-        System.out.println("Picking up %d queued frames".formatted(this.queuedFrames.size()));
+        if (Constants.DEBUG) System.out.println("Raknetify: Picking up %d queued frames".formatted(this.queuedFrames.size()));
         this.reliabilityHandlerFrameQueue.addAll(this.queuedFrames);
         this.queuedFrames.clear();
 
-        System.out.println("Flushing %d queued packets as synchronization finished".formatted(this.queue.size()));
+        if (Constants.DEBUG) System.out.println("Raknetify: Flushing %d queued packets as synchronization finished".formatted(this.queue.size()));
         while (!this.queue.isEmpty()) {
             final ChannelPromise promise = this.queue.firstKey();
             final Object msg = this.queue.removeFirst();

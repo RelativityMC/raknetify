@@ -18,7 +18,7 @@ public class MixinPlayerManager {
     @Inject(method = "onPlayerConnect", at = @At("HEAD"))
     private void onJoin(ClientConnection connection, ServerPlayerEntity player, CallbackInfo ci) {
         if (((IClientConnection) connection).getChannel().config() instanceof RakNet.Config config) {
-            System.out.println(String.format("%s logged in via RakNet, mtu %d", player.getName().getString(), config.getMTU()));
+            System.out.println(String.format("Raknetify: %s logged in via RakNet, mtu %d", player.getName().getString(), config.getMTU()));
         }
     }
 
@@ -27,7 +27,7 @@ public class MixinPlayerManager {
         final Channel channel = ((IClientConnection) connection).getChannel();
         if (channel == null) {
             //noinspection RedundantStringFormatCall
-            System.err.println("Warning: %s don't have valid channel when logged in, not sending sync packet".formatted(this));
+            System.err.println("Raknetify: Warning: %s don't have valid channel when logged in, not sending sync packet".formatted(this));
             return;
         }
         channel.eventLoop().execute(() -> channel.write(RakNetFabricMultiChannelCodec.SIGNAL_START_MULTICHANNEL));

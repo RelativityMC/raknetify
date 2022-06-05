@@ -38,12 +38,12 @@ public class RakNetMultiChannel {
             final String intermediary = mappingResolver.mapClassName("intermediary", className.replace('/', '.'));
             if (!isIntermediaryNamespace && intermediary.equals(className))
                 //noinspection RedundantStringFormatCall
-                System.err.println("Warning: Failed to remap %s for raknet multi-channel".formatted(intermediary));
+                System.err.println("Raknetify: Warning: Failed to remap %s for raknet multi-channel".formatted(intermediary));
             try {
                 classHashSet.add(Class.forName(intermediary));
             } catch (ClassNotFoundException e) {
                 //noinspection RedundantStringFormatCall
-                System.out.println("Warning: %s not found for raknet multi-channel".formatted(intermediary));
+                System.out.println("Raknetify: Warning: %s not found for raknet multi-channel".formatted(intermediary));
             }
         }
         return classHashSet; // no read-only wrapper for performance

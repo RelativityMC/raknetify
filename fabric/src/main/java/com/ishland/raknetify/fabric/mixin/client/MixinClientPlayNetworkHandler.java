@@ -23,7 +23,7 @@ public class MixinClientPlayNetworkHandler {
         final Channel channel = ((IClientConnection) this.connection).getChannel();
         if (channel == null) {
             //noinspection RedundantStringFormatCall
-            System.err.println("Warning: %s don't have valid channel when logged in, not sending sync packet".formatted(this));
+            System.err.println("Raknetify: Warning: %s don't have valid channel when logged in, not sending sync packet".formatted(this));
             return;
         }
         channel.eventLoop().execute(() -> channel.write(RakNetFabricMultiChannelCodec.SIGNAL_START_MULTICHANNEL));
