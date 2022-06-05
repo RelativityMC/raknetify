@@ -1,0 +1,9 @@
+{
+  "id": "raknetify",
+  "name": "Raknetify (Velocity)",
+  "version": "${version}",
+  "description": "A Velocity plugin that allows using RakNet as Minecraft networking backend. ",
+  "authors": ["ishland"],
+  "dependencies": [],
+  "main": "com.ishland.raknetify.velocity.RaknetifyVelocityPlugin"
+}

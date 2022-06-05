@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Velocity Server" type="Application" factoryName="Application" singleton="false">
+  <configuration default="false" name="Velocity Server" type="Application" factoryName="Application">
     <option name="MAIN_CLASS_NAME" value="com.velocitypowered.proxy.Velocity" />
     <module name="raknetify.velocity.main" />
     <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/run-velocity" />

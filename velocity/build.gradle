@@ -34,7 +34,7 @@ dependencies {
 //    annotationProcessor 'com.velocitypowered:velocity-api:3.1.1'
 
     implementation 'velocity:3.1.2-SNAPSHOT:139'
-    annotationProcessor 'velocity:3.1.2-SNAPSHOT:139'
+//    annotationProcessor 'velocity:3.1.2-SNAPSHOT:139'
 
     shadowInclude implementation(project(":common"))
 
@@ -44,6 +44,14 @@ dependencies {
     }
     api("com.github.RelativityMC.netty-raknet:netty-raknet-client:${project.netty_raknet_version}")
     api("com.github.RelativityMC.netty-raknet:netty-raknet-server:${project.netty_raknet_version}")
+}
+
+processResources {
+    inputs.property "version", project.version
+
+    filesMatching("velocity-plugin.json") {
+        expand "version": project.version
+    }
 }
 
 jar {
