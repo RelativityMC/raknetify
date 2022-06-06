@@ -139,6 +139,10 @@ public class BungeeRaknetifyServer {
                 return;
             }
 
+            if (listener.getClass().getName().startsWith("org.geysermc.geyser.network")) { // filter out geyser
+                return;
+            }
+
             final ChannelInitializer<Channel> finalInitializer = initializer;
             final ChannelFuture future = new ServerBootstrap()
                     .channelFactory(() -> new RakNetServerChannel(() -> {
