@@ -17,7 +17,7 @@ public class InjectedSet extends ForwardingSet<Channel> {
 
     @Override
     public boolean add(Channel element) {
-        BungeeRaknetifyServer.injectChannel((BungeeCord) ProxyServer.getInstance(), element);
+        BungeeRaknetifyServer.injectChannel((BungeeCord) ProxyServer.getInstance(), element, false);
 
         return super.add(element);
     }

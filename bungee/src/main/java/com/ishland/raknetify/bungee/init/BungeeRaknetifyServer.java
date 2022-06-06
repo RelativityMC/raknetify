@@ -9,6 +9,7 @@ import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
+import io.netty.channel.EventLoopGroup;
 import io.netty.channel.FixedRecvByteBufAllocator;
 import io.netty.channel.ReflectiveChannelFactory;
 import io.netty.channel.socket.DatagramChannel;
@@ -28,6 +29,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
 
 import static com.ishland.raknetify.common.util.ReflectionUtil.accessible;
 
@@ -72,7 +74,7 @@ public class BungeeRaknetifyServer {
 
             for (Channel listener : listeners) {
                 try {
-                    injectChannel(instance, listener);
+                    injectChannel(instance, listener, true);
                 } catch (Throwable t) {
                     errors.add(t);
                 }
@@ -88,71 +90,76 @@ public class BungeeRaknetifyServer {
         }
     }
 
-    public static void injectChannel(BungeeCord instance, Channel listener) {
-        if (!active) return;
+    public static void injectChannel(BungeeCord instance, Channel listener, boolean throwErrors) {
+        try {
+            if (!active) return;
 
-        final ReflectiveChannelFactory<? extends DatagramChannel> factory = new ReflectiveChannelFactory<>(PipelineUtils.getDatagramChannel());
+            final ReflectiveChannelFactory<? extends DatagramChannel> factory = new ReflectiveChannelFactory<>(PipelineUtils.getDatagramChannel());
 
-        if (listener.localAddress() instanceof DomainSocketAddress) return;
+            if (listener.localAddress() instanceof DomainSocketAddress) return;
 
-        ChannelInitializer<Channel> initializer = null;
-        ListenerInfo info = null;
+            ChannelInitializer<Channel> initializer = null;
+            ListenerInfo info = null;
 
-        for (String name : listener.pipeline().names()) {
-            final ChannelHandler handler = listener.pipeline().get(name);
-            if (handler instanceof QueryHandler) {
-                return;
-            }
-            if (handler != null && ACCEPTOR_CLASS.isAssignableFrom(handler.getClass())) {
-                try {
-                    initializer = (ChannelInitializer<Channel>) accessible(ACCEPTOR_CLASS.getDeclaredField("childHandler")).get(handler);
-                    final Map.Entry<AttributeKey<?>, ?>[] attrs = (Map.Entry<AttributeKey<?>, ?>[])
-                            accessible(ACCEPTOR_CLASS.getDeclaredField("childAttrs")).get(handler);
-                    for (var attr : attrs) {
-                        if (attr.getKey() == PipelineUtils.LISTENER) {
-                            info = (ListenerInfo) attr.getValue();
+            for (String name : listener.pipeline().names()) {
+                final ChannelHandler handler = listener.pipeline().get(name);
+                if (handler instanceof QueryHandler) {
+                    return;
+                }
+                if (handler != null && ACCEPTOR_CLASS.isAssignableFrom(handler.getClass())) {
+                    try {
+                        initializer = (ChannelInitializer<Channel>) accessible(ACCEPTOR_CLASS.getDeclaredField("childHandler")).get(handler);
+                        final Map.Entry<AttributeKey<?>, ?>[] attrs = (Map.Entry<AttributeKey<?>, ?>[])
+                                accessible(ACCEPTOR_CLASS.getDeclaredField("childAttrs")).get(handler);
+                        for (var attr : attrs) {
+                            if (attr.getKey() == PipelineUtils.LISTENER) {
+                                info = (ListenerInfo) attr.getValue();
+                            }
                         }
+                    } catch (IllegalAccessException | NoSuchFieldException e) {
+                        throw new RuntimeException(e);
                     }
-                } catch (IllegalAccessException | NoSuchFieldException e) {
-                    throw new RuntimeException(e);
                 }
             }
+
+            if (initializer == null) {
+                RaknetifyBungeePlugin.LOGGER.severe("Unable to find channel initializer for listener %s".formatted(listener));
+                return;
+            }
+
+            if (info == null) {
+                RaknetifyBungeePlugin.LOGGER.severe("Unable to find listener info for listener %s".formatted(listener));
+            }
+
+            final ChannelInitializer<Channel> finalInitializer = initializer;
+            final ChannelFuture future = new ServerBootstrap()
+                    .channelFactory(() -> new RakNetServerChannel(() -> {
+                        final DatagramChannel channel = factory.newChannel();
+                        channel.config().setOption(ChannelOption.IP_TOS, 0x18);
+                        channel.config().setRecvByteBufAllocator(new FixedRecvByteBufAllocator(Constants.LARGE_MTU + 512));
+                        return channel;
+                    }))
+                    .option(ChannelOption.SO_REUSEADDR, true)
+                    .childAttr(PipelineUtils.LISTENER, info)
+                    .childHandler(new ChannelInitializer<>() {
+                        @Override
+                        protected void initChannel(Channel channel) throws Exception {
+                            RakNetBungeeConnectionUtil.initChannel(channel);
+                            INIT_CHANNEL.invoke(finalInitializer, channel);
+                            RakNetBungeeConnectionUtil.postInitChannel(channel, false);
+                        }
+                    })
+                    .group(getBossEventLoopGroup(instance), getWorkerEventLoopGroup(instance))
+                    .localAddress(info.getSocketAddress())
+                    .bind()
+                    .syncUninterruptibly();
+            channels.add(future);
+
+            RaknetifyBungeePlugin.LOGGER.info("Raknetify server started on %s".formatted(future.channel().localAddress()));
+        } catch (Throwable t) {
+            if (throwErrors) throw new RuntimeException("Failed to start Raknetify server", t);
+            else RaknetifyBungeePlugin.LOGGER.log(Level.SEVERE, "Failed to start Raknetify server", t);
         }
-
-        if (initializer == null) {
-            RaknetifyBungeePlugin.LOGGER.severe("Unable to find channel initializer for listener %s".formatted(listener));
-            return;
-        }
-
-        if (info == null) {
-            RaknetifyBungeePlugin.LOGGER.severe("Unable to find listener info for listener %s".formatted(listener));
-        }
-
-        final ChannelInitializer<Channel> finalInitializer = initializer;
-        final ChannelFuture future = new ServerBootstrap()
-                .channelFactory(() -> new RakNetServerChannel(() -> {
-                    final DatagramChannel channel = factory.newChannel();
-                    channel.config().setOption(ChannelOption.IP_TOS, 0x18);
-                    channel.config().setRecvByteBufAllocator(new FixedRecvByteBufAllocator(Constants.LARGE_MTU + 512));
-                    return channel;
-                }))
-                .option(ChannelOption.SO_REUSEADDR, true)
-                .childAttr(PipelineUtils.LISTENER, info)
-                .childHandler(new ChannelInitializer<>() {
-                    @Override
-                    protected void initChannel(Channel channel) throws Exception {
-                        RakNetBungeeConnectionUtil.initChannel(channel);
-                        INIT_CHANNEL.invoke(finalInitializer, channel);
-                        RakNetBungeeConnectionUtil.postInitChannel(channel, false);
-                    }
-                })
-                .group(instance.eventLoops)
-                .localAddress(info.getSocketAddress())
-                .bind()
-                .syncUninterruptibly();
-        channels.add(future);
-
-        RaknetifyBungeePlugin.LOGGER.info("Raknetify server started on %s".formatted(future.channel().localAddress()));
     }
 
     public static void stopAll() {
@@ -173,6 +180,24 @@ public class BungeeRaknetifyServer {
         if (!active) return;
         stopAll();
         active = false;
+    }
+
+    private static EventLoopGroup getBossEventLoopGroup(BungeeCord instance) throws NoSuchFieldException, IllegalAccessException {
+        try {
+            return (EventLoopGroup) accessible(BungeeCord.class.getDeclaredField("eventLoops")).get(instance);
+        } catch (NoSuchFieldException e) { // waterfall: use split boss and worker group
+            //noinspection JavaReflectionMemberAccess
+            return (EventLoopGroup) accessible(BungeeCord.class.getDeclaredField("bossEventLoopGroup")).get(instance);
+        }
+    }
+
+    private static EventLoopGroup getWorkerEventLoopGroup(BungeeCord instance) throws NoSuchFieldException, IllegalAccessException {
+        try {
+            return (EventLoopGroup) accessible(BungeeCord.class.getDeclaredField("eventLoops")).get(instance);
+        } catch (NoSuchFieldException e) { // waterfall: use split boss and worker group
+            //noinspection JavaReflectionMemberAccess
+            return (EventLoopGroup) accessible(BungeeCord.class.getDeclaredField("workerEventLoopGroup")).get(instance);
+        }
     }
 
 }
