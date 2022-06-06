@@ -24,6 +24,8 @@ import network.ycc.raknet.server.channel.RakNetServerChannel;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -34,6 +36,8 @@ import java.util.logging.Level;
 import static com.ishland.raknetify.common.util.ReflectionUtil.accessible;
 
 public class BungeeRaknetifyServer {
+
+    private static final int portOverride = Integer.getInteger("raknetify.bungee.portOverride", -1);
 
     private static final Method INIT_CHANNEL;
     private static final Field BUNGEE_LISTENERS_FIELD;
@@ -94,6 +98,9 @@ public class BungeeRaknetifyServer {
         try {
             if (!active) return;
 
+            final boolean hasPortOverride = portOverride > 0 && portOverride < 65535;
+            if (hasPortOverride && !channels.isEmpty()) return; // avoid duplicate listeners
+
             final ReflectiveChannelFactory<? extends DatagramChannel> factory = new ReflectiveChannelFactory<>(PipelineUtils.getDatagramChannel());
 
             if (listener.localAddress() instanceof DomainSocketAddress) return;
@@ -129,6 +136,7 @@ public class BungeeRaknetifyServer {
 
             if (info == null) {
                 RaknetifyBungeePlugin.LOGGER.severe("Unable to find listener info for listener %s".formatted(listener));
+                return;
             }
 
             final ChannelInitializer<Channel> finalInitializer = initializer;
@@ -150,7 +158,7 @@ public class BungeeRaknetifyServer {
                         }
                     })
                     .group(getBossEventLoopGroup(instance), getWorkerEventLoopGroup(instance))
-                    .localAddress(info.getSocketAddress())
+                    .localAddress(hasPortOverride ? new InetSocketAddress(portOverride) : info.getSocketAddress())
                     .bind()
                     .syncUninterruptibly();
             channels.add(future);
