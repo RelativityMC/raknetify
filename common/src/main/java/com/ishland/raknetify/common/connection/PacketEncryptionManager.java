@@ -1,4 +1,4 @@
-package com.ishland.raknetify.velocity.connection;
+package com.ishland.raknetify.common.connection;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;

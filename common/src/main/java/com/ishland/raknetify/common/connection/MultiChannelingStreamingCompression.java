@@ -25,8 +25,8 @@ public class MultiChannelingStreamingCompression extends ChannelDuplexHandler {
 
     private final IntOpenHashSet channelsToIgnoreWhenReinit = new IntOpenHashSet();
 
-    private final byte[] inflateBuffer = new byte[8192];
-    private final byte[] deflateBuffer = new byte[8192];
+    private final byte[] inflateBuffer = new byte[256 * 1024];
+    private final byte[] deflateBuffer = new byte[256 * 1024];
 
     private final int rawPacketId;
     private final int compressedPacketId;
@@ -63,7 +63,7 @@ public class MultiChannelingStreamingCompression extends ChannelDuplexHandler {
     private void initDeflater(int channel) {
         if (!active) return;
         if (deflaters[channel] != null) deflaters[channel].end();
-        deflaters[channel] = new Deflater(Deflater.BEST_COMPRESSION);
+        deflaters[channel] = new Deflater();
         if (Constants.DEBUG) System.out.println("Raknetify: Streaming compression deflater for ch%d is ready".formatted(channel));
     }
 

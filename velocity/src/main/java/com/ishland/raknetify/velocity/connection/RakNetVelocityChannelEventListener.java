@@ -2,6 +2,7 @@ package com.ishland.raknetify.velocity.connection;
 
 import com.google.common.base.Preconditions;
 import com.ishland.raknetify.common.connection.MultiChannelingStreamingCompression;
+import com.ishland.raknetify.common.connection.MultiChannellingEncryption;
 import com.ishland.raknetify.common.connection.RakNetSimpleMultiChannelCodec;
 import com.ishland.raknetify.common.connection.SynchronizationLayer;
 import com.ishland.raknetify.velocity.RaknetifyVelocityPlugin;

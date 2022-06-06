@@ -1,0 +1,15 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="BungeeCord Server" type="Application" factoryName="Application">
+    <classpathModifications>
+      <entry exclude="true" path="$PROJECT_DIR$/bungee/build/classes/java/main" />
+    </classpathModifications>
+    <option name="MAIN_CLASS_NAME" value="net.md_5.bungee.BungeeCordLauncher" />
+    <module name="raknetify.bungee.main" />
+    <option name="VM_PARAMETERS" value="-Draknetify.debug=true" />
+    <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/run-bungee" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+      <option name="Gradle.BeforeRunTask" enabled="true" tasks="clean prepareRunBungee" externalProjectPath="$PROJECT_DIR$/bungee" vmOptions="" scriptParameters="" />
+    </method>
+  </configuration>
+</component>

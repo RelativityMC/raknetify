@@ -53,11 +53,13 @@ public class RakNetSimpleMultiChannelCodec extends MessageToMessageCodec<FrameDa
                 isMultichannelEnabled = true;
                 if (Constants.DEBUG) System.out.println("Raknetify: [MultiChannellingDataCodec] Started multichannel");
             });
+            promise.trySuccess();
             return;
         }
         if (msg == SynchronizationLayer.SYNC_REQUEST_OBJECT && this.isMultichannelEnabled) {
             if (Constants.DEBUG) System.out.println("Raknetify: [MultiChannellingDataCodec] Stopped multichannel");
             this.isMultichannelEnabled = false;
+            super.write(ctx, msg, promise);
             return;
         }
         super.write(ctx, msg, promise);

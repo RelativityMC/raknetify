@@ -17,4 +17,5 @@ rootProject.name = "raknetify"
 
 include "fabric"
 include "velocity"
+include "bungee"
 include "common"

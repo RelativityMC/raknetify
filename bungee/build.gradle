@@ -1,23 +1,20 @@
 import java.nio.file.Files
-import java.nio.file.Paths
 import java.nio.file.StandardCopyOption
 
 plugins {
     id 'com.github.johnrengelman.shadow'
 }
 
-archivesBaseName = project.archives_base_name + "-velocity"
-group = project.maven_group + ".velocity"
+archivesBaseName = project.archives_base_name + "-bungee"
+group = project.maven_group + ".bungee"
 
 repositories {
-    maven {
-        name 'papermc'
-        url 'https://repo.papermc.io/repository/maven-public/'
-    }
     ivy {
-        url 'https://api.papermc.io/v2/projects/'
+        url 'https://ci.md-5.net/job/'
         patternLayout {
-            artifact "[organization]/versions/[module]/builds/[revision]/downloads/[organization]-[module]-[revision](.[ext])"
+//            artifact "[organization]/versions/[module]/builds/[revision]/downloads/[organization]-[module]-[revision](.[ext])"
+            // https://ci.md-5.net/job/BungeeCord/1636/artifact/bootstrap/target/BungeeCord.jar
+            artifact "[module]/[revision]/artifact/bootstrap/target/BungeeCord(.[ext])"
         }
         metadataSources {
             it.artifact()
@@ -30,26 +27,15 @@ configurations {
 }
 
 dependencies {
-//    api 'com.velocitypowered:velocity-api:3.1.1'
-//    annotationProcessor 'com.velocitypowered:velocity-api:3.1.1'
-
-    implementation 'velocity:3.1.2-SNAPSHOT:139'
-//    annotationProcessor 'velocity:3.1.2-SNAPSHOT:139'
+    implementation 'bungee:BungeeCord:1636'
 
     shadowInclude implementation(project(":common"))
-
-    // copied here to workaround incomplete fastutil in velocity
-    api("com.github.RelativityMC.netty-raknet:netty-raknet-common:${project.netty_raknet_version}") {
-        transitive = false
-    }
-    api("com.github.RelativityMC.netty-raknet:netty-raknet-client:${project.netty_raknet_version}")
-    api("com.github.RelativityMC.netty-raknet:netty-raknet-server:${project.netty_raknet_version}")
 }
 
 processResources {
     inputs.property "version", project.version
 
-    filesMatching("velocity-plugin.json") {
+    filesMatching("bungee.yml") {
         expand "version": project.version
     }
 }
@@ -61,9 +47,9 @@ jar {
 }
 
 shadowJar {
-    dependencies {
+//    dependencies {
 //        exclude(dependency('it.unimi.dsi:fastutil'))
-    }
+//    }
     exclude "META-INF/LICENSE.txt"
     exclude "META-INF/NOTICE.txt"
     minimize()
@@ -95,9 +81,10 @@ tasks.withType(AbstractArchiveTask) {
     reproducibleFileOrder = true
 }
 
-task("prepareRunVelocity", dependsOn: shadowJar) {
+task("prepareRunBungee", dependsOn: shadowJar) {
     doFirst {
-        Files.createDirectories(rootProject.projectDir.toPath().resolve("run-velocity").resolve("plugins"))
-        Files.copy(shadowJar.archiveFile.getAsFile().get().toPath(), rootProject.projectDir.toPath().resolve("run-velocity").resolve("plugins").resolve("raknetify-velocity-devlaunch.jar"), StandardCopyOption.REPLACE_EXISTING)
+        Files.createDirectories(rootProject.projectDir.toPath().resolve("run-bungee").resolve("plugins"))
+        Files.copy(shadowJar.archiveFile.getAsFile().get().toPath(), rootProject.projectDir.toPath().resolve("run-bungee").resolve("plugins").resolve("raknetify-bungee-devlaunch.jar"), StandardCopyOption.REPLACE_EXISTING)
     }
 }
+

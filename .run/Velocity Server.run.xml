@@ -2,10 +2,11 @@
   <configuration default="false" name="Velocity Server" type="Application" factoryName="Application">
     <option name="MAIN_CLASS_NAME" value="com.velocitypowered.proxy.Velocity" />
     <module name="raknetify.velocity.main" />
+    <option name="VM_PARAMETERS" value="-Draknetify.debug=true" />
     <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/run-velocity" />
     <method v="2">
       <option name="Make" enabled="true" />
-      <option name="Gradle.BeforeRunTask" enabled="true" tasks="prepareRunVelocity" externalProjectPath="$PROJECT_DIR$/velocity" vmOptions="" scriptParameters="" />
+      <option name="Gradle.BeforeRunTask" enabled="true" tasks="clean prepareRunVelocity" externalProjectPath="$PROJECT_DIR$/velocity" vmOptions="" scriptParameters="" />
     </method>
   </configuration>
 </component>

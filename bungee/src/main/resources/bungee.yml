@@ -1,0 +1,6 @@
+name: raknetify
+main: com.ishland.raknetify.bungee.RaknetifyBungeePlugin
+version: ${version}
+author: ishland
+softDepends:
+  - ViaVersion
