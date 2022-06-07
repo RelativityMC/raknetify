@@ -40,17 +40,22 @@ public class MetricsSynchronizationHandler extends ChannelDuplexHandler {
 
     private void sendSyncPacket() {
         if (this.ctx.channel().config() instanceof RakNet.Config config && config.getMetrics() instanceof SimpleMetricsLogger logger){
-            final ByteBuf buffer = this.ctx.alloc().buffer(1 + 8 + 4 + 4 + 8 + 4 + 4);
-            buffer.writeByte(VERSION);
-            buffer.writeLong(System.currentTimeMillis());
-            buffer.writeInt(logger.getCurrentQueuedBytes());
-            buffer.writeInt((int) (logger.getMeasureBurstTokens() + config.getDefaultPendingFrameSets()));
-            buffer.writeDouble(logger.getMeasureErrorRate());
-            buffer.writeInt(logger.getMeasureTX());
-            buffer.writeInt(logger.getMeasureRX());
-            final FrameData frameData = FrameData.create(this.ctx.alloc(), Constants.RAKNET_METRICS_SYNC_PACKET_ID, buffer);
-            frameData.setReliability(FramedPacket.Reliability.UNRELIABLE);
-            this.ctx.write(frameData);
+            ByteBuf buffer = null;
+           try {
+               buffer = this.ctx.alloc().buffer(1 + 8 + 4 + 4 + 8 + 4 + 4);
+               buffer.writeByte(VERSION);
+               buffer.writeLong(System.currentTimeMillis());
+               buffer.writeInt(logger.getCurrentQueuedBytes());
+               buffer.writeInt((int) (logger.getMeasureBurstTokens() + config.getDefaultPendingFrameSets()));
+               buffer.writeDouble(logger.getMeasureErrorRate());
+               buffer.writeInt(logger.getMeasureTX());
+               buffer.writeInt(logger.getMeasureRX());
+               final FrameData frameData = FrameData.create(this.ctx.alloc(), Constants.RAKNET_METRICS_SYNC_PACKET_ID, buffer);
+               frameData.setReliability(FramedPacket.Reliability.UNRELIABLE);
+               this.ctx.write(frameData);
+           } finally {
+               if (buffer != null) buffer.release();
+           }
         }
     }
 
@@ -65,21 +70,27 @@ public class MetricsSynchronizationHandler extends ChannelDuplexHandler {
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         if (msg instanceof FrameData frameData && frameData.getDataSize() > 0 && frameData.getPacketId() == Constants.RAKNET_METRICS_SYNC_PACKET_ID) {
-            final ByteBuf byteBuf = frameData.createData().skipBytes(1);
-            final byte version = byteBuf.readByte();
-            if (version != VERSION) return;
+            ByteBuf byteBuf = null;
+            try {
+                byteBuf = frameData.createData().skipBytes(1);
+                final byte version = byteBuf.readByte();
+                if (version != VERSION) return;
 
-            final long time = byteBuf.readLong();
-            if (time < this.lastRecv) return;
-            this.lastRecv = time;
+                final long time = byteBuf.readLong();
+                if (time < this.lastRecv) return;
+                this.lastRecv = time;
 
-            this.isServerSupported = true;
+                this.isServerSupported = true;
 
-            this.queuedBytes = byteBuf.readInt();
-            this.burst = byteBuf.readInt();
-            this.errorRate = byteBuf.readDouble();
-            this.tx = byteBuf.readInt();
-            this.rx = byteBuf.readInt();
+                this.queuedBytes = byteBuf.readInt();
+                this.burst = byteBuf.readInt();
+                this.errorRate = byteBuf.readDouble();
+                this.tx = byteBuf.readInt();
+                this.rx = byteBuf.readInt();
+            } finally {
+                if (byteBuf != null) byteBuf.release();
+                frameData.release();
+            }
             return;
         }
         super.channelRead(ctx, msg);

@@ -44,19 +44,29 @@ public class MultiChannelingStreamingCompression extends ChannelDuplexHandler {
     }
 
     private void doServerHandshake(ChannelHandlerContext ctx) {
-        final FrameData data = FrameData.create(ctx.alloc(), Constants.RAKNET_STREAMING_COMPRESSION_HANDSHAKE_PACKET_ID,
-                ctx.alloc().buffer().writeLong(SERVER_HANDSHAKE));
-        ctx.write(data);
+        final ByteBuf buf = ctx.alloc().buffer().writeLong(SERVER_HANDSHAKE);
+        try {
+            final FrameData data = FrameData.create(ctx.alloc(), Constants.RAKNET_STREAMING_COMPRESSION_HANDSHAKE_PACKET_ID,
+                    buf);
+            ctx.write(data);
+        } finally {
+            buf.release();
+        }
     }
 
     private void doChannelStart(ChannelHandlerContext ctx) {
         if (!active) return;
-        for (int i = 0; i < 8; i++) {
-            final FrameData data = FrameData.create(ctx.alloc(), Constants.RAKNET_STREAMING_COMPRESSION_HANDSHAKE_PACKET_ID,
-                    ctx.alloc().buffer().writeLong(CHANNEL_START));
-            data.setOrderChannel(i);
-            ctx.write(data);
-            initDeflater(i);
+        ByteBuf buf = ctx.alloc().buffer().writeLong(CHANNEL_START);
+        try {
+            for (int i = 0; i < 8; i++) {
+                final FrameData data = FrameData.create(ctx.alloc(), Constants.RAKNET_STREAMING_COMPRESSION_HANDSHAKE_PACKET_ID,
+                        buf);
+                data.setOrderChannel(i);
+                ctx.write(data);
+                initDeflater(i);
+            }
+        } finally {
+            buf.release();
         }
     }
 
@@ -83,6 +93,7 @@ public class MultiChannelingStreamingCompression extends ChannelDuplexHandler {
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         if (msg instanceof FrameData compressedFrameData) {
+            compressedFrameData.touch();
             if (compressedFrameData.getPacketId() == Constants.RAKNET_STREAMING_COMPRESSION_HANDSHAKE_PACKET_ID) {
                 final int orderChannel = compressedFrameData.getOrderChannel();
                 ByteBuf payload = null;
@@ -100,6 +111,7 @@ public class MultiChannelingStreamingCompression extends ChannelDuplexHandler {
                         }
                     }
                 } finally {
+                    compressedFrameData.release();
                     if (payload != null) payload.release();
                 }
             } else if (compressedFrameData.getPacketId() == compressedPacketId && compressedFrameData.getReliability().isReliable && compressedFrameData.getReliability().isOrdered && !compressedFrameData.getReliability().isSequenced && inflaters[compressedFrameData.getOrderChannel()] != null) {
@@ -125,7 +137,6 @@ public class MultiChannelingStreamingCompression extends ChannelDuplexHandler {
                     inBytesRaw += out.writerIndex();
 
                     rawFrameData = FrameData.create(ctx.alloc(), rawPacketId, out);
-                    out = null;
                     rawFrameData.setReliability(compressedFrameData.getReliability());
                     rawFrameData.setOrderChannel(orderChannel);
                     ctx.fireChannelRead(rawFrameData);
@@ -133,6 +144,7 @@ public class MultiChannelingStreamingCompression extends ChannelDuplexHandler {
                     return;
                 } finally {
                     data.release();
+                    compressedFrameData.release();
                     if (out != null) out.release();
                     if (rawFrameData != null) rawFrameData.release();
                 }
@@ -148,8 +160,8 @@ public class MultiChannelingStreamingCompression extends ChannelDuplexHandler {
             doChannelStart(ctx);
             return;
         } else if (msg instanceof FrameData rawFrameData) {
+            rawFrameData.touch();
             if (rawFrameData.getPacketId() == rawPacketId && rawFrameData.getReliability().isReliable && rawFrameData.getReliability().isOrdered && !rawFrameData.getReliability().isSequenced && deflaters[rawFrameData.getOrderChannel()] != null) {
-
                 if (rawFrameData.getDataSize() < 16 + 1) {
                     outBytesRaw += rawFrameData.getDataSize() - 1;
                     outBytesCompressed += rawFrameData.getDataSize() - 1;
@@ -179,7 +191,6 @@ public class MultiChannelingStreamingCompression extends ChannelDuplexHandler {
                     outBytesCompressed += out.writerIndex();
 
                     compressedFrameData = FrameData.create(ctx.alloc(), compressedPacketId, out);
-                    out = null;
                     compressedFrameData.setReliability(rawFrameData.getReliability());
                     compressedFrameData.setOrderChannel(orderChannel);
                     ctx.write(compressedFrameData, promise);
@@ -187,6 +198,7 @@ public class MultiChannelingStreamingCompression extends ChannelDuplexHandler {
                     return;
                 } finally {
                     data.release();
+                    rawFrameData.release();
                     if (out != null) out.release();
                     if (compressedFrameData != null) compressedFrameData.release();
                 }

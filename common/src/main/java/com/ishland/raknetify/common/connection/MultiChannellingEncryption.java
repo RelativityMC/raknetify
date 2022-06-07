@@ -30,6 +30,7 @@ public class MultiChannellingEncryption extends ChannelDuplexHandler {
     @Override
     public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
         if (msg instanceof FrameData data) {
+            data.touch();
             final ByteBuf buf = data.createData().skipBytes(1);
             ByteBuf res = null;
             FrameData resFrame = null;
@@ -37,7 +38,7 @@ public class MultiChannellingEncryption extends ChannelDuplexHandler {
                 res = ctx.alloc().buffer(data.getDataSize());
                 encryption.encrypt(buf, res);
                 resFrame = FrameData.create(ctx.alloc(), data.getPacketId(), res);
-                res = null;
+//                res = null;
                 resFrame.setOrderChannel(data.getOrderChannel());
                 resFrame.setReliability(data.getReliability());
                 ctx.write(resFrame, promise);
@@ -45,6 +46,7 @@ public class MultiChannellingEncryption extends ChannelDuplexHandler {
                 return;
             } finally {
                 buf.release();
+                data.release();
                 if (res != null) res.release();
                 if (resFrame != null) resFrame.release();
             }
@@ -55,13 +57,13 @@ public class MultiChannellingEncryption extends ChannelDuplexHandler {
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         if (msg instanceof FrameData data) {
+            data.touch();
             final ByteBuf buf = data.createData().skipBytes(1);
             ByteBuf res = null;
             FrameData resFrame = null;
             try {
                 res = decryption.decrypt(ctx, buf);
                 resFrame = FrameData.create(ctx.alloc(), data.getPacketId(), res);
-                res = null;
                 resFrame.setOrderChannel(data.getOrderChannel());
                 resFrame.setReliability(data.getReliability());
                 ctx.fireChannelRead(resFrame);
@@ -69,6 +71,7 @@ public class MultiChannellingEncryption extends ChannelDuplexHandler {
                 return;
             } finally {
                 buf.release();
+                data.release();
                 if (res != null) res.release();
                 if (resFrame != null) resFrame.release();
             }

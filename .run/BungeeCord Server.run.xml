@@ -5,7 +5,7 @@
     </classpathModifications>
     <option name="MAIN_CLASS_NAME" value="net.md_5.bungee.BungeeCordLauncher" />
     <module name="raknetify.bungee.main" />
-    <option name="VM_PARAMETERS" value="-Draknetify.debug=true" />
+    <option name="VM_PARAMETERS" value="-Xmx1G -Draknetify.debug=true -Dio.netty.leakDetection.level=advanced" />
     <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/run-bungee" />
     <method v="2">
       <option name="Make" enabled="true" />
