@@ -9,7 +9,7 @@ A Fabric mod / Velocity plugin / BungeeCord plugin that allows using RakNet as M
 # How to use it?
 
 ## Prerequisites
-- Raknetify is currently confirmed to be working on 1.19-rc2, 1.18.2, 1.18.1 and 1.17.1, 
+- Raknetify is currently confirmed to be working on 1.19, 1.18.2, 1.18.1 and 1.17.1, 
   other Minecraft versions are not tested.  
   It may work on newer Minecraft versions. If it doesn't, feel free to report to us.  
   Note: On proxies such as Velocity and BungeeCord, **unsupported client version** will cause
