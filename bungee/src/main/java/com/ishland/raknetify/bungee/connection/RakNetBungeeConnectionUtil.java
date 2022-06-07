@@ -86,7 +86,6 @@ public class RakNetBungeeConnectionUtil {
     }
 
     public static void handleServerSwitch(ServerConnectedEvent evt) {
-
         try {
             final UserConnection player = (UserConnection) evt.getPlayer();
             final Channel playerChannel = ((ChannelWrapper) USER_CONNECTION_CH.get(player)).getHandle();

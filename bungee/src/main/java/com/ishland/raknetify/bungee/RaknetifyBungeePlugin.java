@@ -14,11 +14,13 @@ import java.util.logging.Logger;
 public class RaknetifyBungeePlugin extends Plugin implements Listener {
 
     public static Logger LOGGER;
+    public static RaknetifyBungeePlugin INSTANCE;
 
     @Override
     public void onEnable() {
         super.onEnable();
 
+        INSTANCE = this;
         LOGGER = this.getLogger();
 
         ProtocolMultiChannelMappings.init();

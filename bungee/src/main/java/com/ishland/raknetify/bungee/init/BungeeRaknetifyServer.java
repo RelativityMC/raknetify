@@ -25,7 +25,6 @@ import network.ycc.raknet.server.channel.RakNetServerChannel;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.InetSocketAddress;
-import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;

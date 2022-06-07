@@ -7,14 +7,16 @@ import com.ishland.raknetify.common.connection.RakNetSimpleMultiChannelCodec;
 import com.ishland.raknetify.common.data.ProtocolMultiChannelMappings;
 import com.ishland.raknetify.velocity.RaknetifyVelocityPlugin;
 import com.velocitypowered.api.event.connection.LoginEvent;
+import com.velocitypowered.api.event.player.ServerPostConnectEvent;
 import com.velocitypowered.api.network.ProtocolVersion;
+import com.velocitypowered.proxy.connection.MinecraftConnection;
+import com.velocitypowered.proxy.connection.backend.VelocityServerConnection;
 import com.velocitypowered.proxy.connection.client.ConnectedPlayer;
 import com.velocitypowered.proxy.network.Connections;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.handler.codec.haproxy.HAProxyMessageDecoder;
 import network.ycc.raknet.RakNet;
-import network.ycc.raknet.pipeline.UserDataCodec;
 
 public class RakNetVelocityConnectionUtil {
 
@@ -57,6 +59,21 @@ public class RakNetVelocityConnectionUtil {
             }
             RaknetifyVelocityPlugin.LOGGER.info(String.format("Raknetify: %s logged in via RakNet, mtu %d", evt.getPlayer().getGameProfile().getName(), config.getMTU()));
         }
+    }
+
+    public static void onServerSwitch(ServerPostConnectEvent evt) {
+        final ConnectedPlayer player = (ConnectedPlayer) evt.getPlayer();
+        final VelocityServerConnection connectedServer = player.getConnectedServer();
+        if (connectedServer == null) {
+            RaknetifyVelocityPlugin.LOGGER.warn("No connected server for player ({}) after server switch?", player);
+            return;
+        }
+        final MinecraftConnection serverConnection = connectedServer.getConnection();
+        if (serverConnection == null) {
+            RaknetifyVelocityPlugin.LOGGER.warn("Connected server ({}) have no underlying connection?", connectedServer);
+            return;
+        }
+        serverConnection.getChannel().pipeline().addBefore(Connections.HANDLER, RakNetVelocityServerChannelEventListener.NAME, new RakNetVelocityServerChannelEventListener(player.getConnection().getChannel()));
     }
 
 }

@@ -1,6 +1,5 @@
 package com.ishland.raknetify.velocity.init;
 
-import com.ishland.raknetify.common.util.ReflectionUtil;
 import com.velocitypowered.api.network.ProtocolVersion;
 import com.velocitypowered.proxy.protocol.MinecraftPacket;
 import com.velocitypowered.proxy.protocol.StateRegistry;
