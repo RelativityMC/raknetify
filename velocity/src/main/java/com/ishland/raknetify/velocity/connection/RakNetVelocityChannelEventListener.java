@@ -79,7 +79,7 @@ public class RakNetVelocityChannelEventListener extends ChannelDuplexHandler {
             Preconditions.checkState(this.encryptionKey != null, "EncryptionResponse not received yet or already consumed");
             ctx.channel().pipeline().replace(Connections.CIPHER_ENCODER, Connections.CIPHER_ENCODER, new ChannelDuplexHandler());
             ctx.channel().pipeline().replace(Connections.CIPHER_DECODER, Connections.CIPHER_DECODER, new ChannelDuplexHandler());
-            ctx.channel().pipeline().addAfter(MultiChannelingStreamingCompression.NAME, MultiChannellingEncryption.NAME, new MultiChannellingEncryption(encryptionKey));
+            ctx.channel().pipeline().addBefore(MultiChannelingStreamingCompression.NAME, MultiChannellingEncryption.NAME, new MultiChannellingEncryption(encryptionKey));
         }
     }
 }

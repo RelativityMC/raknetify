@@ -10,6 +10,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPromise;
 import net.md_5.bungee.EncryptionUtil;
 import net.md_5.bungee.netty.PipelineUtils;
+import net.md_5.bungee.protocol.PacketWrapper;
 import net.md_5.bungee.protocol.Protocol;
 import net.md_5.bungee.protocol.packet.Commands;
 import net.md_5.bungee.protocol.packet.EncryptionResponse;
@@ -46,7 +47,7 @@ public class RakNetBungeeClientChannelEventListener extends ChannelDuplexHandler
         if (this.encryptionKey != null) {
             ctx.channel().pipeline().replace(PipelineUtils.DECRYPT_HANDLER, PipelineUtils.DECRYPT_HANDLER, new ChannelDuplexHandler());
             ctx.channel().pipeline().replace(PipelineUtils.ENCRYPT_HANDLER, PipelineUtils.ENCRYPT_HANDLER, new ChannelDuplexHandler());
-            ctx.channel().pipeline().addAfter(MultiChannelingStreamingCompression.NAME, MultiChannellingEncryption.NAME, new MultiChannellingEncryption(encryptionKey));
+            ctx.channel().pipeline().addBefore(MultiChannelingStreamingCompression.NAME, MultiChannellingEncryption.NAME, new MultiChannellingEncryption(encryptionKey));
             this.encryptionKey = null;
         }
         if (msg instanceof SetCompression) {
@@ -71,11 +72,13 @@ public class RakNetBungeeClientChannelEventListener extends ChannelDuplexHandler
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        if (msg instanceof EncryptionResponse packet) {
-            try {
-                this.encryptionKey = getSecretUnchecked(packet);
-            } catch (Throwable t) {
-                RaknetifyBungeePlugin.LOGGER.log(Level.WARNING, "Failed to decrypt captured encryption secret, the raknetify connection is broken", t);
+        if (msg instanceof PacketWrapper wrapper) {
+            if (wrapper.packet instanceof EncryptionResponse packet) {
+                try {
+                    this.encryptionKey = getSecretUnchecked(packet);
+                } catch (Throwable t) {
+                    RaknetifyBungeePlugin.LOGGER.log(Level.WARNING, "Failed to decrypt captured encryption secret, the raknetify connection is broken", t);
+                }
             }
         }
         super.channelRead(ctx, msg);
@@ -92,7 +95,13 @@ public class RakNetBungeeClientChannelEventListener extends ChannelDuplexHandler
         this.protocolVersion = protocolVersion;
     }
 
-//    @Override
+    @Override
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+        super.exceptionCaught(ctx, cause);
+        cause.printStackTrace();
+    }
+
+    //    @Override
 //    public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
 //        super.userEventTriggered(ctx, evt);
 //        if (evt == VelocityConnectionEvent.COMPRESSION_ENABLED) {

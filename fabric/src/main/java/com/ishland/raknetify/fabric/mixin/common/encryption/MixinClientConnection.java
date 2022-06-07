@@ -40,7 +40,7 @@ public class MixinClientConnection {
                 this.channel.pipeline().remove(MultiChannellingEncryption.NAME);
             } catch (Throwable ignored) {
             }
-            this.channel.pipeline().addAfter(MultiChannelingStreamingCompression.NAME, MultiChannellingEncryption.NAME,
+            this.channel.pipeline().addBefore(MultiChannelingStreamingCompression.NAME, MultiChannellingEncryption.NAME,
                     new MultiChannellingEncryption(new PacketEncryptionManager(decryptionCipher), new PacketEncryptionManager(encryptionCipher)));
         }
     }
