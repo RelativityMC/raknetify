@@ -36,6 +36,16 @@ public class RaknetifyVelocityPlugin {
         PROXY = this.proxy;
         LOGGER = this.logger;
 
+        if (!isCompatible()) {
+            Runnable runnable = () -> {
+                LOGGER.error("This version of Raknetify is NOT compatible with your version of Velocity");
+                LOGGER.error("Please update your Velocity at https://papermc.io/downloads#Velocity");
+            };
+            runnable.run();
+            PROXY.getEventManager().register(this, ListenerBoundEvent.class, PostOrder.LAST, ignored -> runnable.run());
+            return;
+        }
+
         ProtocolMultiChannelMappings.init();
         VelocityPacketRegistryInjector.inject();
 
@@ -43,6 +53,15 @@ public class RaknetifyVelocityPlugin {
         PROXY.getEventManager().register(this, ListenerBoundEvent.class, PostOrder.LAST, VelocityRaknetifyServer::start);
         PROXY.getEventManager().register(this, ListenerCloseEvent.class, PostOrder.LAST, VelocityRaknetifyServer::stop);
         PROXY.getEventManager().register(this, ServerPostConnectEvent.class, PostOrder.LAST, RakNetVelocityConnectionUtil::onServerSwitch);
+    }
+
+    private static boolean isCompatible() {
+        try {
+            Class.forName("com.velocitypowered.proxy.crypto.EncryptionUtils");
+            return true;
+        } catch (ClassNotFoundException e) {
+            return false;
+        }
     }
 
 }
