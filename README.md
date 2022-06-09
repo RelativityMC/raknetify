@@ -17,7 +17,11 @@ A Fabric mod / Velocity plugin / BungeeCord plugin that allows using RakNet as M
 - You need to have a UDP port opened at the same port number of your normal server port. 
 
 ## Installation and usage
-- Download the latest release from [GitHub](https://github.com/RelativityMC/raknetify/releases) 
+- Download the latest release from 
+  [GitHub](https://github.com/RelativityMC/raknetify/releases) 
+  [Modrinth (Fabric)](https://modrinth.com/mod/raknetify/versions) 
+  [CurseForge (Fabric)](https://www.curseforge.com/minecraft/mc-mods/raknetify/files)
+  [SpigotMC (BungeeCord)](https://www.spigotmc.org/resources/raknetify-bungeecord.102509/)
   or development builds from [CodeMC](https://ci.codemc.io/job/RelativityMC/job/raknetify/)
 - Install the mod on both client and server. (Installation on backend servers are not needed if using on proxies) 
 - Prefix your server address with `raknet;` (or `raknetl;` to use high mtu) and save or connect directly. 
