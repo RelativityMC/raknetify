@@ -3,6 +3,7 @@ package com.ishland.raknetify.fabric.mixin.compat.krypton;
 import com.ishland.raknetify.common.connection.MultiChannelingStreamingCompression;
 import com.ishland.raknetify.fabric.common.connection.MultiChannellingEncryption;
 import com.ishland.raknetify.fabric.mixin.access.IClientConnection;
+import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelPipeline;
 import net.minecraft.network.ClientConnection;
 import net.minecraft.network.encryption.NetworkEncryptionException;
@@ -37,23 +38,26 @@ public class MixinServerLoginNetworkHandler {
     @Inject(method = "onKey", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/ClientConnection;setupEncryption(Ljavax/crypto/Cipher;Ljavax/crypto/Cipher;)V", shift = At.Shift.AFTER))
     private void afterSetupEncryption(LoginKeyC2SPacket packet, CallbackInfo ci) throws NetworkEncryptionException {
         final ChannelPipeline pipeline = ((IClientConnection) this.connection).getChannel().pipeline();
-        if (((IClientConnection) this.connection).getChannel().config() instanceof RakNet.Config &&
-                pipeline.get("decrypt").getClass().getName().equals("me.steinborn.krypton.mod.shared.network.pipeline.MinecraftCipherDecoder") &&
-                pipeline.get("encrypt").getClass().getName().equals("me.steinborn.krypton.mod.shared.network.pipeline.MinecraftCipherEncoder")) {
-            System.out.println("Raknetify: Krypton detected, applying compatibility");
+        if (((IClientConnection) this.connection).getChannel().config() instanceof RakNet.Config) {
+            final ChannelHandler decrypt = pipeline.get("decrypt");
+            final ChannelHandler encrypt = pipeline.get("encrypt");
+            if (decrypt != null && (decrypt.getClass().getName().equals("me.steinborn.krypton.mod.shared.network.pipeline.MinecraftCipherDecoder")) &&
+                    encrypt != null && (encrypt.getClass().getName().equals("me.steinborn.krypton.mod.shared.network.pipeline.MinecraftCipherEncoder"))) {
+                System.out.println("Raknetify: Krypton detected, applying compatibility");
 
-            pipeline.remove("decrypt");
-            pipeline.remove("encrypt");
+                pipeline.remove("decrypt");
+                pipeline.remove("encrypt");
 
-            // TODO [VanillaCopy]
-            PrivateKey privateKey = this.server.getKeyPair().getPrivate();
+                // TODO [VanillaCopy]
+                PrivateKey privateKey = this.server.getKeyPair().getPrivate();
 
-            SecretKey secretKey = packet.decryptSecretKey(privateKey);
-            Cipher cipher = NetworkEncryptionUtils.cipherFromKey(2, secretKey);
-            Cipher cipher2 = NetworkEncryptionUtils.cipherFromKey(1, secretKey);
+                SecretKey secretKey = packet.decryptSecretKey(privateKey);
+                Cipher cipher = NetworkEncryptionUtils.cipherFromKey(2, secretKey);
+                Cipher cipher2 = NetworkEncryptionUtils.cipherFromKey(1, secretKey);
 
-            ((IClientConnection) this.connection).setEncrypted(false);
-            this.connection.setupEncryption(cipher, cipher2);
+                ((IClientConnection) this.connection).setEncrypted(false);
+                this.connection.setupEncryption(cipher, cipher2);
+            }
         }
     }
 
