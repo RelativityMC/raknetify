@@ -11,6 +11,7 @@ import net.minecraft.network.encryption.PacketEncryptionManager;
 import net.minecraft.network.packet.c2s.login.LoginKeyC2SPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerLoginNetworkHandler;
+import network.ycc.raknet.RakNet;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -36,7 +37,8 @@ public class MixinServerLoginNetworkHandler {
     @Inject(method = "onKey", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/ClientConnection;setupEncryption(Ljavax/crypto/Cipher;Ljavax/crypto/Cipher;)V", shift = At.Shift.AFTER))
     private void afterSetupEncryption(LoginKeyC2SPacket packet, CallbackInfo ci) throws NetworkEncryptionException {
         final ChannelPipeline pipeline = ((IClientConnection) this.connection).getChannel().pipeline();
-        if (pipeline.get("decrypt").getClass().getName().equals("me.steinborn.krypton.mod.shared.network.pipeline.MinecraftCipherDecoder") &&
+        if (((IClientConnection) this.connection).getChannel().config() instanceof RakNet.Config &&
+                pipeline.get("decrypt").getClass().getName().equals("me.steinborn.krypton.mod.shared.network.pipeline.MinecraftCipherDecoder") &&
                 pipeline.get("encrypt").getClass().getName().equals("me.steinborn.krypton.mod.shared.network.pipeline.MinecraftCipherEncoder")) {
             System.out.println("Raknetify: Krypton detected, applying compatibility");
 
