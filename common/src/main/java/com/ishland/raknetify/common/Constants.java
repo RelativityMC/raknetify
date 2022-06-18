@@ -15,7 +15,7 @@ public class Constants {
     public static final int MAX_QUEUED_SIZE = 256 * 1024 * 1024;
     public static final int DEFAULT_MTU = 1400;
     public static final int LARGE_MTU = 8192;
-    public static final int MAX_PENDING_FRAME_SETS = 32;
+    public static final int MAX_PENDING_FRAME_SETS = 128;
     public static final int DEFAULT_PENDING_FRAME_SETS = 4;
     public static final int[] SYNC_IGNORE_CHANNELS = new int[] {1};
 
