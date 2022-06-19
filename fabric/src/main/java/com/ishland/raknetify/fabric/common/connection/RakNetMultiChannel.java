@@ -302,7 +302,7 @@ public class RakNetMultiChannel {
 
     public static int getPacketChannelOverride(Class<?> clazz) {
         if (clazz == null) {
-            System.err.println("Warning: Tried to send packet without setting packet class");
+            System.err.println("Raknetify: Warning: Tried to send packet without setting packet class");
             return 0;
         }
         int channelOverride = classToChannelIdOverride.getInt(clazz);
@@ -310,7 +310,7 @@ public class RakNetMultiChannel {
             if (foundUnknownClasses.add(clazz)) {
                 final MappingResolver mappingResolver = FabricLoader.getInstance().getMappingResolver();
                 final String intermediary = mappingResolver.unmapClassName("intermediary", clazz.getName());
-                System.err.println("Warning: unknown packet type %s (%s) for raknet multi-channel".formatted(intermediary.replace('.', '/'), clazz.getName()));
+                System.err.println("Raknetify:Warning: unknown packet type %s (%s) for raknet multi-channel".formatted(intermediary.replace('.', '/'), clazz.getName()));
             }
             channelOverride = 7;
         }

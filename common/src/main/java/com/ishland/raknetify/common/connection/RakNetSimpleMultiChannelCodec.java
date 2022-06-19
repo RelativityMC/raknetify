@@ -11,7 +11,9 @@ import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import network.ycc.raknet.frame.FrameData;
 import network.ycc.raknet.packet.FramedPacket;
 
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 
 public class RakNetSimpleMultiChannelCodec extends MessageToMessageCodec<FrameData, ByteBuf> {
 
@@ -40,19 +42,34 @@ public class RakNetSimpleMultiChannelCodec extends MessageToMessageCodec<FrameDa
 
     private boolean isMultichannelEnabled;
 
+    private boolean queuePendingWrites = false;
+    private Queue<PendingWrite> pendingWrites = new LinkedList<>();
+
     @Override
     public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
+        if (this.queuePendingWrites) {
+            pendingWrites.add(new PendingWrite(msg, promise, getUserData(msg)));
+            return;
+        }
+
         if (msg == SIGNAL_START_MULTICHANNEL && !this.isMultichannelEnabled) {
             if (!this.isMultichannelAvailable()) {
                 System.out.println("Raknetify: [MultiChannellingDataCodec] Failed to start multichannel: not available for %s".formatted(this.descriptiveProtocolStatus));
                 return;
             }
-            final FrameData frameData = FrameData.create(ctx.alloc(), Constants.RAKNET_PING_PACKET_ID, ctx.alloc().buffer(1).writeByte(0));
-            frameData.setOrderChannel(7);
-            ctx.write(frameData).addListener(future -> {
-                isMultichannelEnabled = true;
-                if (Constants.DEBUG) System.out.println("Raknetify: [MultiChannellingDataCodec] Started multichannel");
-            });
+            final ByteBuf buf = ctx.alloc().buffer(1).writeByte(0);
+            try {
+                final FrameData frameData = FrameData.create(ctx.alloc(), Constants.RAKNET_PING_PACKET_ID, buf);
+                frameData.setOrderChannel(7);
+                this.queuePendingWrites = true;
+                ctx.write(frameData).addListener(future -> {
+                    isMultichannelEnabled = true;
+                    if (Constants.DEBUG) System.out.println("Raknetify: [MultiChannellingDataCodec] Started multichannel");
+                    flushPendingWrites(ctx);
+                });
+            } finally {
+                buf.release();
+            }
             promise.trySuccess();
             return;
         }
@@ -79,6 +96,19 @@ public class RakNetSimpleMultiChannelCodec extends MessageToMessageCodec<FrameDa
         }
     }
 
+    private void flushPendingWrites(ChannelHandlerContext ctx) {
+        this.queuePendingWrites = false;
+        PendingWrite pendingWrite;
+        while ((pendingWrite = this.pendingWrites.poll()) != null) {
+            try {
+                this.setUserData(pendingWrite.msg, pendingWrite.userData);
+                this.write(ctx, pendingWrite.msg, pendingWrite.promise);
+            } catch (Throwable t) {
+                ctx.fireExceptionCaught(t);
+            }
+        }
+    }
+
     protected boolean isMultichannelAvailable() {
         return this.channelMapping != null;
     }
@@ -96,6 +126,13 @@ public class RakNetSimpleMultiChannelCodec extends MessageToMessageCodec<FrameDa
         return override;
     }
 
+    protected Object getUserData(Object msg) {
+        return null;
+    }
+
+    protected void setUserData(Object msg, Object userData) {
+    }
+
     protected void decode(ChannelHandlerContext ctx, FrameData packet, List<Object> out) {
         assert !packet.isFragment();
         if (packet.getDataSize() > 0) {
@@ -105,6 +142,9 @@ public class RakNetSimpleMultiChannelCodec extends MessageToMessageCodec<FrameDa
                 out.add(packet.retain());
             }
         }
+    }
+
+    private record PendingWrite(Object msg, ChannelPromise promise, Object userData){
     }
 
 }

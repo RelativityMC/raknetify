@@ -19,6 +19,10 @@ public class MultiChannellingPacketCapture extends ChannelOutboundHandlerAdapter
     }
 
     public Class<?> getPacketClass() {
-        return packetClass;
+        return this.packetClass;
+    }
+
+    public void setPacketClass(Class<?> packetClass) {
+        this.packetClass = packetClass;
     }
 }

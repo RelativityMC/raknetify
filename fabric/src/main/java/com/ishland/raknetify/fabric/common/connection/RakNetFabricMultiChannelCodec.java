@@ -36,4 +36,16 @@ public class RakNetFabricMultiChannelCodec extends RakNetSimpleMultiChannelCodec
     protected int getChannelOverride(ByteBuf buf) {
         return RakNetMultiChannel.getPacketChannelOverride(this.capture.getPacketClass());
     }
+
+    @Override
+    protected Object getUserData(Object msg) {
+        return this.capture.getPacketClass();
+    }
+
+    @Override
+    protected void setUserData(Object msg, Object userData) {
+        if (userData instanceof Class<?> clazz) {
+            this.capture.setPacketClass(clazz);
+        }
+    }
 }
