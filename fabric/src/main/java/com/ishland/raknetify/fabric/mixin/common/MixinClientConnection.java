@@ -1,5 +1,6 @@
 package com.ishland.raknetify.fabric.mixin.common;
 
+import com.ishland.raknetify.common.Constants;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
@@ -12,6 +13,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import java.net.SocketAddress;
 import java.nio.channels.ClosedChannelException;
 
 @Mixin(ClientConnection.class)
@@ -19,6 +21,8 @@ public abstract class MixinClientConnection {
 
     @Shadow
     private Channel channel;
+
+    @Shadow public abstract SocketAddress getAddress();
 
     @Unique
     private volatile boolean isClosing = false;
@@ -53,7 +57,12 @@ public abstract class MixinClientConnection {
     @Inject(method = "exceptionCaught", at = @At("HEAD"))
     private void onExceptionCaught(ChannelHandlerContext context, Throwable ex, CallbackInfo ci) {
         if (ex instanceof ClosedChannelException) return;
-        System.err.println(ex.toString());
+        if (Constants.DEBUG) {
+            System.err.println("Exception caught for connection %s".formatted(this.getAddress()));
+            ex.printStackTrace();
+        } else {
+            System.err.println(ex.toString());
+        }
     }
 
 }
