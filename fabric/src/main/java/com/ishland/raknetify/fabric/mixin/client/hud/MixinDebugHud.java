@@ -36,7 +36,7 @@ public class MixinDebugHud {
                                                 logger.getMeasureRTTnsStdDev() / 1_000_000.0
                                         ));
                         final MetricsSynchronizationHandler serverSync = logger.getMetricsSynchronizationHandler();
-                        if (serverSync != null && serverSync.isServerSupported()) {
+                        if (serverSync != null && serverSync.isRemoteSupported()) {
                             cir.getReturnValue().add(
                                     "[Raknetify] C: BUF: %.2fMB; S: BUF: %.2fMB"
                                             .formatted(
@@ -65,7 +65,7 @@ public class MixinDebugHud {
                                                 logger.getMeasureTX(), logger.getMeasureRX(),
                                                 logger.getMeasureBurstTokens() + config.getDefaultPendingFrameSets()
                                         ));
-                        if (serverSync != null && serverSync.isServerSupported()) {
+                        if (serverSync != null && serverSync.isRemoteSupported()) {
                             cir.getReturnValue().add(
                                     "[Raknetify] S: ERR: %.4f%%, %d tx, %d rx, BST: %d"
                                             .formatted(

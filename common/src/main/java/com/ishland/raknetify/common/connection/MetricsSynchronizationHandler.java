@@ -59,7 +59,7 @@ public class MetricsSynchronizationHandler extends ChannelDuplexHandler {
         }
     }
 
-    private boolean isServerSupported = false;
+    private boolean isRemoteSupported = false;
     private long lastRecv = 0L;
     private int queuedBytes;
     private int burst;
@@ -80,7 +80,7 @@ public class MetricsSynchronizationHandler extends ChannelDuplexHandler {
                 if (time < this.lastRecv) return;
                 this.lastRecv = time;
 
-                this.isServerSupported = true;
+                this.isRemoteSupported = true;
 
                 this.queuedBytes = byteBuf.readInt();
                 this.burst = byteBuf.readInt();
@@ -96,8 +96,8 @@ public class MetricsSynchronizationHandler extends ChannelDuplexHandler {
         super.channelRead(ctx, msg);
     }
 
-    public boolean isServerSupported() {
-        return isServerSupported;
+    public boolean isRemoteSupported() {
+        return this.isRemoteSupported;
     }
 
     public int getQueuedBytes() {

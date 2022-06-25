@@ -1,6 +1,7 @@
 package com.ishland.raknetify.fabric.mixin.common;
 
 import com.ishland.raknetify.common.Constants;
+import com.ishland.raknetify.common.util.DebugUtil;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
@@ -59,6 +60,7 @@ public abstract class MixinClientConnection {
         if (ex instanceof ClosedChannelException) return;
         if (Constants.DEBUG) {
             System.err.println("Exception caught for connection %s".formatted(this.getAddress()));
+            System.err.println(DebugUtil.printChannelDetails(this.channel));
             ex.printStackTrace();
         } else {
             System.err.println(ex.toString());
