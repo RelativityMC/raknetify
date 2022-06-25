@@ -27,6 +27,7 @@
     "common.sync.MixinServerPlayerEntity",
     "compat.fabricapi.MixinServerLoginNetworkAddon",
     "compat.krypton.MixinServerLoginNetworkHandler",
+    "compat.qsl.MixinServerLoginNetworkAddon",
     "server.MixinPlayerManager",
     "server.MixinServerLoginNetworkHandler",
     "server.MixinServerNetworkIo",
