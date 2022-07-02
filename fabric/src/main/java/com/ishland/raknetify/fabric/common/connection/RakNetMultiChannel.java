@@ -11,7 +11,6 @@ import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.MappingResolver;
-import net.minecraft.MinecraftVersion;
 import net.minecraft.SharedConstants;
 import net.minecraft.network.NetworkSide;
 import net.minecraft.network.NetworkState;
@@ -150,6 +149,15 @@ public class RakNetMultiChannel {
             "net/minecraft/class_2612", // PaintingSpawnS2C
             "net/minecraft/class_2606", // ExperienceOrbSpawnS2CPacket
 
+            "net/minecraft/class_2885", // PlayerInteractBlockC2S
+            "net/minecraft/class_2886", // PlayerInteractItemC2S
+            "net/minecraft/class_2824", // PlayerInteractEntityC2S
+            "net/minecraft/class_2828", // PlayerMoveC2S
+            "net/minecraft/class_2828$class_5911", // PlayerMoveC2SPacket$OnGroundOnly
+            "net/minecraft/class_2828$class_2829", // PlayerMoveC2SPacket$PositionAndOnGround
+            "net/minecraft/class_2828$class_2830", // PlayerMoveC2SPacket$Full
+            "net/minecraft/class_2828$class_2831", // PlayerMoveC2SPacket$LookAndOnGround
+
             "net/minecraft/class_2664", // ExplosionS2C
             "net/minecraft/class_2678", // GameJoinS2C
             "net/minecraft/class_2668", // GameStateChangeS2C
@@ -170,19 +178,11 @@ public class RakNetMultiChannel {
 
     // Primarily used for interactions dependent to world
     private static final Set<Class<?>> channel3 = createClassSet(new String[]{
-            "net/minecraft/class_2885", // PlayerInteractBlockC2S
-            "net/minecraft/class_2886", // PlayerInteractItemC2S
-            "net/minecraft/class_2824", // PlayerInteractEntityC2S
-            "net/minecraft/class_2828", // PlayerMoveC2S
-            "net/minecraft/class_2828$class_5911", // PlayerMoveC2SPacket$OnGroundOnly
-            "net/minecraft/class_2828$class_2829", // PlayerMoveC2SPacket$PositionAndOnGround
-            "net/minecraft/class_2828$class_2830", // PlayerMoveC2SPacket$Full
-            "net/minecraft/class_2828$class_2831", // PlayerMoveC2SPacket$LookAndOnGround
-            "net/minecraft/class_2795", // QueryBlockNbtC2S
-            "net/minecraft/class_2822", // QueryEntityNbtC2S
             "net/minecraft/class_2884", // SpectatorTeleportC2S
             "net/minecraft/class_2793", // TeleportConfirmC2S
 
+            "net/minecraft/class_2795", // QueryBlockNbtC2S
+            "net/minecraft/class_2822", // QueryEntityNbtC2S
             "net/minecraft/class_2774", // NbtQueryResponseS2C
 
             "net/minecraft/class_2645", // CloseScreenS2C
