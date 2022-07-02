@@ -18,6 +18,7 @@ import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -28,6 +29,9 @@ import java.net.InetAddress;
 
 @Mixin(ServerNetworkIo.class)
 public abstract class MixinServerNetworkIo {
+
+    @Unique
+    private static final int raknetify$portOverride = Integer.getInteger("raknetify.fabric.portOverride", -1);
 
     @Shadow
     @Final
@@ -40,7 +44,8 @@ public abstract class MixinServerNetworkIo {
         if (!ThreadLocalUtil.isInitializingRaknet()) {
             try {
                 ThreadLocalUtil.setInitializingRaknet(true);
-                bind(address, port);
+                final boolean hasPortOverride = raknetify$portOverride > 0 && raknetify$portOverride < 65535;
+                bind(address, hasPortOverride ? raknetify$portOverride : port);
             } finally {
                 ThreadLocalUtil.setInitializingRaknet(false);
             }
