@@ -1,13 +1,10 @@
 plugins {
-	id 'java'
-	id 'java-library'
 	id 'fabric-loom' version '0.12-SNAPSHOT' apply false
 	id 'io.github.juuxel.loom-quiltflower' version '1.7.1' apply false
 	id 'com.github.johnrengelman.shadow' version '7.1.0' apply false
-	id 'maven-publish'
 }
 
-allprojects {
+subprojects {
 	apply plugin: 'java'
 	apply plugin: 'java-library'
 	apply plugin: 'maven-publish'
@@ -21,41 +18,32 @@ allprojects {
 		maven { url 'https://jitpack.io' }
 		mavenCentral()
 	}
-}
 
-archivesBaseName = project.archives_base_name
-group = project.maven_group
+	// configure the maven publication
+	publishing {
+		publications {
+			mavenJava(MavenPublication) {
+				from components.java
+			}
+		}
 
-afterEvaluate {
-	logger.lifecycle("Version String: ${version}")
-}
-
-dependencies {
-
-}
-
-jar.enabled = false
-
-// configure the maven publication
-publishing {
-	publications {
-		mavenJava(MavenPublication) {
-			from components.java
+		// See https://docs.gradle.org/current/userguide/publishing_maven.html for information on how to set up publishing.
+		repositories {
+			// Add repositories to publish to here.
+			// Notice: This block does NOT have the same function as the block in the top level.
+			// The repositories here will be used for publishing your artifact, not for
+			// retrieving dependencies.
 		}
 	}
 
-	// See https://docs.gradle.org/current/userguide/publishing_maven.html for information on how to set up publishing.
-	repositories {
-		// Add repositories to publish to here.
-		// Notice: This block does NOT have the same function as the block in the top level.
-		// The repositories here will be used for publishing your artifact, not for
-		// retrieving dependencies.
+	tasks.withType(AbstractArchiveTask) {
+		preserveFileTimestamps = false
+		reproducibleFileOrder = true
 	}
 }
 
-tasks.withType(AbstractArchiveTask) {
-	preserveFileTimestamps = false
-	reproducibleFileOrder = true
+afterEvaluate {
+	logger.lifecycle("Version String: ${project.mod_version + '.' + getVersionSuffix()}")
 }
 
 String getVersionSuffix() {
