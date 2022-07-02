@@ -5,7 +5,7 @@ on:
       - 'master'
 
 jobs:
-  build:
+  genMappings:
     strategy:
       matrix:
         # Use these Java versions
