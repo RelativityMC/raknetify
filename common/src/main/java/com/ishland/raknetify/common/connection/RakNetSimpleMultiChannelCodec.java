@@ -6,6 +6,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPromise;
 import io.netty.handler.codec.MessageToMessageCodec;
+import it.unimi.dsi.fastutil.ints.Int2IntMap;
 import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import network.ycc.raknet.frame.FrameData;
@@ -31,9 +32,10 @@ public class RakNetSimpleMultiChannelCodec extends MessageToMessageCodec<FrameDa
         this.packetId = packetId;
     }
 
-    public void setSimpleChannelMapping(Int2IntOpenHashMap channelMapping) {
-        this.channelMapping = channelMapping;
-        if (this.channelMapping != null) this.channelMapping.defaultReturnValue(Integer.MAX_VALUE);
+    public void setSimpleChannelMapping(Int2IntMap channelMapping) {
+        if (channelMapping == null) return;
+        this.channelMapping = new Int2IntOpenHashMap(channelMapping);
+        this.channelMapping.defaultReturnValue(Integer.MAX_VALUE);
     }
 
     public void setDescriptiveProtocolStatus(String descriptiveProtocolStatus) {
