@@ -48,7 +48,6 @@ jobs:
           MAPPINGS_GEN_FRESH: true
         run: ./genMappings.sh
       - name: create pull request
-        if: github.event.pull_request.head.repo.full_name == github.repository
         uses: peter-evans/create-pull-request@v4
         with:
           base: ${{ github.head_ref }}
