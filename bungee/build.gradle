@@ -27,7 +27,7 @@ configurations {
 }
 
 dependencies {
-    implementation 'bungee:BungeeCord:1643'
+    implementation 'bungee:BungeeCord:1653'
 
     shadowInclude implementation(project(":common"))
 }

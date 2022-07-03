@@ -3,6 +3,7 @@ package com.ishland.raknetify.bungee.init;
 import com.ishland.raknetify.bungee.RaknetifyBungeePlugin;
 import com.ishland.raknetify.bungee.connection.RakNetBungeeConnectionUtil;
 import com.ishland.raknetify.common.Constants;
+import com.ishland.raknetify.common.util.NetworkInterfaceListener;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
@@ -15,6 +16,9 @@ import io.netty.channel.ReflectiveChannelFactory;
 import io.netty.channel.socket.DatagramChannel;
 import io.netty.channel.unix.DomainSocketAddress;
 import io.netty.util.AttributeKey;
+import it.unimi.dsi.fastutil.objects.ObjectIterator;
+import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
+import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import net.md_5.bungee.BungeeCord;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.config.ListenerInfo;
@@ -24,13 +28,19 @@ import network.ycc.raknet.server.channel.RakNetServerChannel;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.NetworkInterface;
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 import java.util.logging.Level;
+import java.util.stream.Stream;
 
 import static com.ishland.raknetify.common.util.ReflectionUtil.accessible;
 
@@ -53,10 +63,13 @@ public class BungeeRaknetifyServer {
         }
     }
 
-    private static final HashSet<ChannelFuture> channels = new HashSet<>();
+    private static final Reference2ReferenceOpenHashMap<Channel, ReferenceOpenHashSet<ChannelFuture>> channels = new Reference2ReferenceOpenHashMap<>();
+    private static final ReferenceOpenHashSet<ChannelFuture> nonWildcardChannels = new ReferenceOpenHashSet<>();
 
     private static boolean active = false;
     private static boolean injected = false;
+
+    private static Consumer<NetworkInterfaceListener.InterfaceChangeEvent> listener = null;
 
     public static void inject() {
         if (active) return;
@@ -83,6 +96,39 @@ public class BungeeRaknetifyServer {
                 }
             }
 
+            listener = event -> {
+                if (!active) {
+                    NetworkInterfaceListener.removeListener(listener);
+                }
+
+                if (event.added()) {
+                    for (Channel channel : channels.keySet()) {
+                        injectChannel(instance, channel, false);
+                    }
+                } else {
+                    for (ReferenceOpenHashSet<ChannelFuture> futures : channels.values()) {
+                        for (ObjectIterator<ChannelFuture> iterator = futures.iterator(); iterator.hasNext(); ) {
+                            ChannelFuture future = iterator.next();
+                            final Iterator<InetAddress> iterator1 = event.networkInterface().getInetAddresses().asIterator();
+
+                            __loop0:
+                            while (iterator1.hasNext()) {
+                                final InetAddress address = iterator1.next();
+                                if (((InetSocketAddress) future.channel().localAddress()).getAddress().equals(address)) {
+                                    RaknetifyBungeePlugin.LOGGER.info("Closing Raknetify server %s".formatted(future.channel().localAddress()));
+                                    future.channel().close();
+                                    iterator.remove();
+                                    break __loop0;
+                                }
+                            }
+                        }
+
+                    }
+                }
+            };
+            NetworkInterfaceListener.addListener(event ->
+                    instance.getScheduler().schedule(RaknetifyBungeePlugin.INSTANCE, () -> listener.accept(event), 100, TimeUnit.MILLISECONDS));
+
             if (!errors.isEmpty()) {
                 final RuntimeException exception = new RuntimeException("Failed to start Raknetify server");
                 errors.forEach(exception::addSuppressed);
@@ -100,9 +146,7 @@ public class BungeeRaknetifyServer {
             final boolean hasPortOverride = portOverride > 0 && portOverride < 65535;
             if (hasPortOverride && !channels.isEmpty()) return; // avoid duplicate listeners
 
-            final ReflectiveChannelFactory<? extends DatagramChannel> factory = new ReflectiveChannelFactory<>(PipelineUtils.getDatagramChannel());
-
-            if (listener.localAddress() instanceof DomainSocketAddress) return;
+            if (!(listener.localAddress() instanceof InetSocketAddress)) return;
 
             ChannelInitializer<Channel> initializer = null;
             ListenerInfo info = null;
@@ -142,40 +186,75 @@ public class BungeeRaknetifyServer {
                 return;
             }
 
-            final ChannelInitializer<Channel> finalInitializer = initializer;
-            final ChannelFuture future = new ServerBootstrap()
-                    .channelFactory(() -> new RakNetServerChannel(() -> {
-                        final DatagramChannel channel = factory.newChannel();
-                        channel.config().setOption(ChannelOption.IP_TOS, 0x18);
-                        channel.config().setRecvByteBufAllocator(new FixedRecvByteBufAllocator(Constants.LARGE_MTU + 512));
-                        return channel;
-                    }))
-                    .option(ChannelOption.SO_REUSEADDR, true)
-                    .childAttr(PipelineUtils.LISTENER, info)
-                    .childHandler(new ChannelInitializer<>() {
-                        @Override
-                        protected void initChannel(Channel channel) throws Exception {
-                            RakNetBungeeConnectionUtil.initChannel(channel);
-                            INIT_CHANNEL.invoke(finalInitializer, channel);
-                            RakNetBungeeConnectionUtil.postInitChannel(channel, false);
+            if (((InetSocketAddress) info.getSocketAddress()).getAddress().isAnyLocalAddress()) {
+                for (NetworkInterface networkInterface : NetworkInterface.networkInterfaces().toList()) {
+                    final Iterator<InetAddress> iterator = networkInterface.getInetAddresses().asIterator();
+                    while (iterator.hasNext()) {
+                        final InetAddress address = iterator.next();
+                        try {
+                            startServer(instance, listener, initializer, info, address);
+                        } catch (Throwable t) {
+                            RaknetifyBungeePlugin.LOGGER.log(Level.SEVERE, "Failed to start Raknetify server", t);
                         }
-                    })
-                    .group(getBossEventLoopGroup(instance), getWorkerEventLoopGroup(instance))
-                    .localAddress(hasPortOverride ? new InetSocketAddress(portOverride) : info.getSocketAddress())
-                    .bind()
-                    .syncUninterruptibly();
-            channels.add(future);
+                    }
+                }
+            } else {
+                startServer(instance, listener, initializer, info, null);
+            }
 
-            RaknetifyBungeePlugin.LOGGER.info("Raknetify server started on %s".formatted(future.channel().localAddress()));
         } catch (Throwable t) {
             if (throwErrors) throw new RuntimeException("Failed to start Raknetify server", t);
             else RaknetifyBungeePlugin.LOGGER.log(Level.SEVERE, "Failed to start Raknetify server", t);
         }
     }
 
+    private static void startServer(BungeeCord instance, Channel listener, ChannelInitializer<Channel> initializer, ListenerInfo info, InetAddress address) throws NoSuchFieldException, IllegalAccessException {
+        if (address != null) {
+            final ReferenceOpenHashSet<ChannelFuture> futures = channels.get(listener);
+            if (futures != null) {
+                for (ChannelFuture future : futures) {
+                    if (((InetSocketAddress) future.channel().localAddress()).getAddress().equals(address))
+                        return; // avoid duplicate
+                }
+            }
+        }
+
+        final boolean hasPortOverride = portOverride > 0 && portOverride < 65535;
+        final ReflectiveChannelFactory<? extends DatagramChannel> factory = new ReflectiveChannelFactory<>(PipelineUtils.getDatagramChannel());
+        final InetAddress actualAddress = address == null ? ((InetSocketAddress) info.getSocketAddress()).getAddress() : address;
+        final ChannelFuture future = new ServerBootstrap()
+                .channelFactory(() -> new RakNetServerChannel(() -> {
+                    final DatagramChannel channel = factory.newChannel();
+                    channel.config().setOption(ChannelOption.IP_TOS, 0x18);
+                    channel.config().setRecvByteBufAllocator(new FixedRecvByteBufAllocator(Constants.LARGE_MTU + 512));
+                    return channel;
+                }))
+                .option(ChannelOption.SO_REUSEADDR, true)
+                .childAttr(PipelineUtils.LISTENER, info)
+                .childHandler(new ChannelInitializer<>() {
+                    @Override
+                    protected void initChannel(Channel channel) throws Exception {
+                        RakNetBungeeConnectionUtil.initChannel(channel);
+                        INIT_CHANNEL.invoke(initializer, channel);
+                        RakNetBungeeConnectionUtil.postInitChannel(channel, false);
+                    }
+                })
+                .group(getBossEventLoopGroup(instance), getWorkerEventLoopGroup(instance))
+                .localAddress(hasPortOverride ? new InetSocketAddress(actualAddress, portOverride) : new InetSocketAddress(actualAddress, ((InetSocketAddress) info.getSocketAddress()).getPort()))
+                .bind()
+                .syncUninterruptibly();
+        if (address == null) {
+            nonWildcardChannels.add(future);
+        } else {
+            channels.computeIfAbsent(listener, unused -> new ReferenceOpenHashSet<>()).add(future);
+        }
+
+        RaknetifyBungeePlugin.LOGGER.info("Raknetify server started on %s".formatted(future.channel().localAddress()));
+    }
+
     public static void stopAll() {
         if (!active) return;
-        for (ChannelFuture future : channels) {
+        for (ChannelFuture future : Stream.concat(channels.values().stream().flatMap(Collection::stream), nonWildcardChannels.stream()).toList()) {
             RaknetifyBungeePlugin.LOGGER.info("Closing Raknetify server %s".formatted(future.channel().localAddress()));
             try {
                 future.channel().close().sync();
@@ -185,6 +264,7 @@ public class BungeeRaknetifyServer {
         }
 
         channels.clear();
+        nonWildcardChannels.clear();
     }
 
     public static void disable() {

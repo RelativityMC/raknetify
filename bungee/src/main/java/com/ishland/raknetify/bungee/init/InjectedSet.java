@@ -1,11 +1,13 @@
 package com.ishland.raknetify.bungee.init;
 
 import com.google.common.collect.ForwardingSet;
+import com.ishland.raknetify.bungee.RaknetifyBungeePlugin;
 import io.netty.channel.Channel;
 import net.md_5.bungee.BungeeCord;
 import net.md_5.bungee.api.ProxyServer;
 
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 public class InjectedSet extends ForwardingSet<Channel> {
 
@@ -17,7 +19,10 @@ public class InjectedSet extends ForwardingSet<Channel> {
 
     @Override
     public boolean add(Channel element) {
-        BungeeRaknetifyServer.injectChannel((BungeeCord) ProxyServer.getInstance(), element, false);
+        ProxyServer.getInstance().getScheduler().schedule(
+                RaknetifyBungeePlugin.INSTANCE,
+                () -> BungeeRaknetifyServer.injectChannel((BungeeCord) ProxyServer.getInstance(), element, false),
+                100, TimeUnit.MILLISECONDS);
 
         return super.add(element);
     }

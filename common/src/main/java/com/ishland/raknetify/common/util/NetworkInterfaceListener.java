@@ -1,11 +1,8 @@
-package com.ishland.raknetify.fabric.common.netif;
+package com.ishland.raknetify.common.util;
 
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectIterator;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
-import it.unimi.dsi.fastutil.objects.ObjectSet;
-import it.unimi.dsi.fastutil.objects.ObjectSets;
 import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ReferenceSet;
 import it.unimi.dsi.fastutil.objects.ReferenceSets;
@@ -21,11 +18,22 @@ import java.util.function.Consumer;
 public class NetworkInterfaceListener {
 
     private static final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor(
-            new ThreadFactoryBuilder().setNameFormat("Raknetify IFListener").setDaemon(true).setPriority(Thread.NORM_PRIORITY - 1).build()
+            r -> {
+                final Thread thread = new Thread(r, "Raknetify IFListener");
+                thread.setDaemon(true);
+                thread.setPriority(Thread.NORM_PRIORITY - 1);
+                return thread;
+            }
     );
 
     static {
-        scheduler.scheduleAtFixedRate(NetworkInterfaceListener::pollChanges, 0, 10, TimeUnit.SECONDS);
+        scheduler.scheduleAtFixedRate(() -> {
+            try {
+                pollChanges();
+            } catch (Throwable t) {
+                t.printStackTrace();
+            }
+        }, 0, 10, TimeUnit.SECONDS);
     }
 
     public static void init() {
@@ -50,8 +58,9 @@ public class NetworkInterfaceListener {
             while (iterator.hasNext()) {
                 final Map.Entry<String, NetworkInterface> entry = iterator.next();
                 if (!currentInterfaces.contains(entry.getKey())) {
+                    final NetworkInterface networkInterface = entry.getValue();
                     iterator.remove();
-                    listeners.forEach(consumer -> consumer.accept(new InterfaceChangeEvent(false, entry.getValue())));
+                    listeners.forEach(consumer -> consumer.accept(new InterfaceChangeEvent(false, networkInterface)));
                 }
             }
         } catch (Throwable t) {
