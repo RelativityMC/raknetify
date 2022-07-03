@@ -6,7 +6,7 @@ public class Constants {
 
     public static final String RAKNET_PREFIX = "raknet;";
     public static final String RAKNET_LARGE_MTU_PREFIX = "raknetl;";
-    public static final int RAKNET_PING_PACKET_ID = 0xFE;
+    public static final int RAKNET_PING_PACKET_ID = 0xFA;
     public static final int RAKNET_GAME_PACKET_ID = 0xFD;
     public static final int RAKNET_STREAMING_COMPRESSION_PACKET_ID = 0xED;
     public static final int RAKNET_STREAMING_COMPRESSION_HANDSHAKE_PACKET_ID = 0xEC;
