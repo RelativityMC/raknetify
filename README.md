@@ -1,5 +1,6 @@
 # Raknetify
-A Fabric mod / Velocity plugin / BungeeCord plugin that allows using RakNet as Minecraft networking backend.
+A Fabric mod / Velocity plugin / BungeeCord plugin that uses RakNet to improve multiplayer experience significantly
+under unreliable and rate-limited connections.
 
 # Features
 - Higher reliability and lower latency under unreliable and rate-limited client connections.
