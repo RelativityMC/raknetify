@@ -10,8 +10,9 @@ public class FrameDataBlocker extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        if (msg instanceof FrameData) {
+        if (msg instanceof FrameData data) {
             if (printBlockedFrames) System.out.println("Blocked %s".formatted(msg));
+            data.release();
             return;
         }
         ctx.fireChannelRead(msg);

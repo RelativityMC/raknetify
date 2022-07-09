@@ -36,7 +36,7 @@ public class MultiChannellingEncryption extends ChannelDuplexHandler {
             FrameData resFrame = null;
             try {
                 res = ctx.alloc().buffer(data.getDataSize());
-                encryption.encrypt(buf, res);
+                encryption.doWork(buf, res);
                 resFrame = FrameData.create(ctx.alloc(), data.getPacketId(), res);
 //                res = null;
                 resFrame.setOrderChannel(data.getOrderChannel());
@@ -62,7 +62,8 @@ public class MultiChannellingEncryption extends ChannelDuplexHandler {
             ByteBuf res = null;
             FrameData resFrame = null;
             try {
-                res = decryption.decrypt(ctx, buf);
+                res = ctx.alloc().buffer(data.getDataSize());
+                decryption.doWork(buf, res);
                 resFrame = FrameData.create(ctx.alloc(), data.getPacketId(), res);
                 resFrame.setOrderChannel(data.getOrderChannel());
                 resFrame.setReliability(data.getReliability());

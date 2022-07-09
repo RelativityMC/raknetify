@@ -1,7 +1,6 @@
 package com.ishland.raknetify.common.connection;
 
 import io.netty.buffer.ByteBuf;
-import io.netty.channel.ChannelHandlerContext;
 
 import javax.crypto.Cipher;
 import java.security.GeneralSecurityException;
@@ -26,20 +25,12 @@ public class PacketEncryptionManager {
         return this.conversionBuffer;
     }
 
-    public ByteBuf decrypt(ChannelHandlerContext context, ByteBuf buf) throws GeneralSecurityException {
+    public void doWork(ByteBuf buf, ByteBuf result) throws GeneralSecurityException {
         int i = buf.readableBytes();
         byte[] bs = this.toByteArray(buf);
-        ByteBuf byteBuf = context.alloc().heapBuffer(this.cipher.getOutputSize(i));
-        byteBuf.writerIndex(this.cipher.doFinal(bs, 0, i, byteBuf.array(), byteBuf.arrayOffset()));
-        return byteBuf;
-    }
-
-    public void encrypt(ByteBuf buf, ByteBuf result) throws GeneralSecurityException {
-        int i = buf.readableBytes();
-        byte[] bs = this.toByteArray(buf);
-        int j = this.cipher.getOutputSize(i);
-        if (this.encryptionBuffer.length < j) {
-            this.encryptionBuffer = new byte[j];
+        int outputSize = this.cipher.getOutputSize(i);
+        if (this.encryptionBuffer.length < outputSize) {
+            this.encryptionBuffer = new byte[outputSize];
         }
 
         result.writeBytes(this.encryptionBuffer, 0, this.cipher.doFinal(bs, 0, i, this.encryptionBuffer));
