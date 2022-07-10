@@ -10,6 +10,7 @@ import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 import java.security.GeneralSecurityException;
+import java.util.Objects;
 
 public class MultiChannellingEncryption extends ChannelDuplexHandler {
 
@@ -25,6 +26,11 @@ public class MultiChannellingEncryption extends ChannelDuplexHandler {
         Cipher encryption = Cipher.getInstance("AES/CFB8/NoPadding");
         encryption.init(Cipher.ENCRYPT_MODE, key, new IvParameterSpec(key.getEncoded()));
         this.encryption = new PacketEncryptionManager(encryption);
+    }
+
+    public MultiChannellingEncryption(Cipher decryption, Cipher encryption) {
+        this.decryption = new PacketEncryptionManager(Objects.requireNonNull(decryption));
+        this.encryption = new PacketEncryptionManager(Objects.requireNonNull(encryption));
     }
 
     @Override

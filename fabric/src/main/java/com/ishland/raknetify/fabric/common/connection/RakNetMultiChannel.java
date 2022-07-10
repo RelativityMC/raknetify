@@ -324,57 +324,10 @@ public class RakNetMultiChannel {
     }
 
     static {
-        Int2IntArrayMap s2c = new Int2IntArrayMap();
-        Int2IntArrayMap c2s = new Int2IntArrayMap();
         for (Map.Entry<NetworkSide, ? extends NetworkState.PacketHandler<?>> entry : ((INetworkState) (Object) NetworkState.PLAY).getPacketHandlers().entrySet()) {
             for (Object2IntMap.Entry<Class<? extends Packet<?>>> type : ((INetworkStatePacketHandler) entry.getValue()).getPacketIds().object2IntEntrySet()) {
-                if (entry.getKey() == NetworkSide.CLIENTBOUND)
-                    s2c.put(type.getIntValue(), getPacketChannelOverride(type.getKey()));
-                else if (entry.getKey() == NetworkSide.SERVERBOUND)
-                    c2s.put(type.getIntValue(), getPacketChannelOverride(type.getKey()));
+                getPacketChannelOverride(type.getKey());
             }
-        }
-        if (Boolean.getBoolean("raknetify.saveChannelMappings")) {
-            final Gson gson = new GsonBuilder()
-                    .setPrettyPrinting()
-                    .create();
-            ProtocolMultiChannelMappings mappings = new ProtocolMultiChannelMappings();
-            Path path = Path.of("channelMappings.json");
-            try {
-                mappings = gson.fromJson(Files.readString(path), ProtocolMultiChannelMappings.class);
-            } catch (IOException e) {
-                System.out.println("Error reading previously generated mappings: " + e.toString());
-            }
-            final ProtocolMultiChannelMappings.VersionMapping versionMapping = new ProtocolMultiChannelMappings.VersionMapping();
-            versionMapping.c2s = c2s;
-            versionMapping.s2c = s2c;
-            mappings.mappings.put(SharedConstants.getProtocolVersion(), versionMapping);
-
-            // reproducible mappings
-            mappings.mappings = mappings.mappings.int2ObjectEntrySet()
-                    .stream()
-                    .map(entry -> {
-                        final ProtocolMultiChannelMappings.VersionMapping value = entry.getValue();
-                        value.s2c = value.s2c.int2IntEntrySet().stream()
-                                .sorted(Comparator.comparingInt(Int2IntMap.Entry::getIntKey))
-                                .collect(Collectors.toMap(Int2IntMap.Entry::getIntKey, Int2IntMap.Entry::getIntValue, (o, o2) -> {throw new RuntimeException("Unresolvable conflicts");}, Int2IntArrayMap::new));
-                        value.c2s = value.c2s.int2IntEntrySet().stream()
-                                .sorted(Comparator.comparingInt(Int2IntMap.Entry::getIntKey))
-                                .collect(Collectors.toMap(Int2IntMap.Entry::getIntKey, Int2IntMap.Entry::getIntValue, (o, o2) -> {throw new RuntimeException("Unresolvable conflicts");}, Int2IntArrayMap::new));
-                        return new AbstractInt2ObjectMap.BasicEntry<>(
-                                entry.getIntKey(),
-                                value
-                        );
-                    })
-                    .sorted(Comparator.comparingInt(Int2ObjectMap.Entry::getIntKey))
-                    .collect(Collectors.toMap(Int2ObjectMap.Entry::getIntKey, Int2ObjectMap.Entry::getValue, (o, o2) -> {throw new RuntimeException("Unresolvable conflicts");}, Int2ObjectArrayMap::new));
-
-            try {
-                Files.writeString(path, gson.toJson(mappings), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
-            } catch (IOException e) {
-                System.out.println("Error writing generated mappings: " + e.toString());
-            }
-            if (Boolean.getBoolean("raknetify.saveChannelMappings.exit")) System.exit(0);
         }
     }
 

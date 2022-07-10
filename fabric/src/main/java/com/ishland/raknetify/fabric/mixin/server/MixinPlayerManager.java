@@ -30,7 +30,7 @@ public class MixinPlayerManager {
             System.err.println("Raknetify: Warning: %s don't have valid channel when logged in, not sending sync packet".formatted(this));
             return;
         }
-        channel.eventLoop().execute(() -> channel.write(RakNetFabricMultiChannelCodec.SIGNAL_START_MULTICHANNEL));
+        channel.write(RakNetFabricMultiChannelCodec.SIGNAL_START_MULTICHANNEL);
     }
 
 }

@@ -38,8 +38,6 @@ public class MixinPlayerManager {
         }
         if (channel.config() instanceof RakNet.Config) {
             channel.write(RakNetFabricMultiChannelCodec.SIGNAL_START_MULTICHANNEL);
-
-
         }
     }
 }

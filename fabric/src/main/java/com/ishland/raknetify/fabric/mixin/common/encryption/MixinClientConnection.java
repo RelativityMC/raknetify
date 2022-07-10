@@ -1,7 +1,7 @@
 package com.ishland.raknetify.fabric.mixin.common.encryption;
 
 import com.ishland.raknetify.common.connection.MultiChannelingStreamingCompression;
-import com.ishland.raknetify.fabric.common.connection.MultiChannellingEncryption;
+import com.ishland.raknetify.common.connection.MultiChannellingEncryption;
 import io.netty.channel.Channel;
 import net.minecraft.network.ClientConnection;
 import net.minecraft.network.encryption.PacketDecryptor;
@@ -41,7 +41,7 @@ public class MixinClientConnection {
             } catch (Throwable ignored) {
             }
             this.channel.pipeline().addBefore(MultiChannelingStreamingCompression.NAME, MultiChannellingEncryption.NAME,
-                    new MultiChannellingEncryption(new PacketEncryptionManager(decryptionCipher), new PacketEncryptionManager(encryptionCipher)));
+                    new MultiChannellingEncryption(decryptionCipher, encryptionCipher));
         }
     }
 

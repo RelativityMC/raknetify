@@ -1,14 +1,11 @@
 package com.ishland.raknetify.fabric.mixin.compat.krypton;
 
-import com.ishland.raknetify.common.connection.MultiChannelingStreamingCompression;
-import com.ishland.raknetify.fabric.common.connection.MultiChannellingEncryption;
 import com.ishland.raknetify.fabric.mixin.access.IClientConnection;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelPipeline;
 import net.minecraft.network.ClientConnection;
 import net.minecraft.network.encryption.NetworkEncryptionException;
 import net.minecraft.network.encryption.NetworkEncryptionUtils;
-import net.minecraft.network.encryption.PacketEncryptionManager;
 import net.minecraft.network.packet.c2s.login.LoginKeyC2SPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerLoginNetworkHandler;

@@ -140,6 +140,8 @@ public class RakNetSimpleMultiChannelCodec extends MessageToMessageCodec<FrameDa
         if (packet.getDataSize() > 0) {
             if (packetId == packet.getPacketId()) {
                 out.add(packet.createData().skipBytes(1));
+            } else if (packet.getPacketId() == Constants.RAKNET_PING_PACKET_ID) {
+                return;
             } else {
                 out.add(packet.retain());
             }
