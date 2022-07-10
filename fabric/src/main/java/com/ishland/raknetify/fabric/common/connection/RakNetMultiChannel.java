@@ -323,15 +323,15 @@ public class RakNetMultiChannel {
         return channelOverride;
     }
 
-    static {
+    public static void init() {
+    }
+
+    public static void iterateKnownPackets() {
         for (Map.Entry<NetworkSide, ? extends NetworkState.PacketHandler<?>> entry : ((INetworkState) (Object) NetworkState.PLAY).getPacketHandlers().entrySet()) {
             for (Object2IntMap.Entry<Class<? extends Packet<?>>> type : ((INetworkStatePacketHandler) entry.getValue()).getPacketIds().object2IntEntrySet()) {
                 getPacketChannelOverride(type.getKey());
             }
         }
-    }
-
-    public static void init() {
     }
 
 }

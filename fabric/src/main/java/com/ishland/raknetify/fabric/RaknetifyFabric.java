@@ -34,6 +34,7 @@ public class RaknetifyFabric implements ModInitializer {
     @Override
     public void onInitialize() {
         RakNetMultiChannel.init();
+        RakNetMultiChannel.iterateKnownPackets();
         NetworkInterfaceListener.init();
 
         // If new property name is present, use it
