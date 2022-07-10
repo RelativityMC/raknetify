@@ -19,14 +19,16 @@ import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.FixedRecvByteBufAllocator;
 import io.netty.channel.socket.DatagramChannel;
+import it.unimi.dsi.fastutil.objects.ObjectIterator;
 import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import network.ycc.raknet.server.channel.RakNetServerChannel;
 
+import java.io.IOException;
 import java.lang.reflect.Method;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.NetworkInterface;
-import java.util.function.Consumer;
+import java.util.concurrent.TimeUnit;
 
 import static com.ishland.raknetify.common.util.ReflectionUtil.accessible;
 
@@ -48,19 +50,29 @@ public class VelocityRaknetifyServer {
 
     static {
         NetworkInterfaceListener.addListener(event -> {
-            if (!active) return;
-            final InetSocketAddress address = currentServerAddress;
-            if (address != null && address.getAddress().isAnyLocalAddress()) {
-                if (event.added()) {
-                    startServer(new InetSocketAddress(event.address(), address.getPort()));
-                } else {
-                    for (ChannelFuture future : channels) {
-                        if (((InetSocketAddress) future.channel().localAddress()).getAddress().equals(event.address())) {
-                            closeServer(future);
+            RaknetifyVelocityPlugin.PROXY.getScheduler()
+                    .buildTask(RaknetifyVelocityPlugin.INSTANCE, () -> {
+                        if (!active) return;
+                        final InetSocketAddress address = currentServerAddress;
+                        if (address != null && address.getAddress().isAnyLocalAddress()) {
+                            if (event.added()) {
+                                startServer(new InetSocketAddress(event.address(), address.getPort()));
+                            } else {
+                                synchronized (channels) {
+                                    final ObjectIterator<ChannelFuture> iterator = channels.iterator();
+                                    while (iterator.hasNext()) {
+                                        final ChannelFuture future = iterator.next();
+                                        if (((InetSocketAddress) future.channel().localAddress()).getAddress().equals(event.address())) {
+                                            closeServer(future);
+                                            iterator.remove();
+                                        }
+                                    }
+                                }
+                            }
                         }
-                    }
-                }
-            }
+                    })
+                    .delay(100, TimeUnit.MILLISECONDS)
+                    .schedule();
         });
     }
 
@@ -70,6 +82,7 @@ public class VelocityRaknetifyServer {
         Preconditions.checkState(channels.isEmpty(), "Raknetify Server is already running");
         final InetSocketAddress address = evt.getAddress();
         currentServerAddress = address;
+        active = true;
 
         if (address.getAddress().isAnyLocalAddress()) {
             try {
@@ -99,29 +112,40 @@ public class VelocityRaknetifyServer {
             final EventLoopGroup bossGroup = (EventLoopGroup) accessible(ConnectionManager.class.getDeclaredField("bossGroup")).get(cm);
             final EventLoopGroup workerGroup = (EventLoopGroup) accessible(ConnectionManager.class.getDeclaredField("workerGroup")).get(cm);
 
-            ChannelFuture future = new ServerBootstrap()
-                    .channelFactory(() -> new RakNetServerChannel(() -> {
-                        final DatagramChannel channel = datagramChannelFactory.newChannel();
-                        channel.config().setOption(ChannelOption.IP_TOS, 0x18);
-                        channel.config().setRecvByteBufAllocator(new FixedRecvByteBufAllocator(Constants.LARGE_MTU + 512));
-                        return channel;
-                    }))
-                    .group(bossGroup, workerGroup)
-                    .childHandler(new ChannelInitializer<>() {
-                        @Override
-                        protected void initChannel(Channel channel) throws Exception {
-                            RakNetVelocityConnectionUtil.initChannel(channel);
-                            INIT_CHANNEL.invoke(cm.serverChannelInitializer.get(), channel);
-                            RakNetVelocityConnectionUtil.postInitChannel(channel, false);
-                        }
-                    })
-                    .localAddress(address)
-                    .bind()
-                    .syncUninterruptibly();
+            synchronized (channels) {
+                for (ChannelFuture future : channels) {
+                    if (future.channel().localAddress().equals(address)) return;
+                }
 
-            RaknetifyVelocityPlugin.LOGGER.info("Raknetify server started on {}", future.channel().localAddress());
-            channels.add(future);
+                ChannelFuture future = new ServerBootstrap()
+                        .channelFactory(() -> new RakNetServerChannel(() -> {
+                            final DatagramChannel channel = datagramChannelFactory.newChannel();
+                            channel.config().setOption(ChannelOption.IP_TOS, 0x18);
+                            channel.config().setRecvByteBufAllocator(new FixedRecvByteBufAllocator(Constants.LARGE_MTU + 512));
+                            return channel;
+                        }))
+                        .group(bossGroup, workerGroup)
+                        .childHandler(new ChannelInitializer<>() {
+                            @Override
+                            protected void initChannel(Channel channel) throws Exception {
+                                RakNetVelocityConnectionUtil.initChannel(channel);
+                                INIT_CHANNEL.invoke(cm.serverChannelInitializer.get(), channel);
+                                RakNetVelocityConnectionUtil.postInitChannel(channel, false);
+                            }
+                        })
+                        .localAddress(address)
+                        .bind()
+                        .syncUninterruptibly();
+
+                RaknetifyVelocityPlugin.LOGGER.info("Raknetify server started on {}", future.channel().localAddress());
+                channels.add(future);
+            }
+
         } catch (Throwable t) {
+            if (t instanceof IOException) {
+                RaknetifyVelocityPlugin.LOGGER.error("Raknetify server failed to start on {}: {}", address, t.getMessage());
+                return;
+            }
             throw new RuntimeException("Failed to start Raknetify server", t);
         }
     }
@@ -130,12 +154,14 @@ public class VelocityRaknetifyServer {
         if (evt.getListenerType() != ListenerType.MINECRAFT) return;
         Preconditions.checkArgument(RaknetifyVelocityPlugin.PROXY instanceof VelocityServer);
         Preconditions.checkState(!channels.isEmpty(), "Raknetify Server is not running");
-        for (ChannelFuture channel : channels) {
-            closeServer(channel);
+        synchronized (channels) {
+            active = false;
+            for (ChannelFuture channel : channels) {
+                closeServer(channel);
+            }
+
+            channels.clear();
         }
-
-
-        channels.clear();
     }
 
     private static void closeServer(ChannelFuture channel) {
