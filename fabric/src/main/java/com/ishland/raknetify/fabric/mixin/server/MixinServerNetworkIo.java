@@ -52,7 +52,7 @@ public abstract class MixinServerNetworkIo {
 
     @Shadow @Final private List<ChannelFuture> channels;
     @Unique
-    private Consumer<NetworkInterfaceListener.InterfaceChangeEvent> raknetify$eventListener = null;
+    private Consumer<NetworkInterfaceListener.InterfaceAddressChangeEvent> raknetify$eventListener = null;
 
     @Inject(method = "bind", at = @At("HEAD"))
     private void bindUdp(InetAddress address, int port, CallbackInfo ci) throws IOException {
@@ -65,7 +65,7 @@ public abstract class MixinServerNetworkIo {
                         final Iterator<InetAddress> iterator = networkInterface.getInetAddresses().asIterator();
                         while (iterator.hasNext()) {
                             final InetAddress inetAddress = iterator.next();
-                            System.out.println("Starting raknetify server on interface %s address %s".formatted(networkInterface.getName(), inetAddress));
+                            System.out.println("Starting raknetify server on %s".formatted(inetAddress));
                             bind(inetAddress, hasPortOverride ? raknetify$portOverride : port);
                         }
                     }
@@ -78,29 +78,26 @@ public abstract class MixinServerNetworkIo {
                             }
                             try {
                                 ThreadLocalUtil.setInitializingRaknet(true);
-                                final Iterator<InetAddress> iterator = event.networkInterface().getInetAddresses().asIterator();
-                                while (iterator.hasNext()) {
-                                    final InetAddress inetAddress = iterator.next();
-                                    if (event.added()) {
-                                        System.out.println("Starting raknetify server on interface %s address %s".formatted(event.networkInterface().getName(), inetAddress));
-                                        try {
-                                            bind(inetAddress, hasPortOverride ? raknetify$portOverride : port);
-                                        } catch (IOException t) {
-                                            System.out.println("**** FAILED TO BIND TO PORT! %s".formatted(t.getMessage()));
-                                        } catch (Throwable t) {
-                                            t.printStackTrace();
-                                        }
-                                    } else {
-                                        synchronized (this.channels) {
-                                            for (Iterator<ChannelFuture> iter = this.channels.iterator(); iter.hasNext(); ) {
-                                                ChannelFuture channel = iter.next();
-                                                final SocketAddress socketAddress = channel.channel().localAddress();
-                                                if (socketAddress instanceof InetSocketAddress channelAddress) {
-                                                    if (inetAddress.equals(channelAddress.getAddress())) {
-                                                        System.out.println("Stopping raknetify server on interface %s address %s".formatted(event.networkInterface().getName(), inetAddress));
-                                                        channel.channel().close();
-                                                        iter.remove();
-                                                    }
+                                final InetAddress inetAddress = event.address();
+                                if (event.added()) {
+                                    System.out.println("Starting raknetify server on %s".formatted(inetAddress));
+                                    try {
+                                        bind(inetAddress, hasPortOverride ? raknetify$portOverride : port);
+                                    } catch (IOException t) {
+                                        System.out.println("**** FAILED TO BIND TO PORT! %s".formatted(t.getMessage()));
+                                    } catch (Throwable t) {
+                                        t.printStackTrace();
+                                    }
+                                } else {
+                                    synchronized (this.channels) {
+                                        for (Iterator<ChannelFuture> iter = this.channels.iterator(); iter.hasNext(); ) {
+                                            ChannelFuture channel = iter.next();
+                                            final SocketAddress socketAddress = channel.channel().localAddress();
+                                            if (socketAddress instanceof InetSocketAddress channelAddress) {
+                                                if (inetAddress.equals(channelAddress.getAddress())) {
+                                                    System.out.println("Stopping raknetify server on %s".formatted(inetAddress));
+                                                    channel.channel().close();
+                                                    iter.remove();
                                                 }
                                             }
                                         }
@@ -115,6 +112,7 @@ public abstract class MixinServerNetworkIo {
                         NetworkInterfaceListener.addListener(event -> this.server.submit(() -> raknetify$eventListener.accept(event)));
                     }
                 } else {
+                    System.out.println("Starting raknetify server on %s".formatted(address));
                     bind(address, hasPortOverride ? raknetify$portOverride : port);
                 }
             } finally {

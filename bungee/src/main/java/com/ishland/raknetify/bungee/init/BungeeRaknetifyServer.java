@@ -14,7 +14,6 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.FixedRecvByteBufAllocator;
 import io.netty.channel.ReflectiveChannelFactory;
 import io.netty.channel.socket.DatagramChannel;
-import io.netty.channel.unix.DomainSocketAddress;
 import io.netty.util.AttributeKey;
 import it.unimi.dsi.fastutil.objects.ObjectIterator;
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
@@ -66,10 +65,11 @@ public class BungeeRaknetifyServer {
     private static final Reference2ReferenceOpenHashMap<Channel, ReferenceOpenHashSet<ChannelFuture>> channels = new Reference2ReferenceOpenHashMap<>();
     private static final ReferenceOpenHashSet<ChannelFuture> nonWildcardChannels = new ReferenceOpenHashSet<>();
 
-    private static boolean active = false;
+    private static volatile boolean active = false;
+    private static volatile int activeIndex = 0;
     private static boolean injected = false;
 
-    private static Consumer<NetworkInterfaceListener.InterfaceChangeEvent> listener = null;
+    private static volatile Consumer<NetworkInterfaceListener.InterfaceAddressChangeEvent> listener = null;
 
     public static void inject() {
         if (active) return;
@@ -96,10 +96,13 @@ public class BungeeRaknetifyServer {
                 }
             }
 
+            int currentActiveIndex = ++activeIndex;
             listener = event -> {
                 if (!active) {
                     NetworkInterfaceListener.removeListener(listener);
                 }
+
+                if (currentActiveIndex != activeIndex) return; // we can't remove ourselves now, is plugin reloaded?
 
                 if (event.added()) {
                     for (Channel channel : channels.keySet()) {
@@ -109,20 +112,12 @@ public class BungeeRaknetifyServer {
                     for (ReferenceOpenHashSet<ChannelFuture> futures : channels.values()) {
                         for (ObjectIterator<ChannelFuture> iterator = futures.iterator(); iterator.hasNext(); ) {
                             ChannelFuture future = iterator.next();
-                            final Iterator<InetAddress> iterator1 = event.networkInterface().getInetAddresses().asIterator();
-
-                            __loop0:
-                            while (iterator1.hasNext()) {
-                                final InetAddress address = iterator1.next();
-                                if (((InetSocketAddress) future.channel().localAddress()).getAddress().equals(address)) {
-                                    RaknetifyBungeePlugin.LOGGER.info("Closing Raknetify server %s".formatted(future.channel().localAddress()));
-                                    future.channel().close();
-                                    iterator.remove();
-                                    break __loop0;
-                                }
+                            if (((InetSocketAddress) future.channel().localAddress()).getAddress().equals(event.address())) {
+                                RaknetifyBungeePlugin.LOGGER.info("Closing Raknetify server %s".formatted(future.channel().localAddress()));
+                                future.channel().close();
+                                iterator.remove();
                             }
                         }
-
                     }
                 }
             };
