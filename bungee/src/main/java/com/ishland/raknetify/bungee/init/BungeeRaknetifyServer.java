@@ -3,6 +3,7 @@ package com.ishland.raknetify.bungee.init;
 import com.ishland.raknetify.bungee.RaknetifyBungeePlugin;
 import com.ishland.raknetify.bungee.connection.RakNetBungeeConnectionUtil;
 import com.ishland.raknetify.common.Constants;
+import com.ishland.raknetify.common.connection.RakNetConnectionUtil;
 import com.ishland.raknetify.common.util.NetworkInterfaceListener;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
@@ -220,7 +221,7 @@ public class BungeeRaknetifyServer {
         final ChannelFuture future = new ServerBootstrap()
                 .channelFactory(() -> new RakNetServerChannel(() -> {
                     final DatagramChannel channel = factory.newChannel();
-                    channel.config().setOption(ChannelOption.IP_TOS, 0x18);
+                    channel.config().setOption(ChannelOption.IP_TOS, RakNetConnectionUtil.DEFAULT_IP_TOS);
                     channel.config().setRecvByteBufAllocator(new FixedRecvByteBufAllocator(Constants.LARGE_MTU + 512));
                     return channel;
                 }))

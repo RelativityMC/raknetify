@@ -2,6 +2,7 @@ package com.ishland.raknetify.velocity.init;
 
 import com.google.common.base.Preconditions;
 import com.ishland.raknetify.common.Constants;
+import com.ishland.raknetify.common.connection.RakNetConnectionUtil;
 import com.ishland.raknetify.common.util.NetworkInterfaceListener;
 import com.ishland.raknetify.velocity.RaknetifyVelocityPlugin;
 import com.ishland.raknetify.velocity.connection.RakNetVelocityConnectionUtil;
@@ -120,7 +121,7 @@ public class VelocityRaknetifyServer {
                 ChannelFuture future = new ServerBootstrap()
                         .channelFactory(() -> new RakNetServerChannel(() -> {
                             final DatagramChannel channel = datagramChannelFactory.newChannel();
-                            channel.config().setOption(ChannelOption.IP_TOS, 0x18);
+                            channel.config().setOption(ChannelOption.IP_TOS, RakNetConnectionUtil.DEFAULT_IP_TOS);
                             channel.config().setRecvByteBufAllocator(new FixedRecvByteBufAllocator(Constants.LARGE_MTU + 512));
                             return channel;
                         }))

@@ -1,6 +1,7 @@
 package com.ishland.raknetify.fabric.mixin.server;
 
 import com.ishland.raknetify.common.Constants;
+import com.ishland.raknetify.common.connection.RakNetConnectionUtil;
 import com.ishland.raknetify.common.util.ThreadLocalUtil;
 import com.ishland.raknetify.common.util.NetworkInterfaceListener;
 import io.netty.bootstrap.AbstractBootstrap;
@@ -128,6 +129,7 @@ public abstract class MixinServerNetworkIo {
                 ? instance.channelFactory(() -> new RakNetServerChannel(() -> {
                     final DatagramChannel channel = useEpoll ? new EpollDatagramChannel() : new NioDatagramChannel();
                     channel.config().setOption(ChannelOption.SO_REUSEADDR, true);
+                    channel.config().setOption(ChannelOption.IP_TOS, RakNetConnectionUtil.DEFAULT_IP_TOS);
                     channel.config().setRecvByteBufAllocator(new FixedRecvByteBufAllocator(Constants.LARGE_MTU + 512));
                     return channel;
                 }))

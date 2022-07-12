@@ -1,10 +1,12 @@
 package com.ishland.raknetify.fabric.mixin.common;
 
 import com.ishland.raknetify.common.Constants;
+import com.ishland.raknetify.common.connection.RakNetConnectionUtil;
 import com.ishland.raknetify.common.util.ThreadLocalUtil;
 import io.netty.bootstrap.AbstractBootstrap;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelOption;
 import io.netty.channel.FixedRecvByteBufAllocator;
 import io.netty.channel.epoll.Epoll;
 import io.netty.channel.epoll.EpollDatagramChannel;
@@ -49,6 +51,7 @@ public class MixinCCConnect {
                     final boolean initializingRaknetLargeMTU = ThreadLocalUtil.isInitializingRaknetLargeMTU();
                     final RakNetClientThreadedChannel channel = new RakNetClientThreadedChannel(() -> {
                         final DatagramChannel channel1 = actuallyUseEpoll ? new EpollDatagramChannel() : new NioDatagramChannel();
+                        channel1.config().setOption(ChannelOption.IP_TOS, RakNetConnectionUtil.DEFAULT_IP_TOS);
                         if (initializingRaknetLargeMTU)
                             channel1.config().setRecvByteBufAllocator(new FixedRecvByteBufAllocator(Constants.LARGE_MTU + 512));
                         return channel1;

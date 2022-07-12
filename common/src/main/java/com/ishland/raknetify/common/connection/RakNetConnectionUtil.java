@@ -19,6 +19,12 @@ import static com.ishland.raknetify.common.util.ReflectionUtil.accessible;
 
 public class RakNetConnectionUtil {
 
+    public static final int IP_TOS_LOWDELAY = 0b00010000;
+    public static final int IP_TOS_THROUGHPUT = 0b00001000;
+    public static final int IP_TOS_RELIABILITY = 0b00000100;
+
+    public static final int DEFAULT_IP_TOS = IP_TOS_LOWDELAY | IP_TOS_THROUGHPUT;
+
     private RakNetConnectionUtil() {
     }
 
