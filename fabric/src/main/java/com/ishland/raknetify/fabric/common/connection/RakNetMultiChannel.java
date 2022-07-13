@@ -82,6 +82,9 @@ public class RakNetMultiChannel {
             "net/minecraft/class_7519", // ChatPreviewStateChangeS2CPacket
             "net/minecraft/class_7438", // ChatMessageS2CPacket
             "net/minecraft/class_7494", // ChatPreviewS2CPacket
+            "net/minecraft/class_7618", // MOJMAP: ClientboundPlayerChatHeaderPacket
+            "net/minecraft/class_7597", // ChatSuggestionsS2CPacket
+            "net/minecraft/class_7617", // MOJMAP: ClientboundDeleteChatPacket
             "net/minecraft/class_7495", // ServerMetadataS2CPacket
             "net/minecraft/class_5894", // OverlayMessageS2C
             "net/minecraft/class_2748", // ExperienceBarUpdateS2C
@@ -316,7 +319,7 @@ public class RakNetMultiChannel {
             if (foundUnknownClasses.add(clazz)) {
                 final MappingResolver mappingResolver = FabricLoader.getInstance().getMappingResolver();
                 final String intermediary = mappingResolver.unmapClassName("intermediary", clazz.getName());
-                System.err.println("Raknetify:Warning: unknown packet type %s (%s) for raknet multi-channel".formatted(intermediary.replace('.', '/'), clazz.getName()));
+                System.err.println("Raknetify: Warning: unknown packet type %s (%s) for raknet multi-channel".formatted(intermediary.replace('.', '/'), clazz.getName()));
             }
             channelOverride = 7;
         }
