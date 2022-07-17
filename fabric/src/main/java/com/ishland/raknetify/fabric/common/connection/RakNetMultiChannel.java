@@ -85,6 +85,7 @@ public class RakNetMultiChannel {
             "net/minecraft/class_7618", // MOJMAP: ClientboundPlayerChatHeaderPacket
             "net/minecraft/class_7597", // ChatSuggestionsS2CPacket
             "net/minecraft/class_7617", // MOJMAP: ClientboundDeleteChatPacket
+            "net/minecraft/class_7640", // UMMAPPED: chat related anyways
             "net/minecraft/class_7495", // ServerMetadataS2CPacket
             "net/minecraft/class_5894", // OverlayMessageS2C
             "net/minecraft/class_2748", // ExperienceBarUpdateS2C
