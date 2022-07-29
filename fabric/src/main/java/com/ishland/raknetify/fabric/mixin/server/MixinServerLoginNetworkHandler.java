@@ -5,6 +5,7 @@ import com.ishland.raknetify.fabric.mixin.access.IClientConnection;
 import net.minecraft.network.ClientConnection;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerLoginNetworkHandler;
+import org.spongepowered.asm.mixin.Dynamic;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -32,7 +33,14 @@ public class MixinServerLoginNetworkHandler {
         return server.getNetworkCompressionThreshold();
     }
 
-    @Inject(method = "acceptPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/ClientConnection;send(Lnet/minecraft/network/Packet;Lio/netty/util/concurrent/GenericFutureListener;)V", ordinal = 0, shift = At.Shift.AFTER))
+    @Dynamic
+    @Inject(
+            method = "acceptPlayer",
+            at = {
+                    @At(value = "INVOKE", target = "Lnet/minecraft/network/ClientConnection;send(Lnet/minecraft/network/Packet;Lnet/minecraft/class_7648;)V", ordinal = 0, shift = At.Shift.AFTER),
+                    @At(value = "INVOKE", target = "Lnet/minecraft/network/ClientConnection;method_10752(Lnet/minecraft/network/Packet;Lio/netty/util/concurrent/GenericFutureListener;)V", ordinal = 0, shift = At.Shift.AFTER)
+            }
+    )
     private void setupDummyCompressionImmediately(CallbackInfo ci) throws Throwable {
         ((IClientConnection) this.connection).getChannel().eventLoop().execute(() -> {
             try {
