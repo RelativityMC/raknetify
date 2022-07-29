@@ -17,6 +17,9 @@
   "entrypoints": {
     "main": [
       "com.ishland.raknetify.fabric.RaknetifyFabric"
+    ],
+    "preLaunch": [
+      "com.ishland.raknetify.fabric.RaknetifyFabric"
     ]
   },
 

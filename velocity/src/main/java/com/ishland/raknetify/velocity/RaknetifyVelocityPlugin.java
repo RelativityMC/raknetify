@@ -61,7 +61,7 @@ public class RaknetifyVelocityPlugin {
         LOGGER = this.logger;
 
         final CodeSource codeSource = RaknetifyVelocityPlugin.class.getProtectionDomain().getCodeSource();
-        if (codeSource != null) {
+        if (codeSource != null && !isDevLaunch()) {
             try {
                 LOGGER.info("Bootstrapping raknetify in wrapped environment");
                 final URLClassLoader urlClassLoader = new RaknetifyURLClassLoader("raknetify wrapper", new URL[]{codeSource.getLocation()}, RaknetifyVelocityPlugin.class.getClassLoader());
@@ -79,6 +79,15 @@ public class RaknetifyVelocityPlugin {
             Class.forName("com.ishland.raknetify.velocity.RaknetifyVelocityLaunchWrapper").getMethod("launch").invoke(null);
         } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException | ClassNotFoundException ex) {
             throw new RuntimeException(ex);
+        }
+    }
+
+    private static boolean isDevLaunch() {
+        try {
+            ClassLoader.getSystemClassLoader().loadClass("com.ishland.raknetify.velocity.RaknetifyVelocityPlugin");
+            return true;
+        } catch (ClassNotFoundException e) {
+            return false;
         }
     }
 

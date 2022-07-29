@@ -16,6 +16,7 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.loader.api.entrypoint.PreLaunchEntrypoint;
 import net.minecraft.SharedConstants;
 import net.minecraft.network.NetworkSide;
 import net.minecraft.network.NetworkState;
@@ -30,12 +31,23 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class RaknetifyFabric implements ModInitializer {
+public class RaknetifyFabric implements ModInitializer, PreLaunchEntrypoint {
+
+    private static final boolean SAVE_CHANNEL_MAPPINGS = Boolean.getBoolean("raknetify.saveChannelMappings");
+    private static final boolean EXIT_AFTER_SAVE_CHANNEL_MAPPINGS = Boolean.getBoolean("raknetify.saveChannelMappings.exit");
+    private static final boolean HANDLE_MAPPINGS_ON_PRELAUNCH = Boolean.getBoolean("raknetify.handleMappingsOnPreLaunch");
+
+
+    @Override
+    public void onPreLaunch() {
+        if (HANDLE_MAPPINGS_ON_PRELAUNCH)
+            handleMappings();
+    }
+
     @Override
     public void onInitialize() {
-        RakNetMultiChannel.init();
-        RakNetMultiChannel.iterateKnownPackets();
-        NetworkInterfaceListener.init();
+        if (!HANDLE_MAPPINGS_ON_PRELAUNCH)
+            handleMappings();
 
         // If new property name is present, use it
         String levelStr = SystemPropertyUtil.get("io.netty.leakDetection.level", ResourceLeakDetector.Level.SIMPLE.name());
@@ -46,6 +58,12 @@ public class RaknetifyFabric implements ModInitializer {
         }
         System.out.println("Raknetify: Using leak detector level %s".formatted(level));
         ResourceLeakDetector.setLevel(level);
+    }
+
+    private static void handleMappings() {
+        RakNetMultiChannel.init();
+        RakNetMultiChannel.iterateKnownPackets();
+        NetworkInterfaceListener.init();
 
         Int2IntArrayMap s2c = new Int2IntArrayMap();
         Int2IntArrayMap c2s = new Int2IntArrayMap();
@@ -57,7 +75,7 @@ public class RaknetifyFabric implements ModInitializer {
                     c2s.put(type.getIntValue(), RakNetMultiChannel.getPacketChannelOverride(type.getKey()));
             }
         }
-        if (Boolean.getBoolean("raknetify.saveChannelMappings")) {
+        if (SAVE_CHANNEL_MAPPINGS) {
             final Gson gson = new GsonBuilder()
                     .setPrettyPrinting()
                     .create();
@@ -80,24 +98,31 @@ public class RaknetifyFabric implements ModInitializer {
                         final ProtocolMultiChannelMappings.VersionMapping value = entry.getValue();
                         value.s2c = value.s2c.int2IntEntrySet().stream()
                                 .sorted(Comparator.comparingInt(Int2IntMap.Entry::getIntKey))
-                                .collect(Collectors.toMap(Int2IntMap.Entry::getIntKey, Int2IntMap.Entry::getIntValue, (o, o2) -> {throw new RuntimeException("Unresolvable conflicts");}, Int2IntArrayMap::new));
+                                .collect(Collectors.toMap(Int2IntMap.Entry::getIntKey, Int2IntMap.Entry::getIntValue, (o, o2) -> {
+                                    throw new RuntimeException("Unresolvable conflicts");
+                                }, Int2IntArrayMap::new));
                         value.c2s = value.c2s.int2IntEntrySet().stream()
                                 .sorted(Comparator.comparingInt(Int2IntMap.Entry::getIntKey))
-                                .collect(Collectors.toMap(Int2IntMap.Entry::getIntKey, Int2IntMap.Entry::getIntValue, (o, o2) -> {throw new RuntimeException("Unresolvable conflicts");}, Int2IntArrayMap::new));
+                                .collect(Collectors.toMap(Int2IntMap.Entry::getIntKey, Int2IntMap.Entry::getIntValue, (o, o2) -> {
+                                    throw new RuntimeException("Unresolvable conflicts");
+                                }, Int2IntArrayMap::new));
                         return new AbstractInt2ObjectMap.BasicEntry<>(
                                 entry.getIntKey(),
                                 value
                         );
                     })
                     .sorted(Comparator.comparingInt(Int2ObjectMap.Entry::getIntKey))
-                    .collect(Collectors.toMap(Int2ObjectMap.Entry::getIntKey, Int2ObjectMap.Entry::getValue, (o, o2) -> {throw new RuntimeException("Unresolvable conflicts");}, Int2ObjectArrayMap::new));
+                    .collect(Collectors.toMap(Int2ObjectMap.Entry::getIntKey, Int2ObjectMap.Entry::getValue, (o, o2) -> {
+                        throw new RuntimeException("Unresolvable conflicts");
+                    }, Int2ObjectArrayMap::new));
 
             try {
                 Files.writeString(path, gson.toJson(mappings), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
             } catch (IOException e) {
                 System.out.println("Error writing generated mappings: " + e.toString());
             }
-            if (Boolean.getBoolean("raknetify.saveChannelMappings.exit")) System.exit(0);
+            if (EXIT_AFTER_SAVE_CHANNEL_MAPPINGS) System.exit(0);
         }
     }
+
 }

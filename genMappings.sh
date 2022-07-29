@@ -3,9 +3,9 @@
 loader_version=0.14.6
 installer_version=0.11.0
 
-declare -a vers
+#declare -a vers
 if [[ -z "$@" ]]; then
-  vers="1.16.5 1.17 1.17.1 1.18.1 1.18.2 1.19 1.19.1-pre5"
+  vers="1.16.5 1.17 1.17.1 1.18.1 1.18.2 1.19 1.19.1"
 else
   vers=$@
 fi
@@ -15,7 +15,7 @@ echo $vers
 ./gradlew clean build || exit 1
 
 mkdir run-mappingsGen || true
-cd run-mappingsGen
+cd run-mappingsGen  || exit 1
 rm -r mods
 mkdir mods
 cp ../fabric/build/libs/raknetify-*-all.jar mods/
@@ -26,11 +26,15 @@ fi
 
 for version in $vers
 do
-  wget -O fabric-server-mc$version.jar https://meta.fabricmc.net/v2/versions/loader/$version/$loader_version/$installer_version/server/jar || exit 1
+  if [ -e fabric-server-mc"$version".jar ]; then
+    echo "Using existing fabric-server-mc$version.jar"
+  else
+    wget -O fabric-server-mc"$version".jar https://meta.fabricmc.net/v2/versions/loader/"$version"/$loader_version/$installer_version/server/jar || exit 1
+  fi
 
   sleep 1
 
-  java -Draknetify.saveChannelMappings=true -Draknetify.saveChannelMappings.exit=true -jar fabric-server-mc$version.jar || exit 1
+  java -Draknetify.saveChannelMappings=true -Draknetify.saveChannelMappings.exit=true -Draknetify.handleMappingsOnPreLaunch=true -jar fabric-server-mc"$version".jar || exit 1
 done
 
 cp channelMappings.json ../common/src/main/resources/raknetify-channel-mappings.json
