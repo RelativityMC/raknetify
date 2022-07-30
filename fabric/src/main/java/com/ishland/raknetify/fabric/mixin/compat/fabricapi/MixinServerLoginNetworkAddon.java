@@ -41,7 +41,14 @@ public class MixinServerLoginNetworkAddon {
 
     @SuppressWarnings("DefaultAnnotationParam")
     @Dynamic("Pseudo")
-    @Inject(method = "sendCompressionPacket()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/ClientConnection;send(Lnet/minecraft/network/Packet;Lio/netty/util/concurrent/GenericFutureListener;)V", ordinal = 0, shift = At.Shift.AFTER, remap = true), remap = false)
+    @Inject(
+            method = "sendCompressionPacket()V",
+            at = {
+                    @At(value = "INVOKE", target = "Lnet/minecraft/network/ClientConnection;send(Lnet/minecraft/network/Packet;Lnet/minecraft/class_7648;)V", ordinal = 0, shift = At.Shift.AFTER),
+                    @At(value = "INVOKE", target = "Lnet/minecraft/network/ClientConnection;method_10752(Lnet/minecraft/network/Packet;Lio/netty/util/concurrent/GenericFutureListener;)V", ordinal = 0, shift = At.Shift.AFTER, remap = true)
+            },
+            remap = false
+    )
     private void setupDummyCompressionImmediately(CallbackInfo info) {
         ((IClientConnection) this.connection).getChannel().eventLoop().execute(() -> {
             try {
