@@ -1,6 +1,6 @@
 #!/bin/bash
 
-loader_version=0.14.6
+loader_version=0.14.8
 installer_version=0.11.0
 
 #declare -a vers

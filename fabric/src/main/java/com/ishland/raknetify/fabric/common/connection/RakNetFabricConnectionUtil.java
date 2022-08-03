@@ -31,6 +31,7 @@ public class RakNetFabricConnectionUtil {
             final MultiChannellingPacketCapture handler = new MultiChannellingPacketCapture();
             channel.pipeline().addLast("raknetify-multi-channel-packet-cature", handler);
             channel.pipeline().get(RakNetFabricMultiChannelCodec.class).setCapture(handler);
+            channel.pipeline().addLast("raknetify-handle-compression-compatibility", new RakNetCompressionCompatibilityHandler());
         }
     }
 

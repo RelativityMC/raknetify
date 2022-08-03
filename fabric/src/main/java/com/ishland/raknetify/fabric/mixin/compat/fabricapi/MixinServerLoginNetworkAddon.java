@@ -39,31 +39,4 @@ public class MixinServerLoginNetworkAddon {
         return server.getNetworkCompressionThreshold();
     }
 
-    @SuppressWarnings("DefaultAnnotationParam")
-    @Dynamic("Pseudo")
-    @Inject(
-            method = "sendCompressionPacket()V",
-            at = {
-                    @At(value = "INVOKE", target = "Lnet/minecraft/network/ClientConnection;send(Lnet/minecraft/network/Packet;Lnet/minecraft/class_7648;)V", ordinal = 0, shift = At.Shift.AFTER),
-                    @At(value = "INVOKE", target = "Lnet/minecraft/network/ClientConnection;method_10752(Lnet/minecraft/network/Packet;Lio/netty/util/concurrent/GenericFutureListener;)V", ordinal = 0, shift = At.Shift.AFTER, remap = true)
-            },
-            remap = false
-    )
-    private void setupDummyCompressionImmediately(CallbackInfo info) {
-        ((IClientConnection) this.connection).getChannel().eventLoop().execute(() -> {
-            try {
-                try {
-                    this.connection.setCompressionThreshold(this.server.getNetworkCompressionThreshold(), false);
-                } catch (NoSuchMethodError e) {
-                    System.out.println("Raknetify: An error occurred when starting compression, using alternative method: " + e.toString());
-                    //noinspection JavaReflectionMemberAccess
-                    final Method method_10760 = ClientConnection.class.getMethod("method_10760", int.class);
-                    method_10760.invoke(this.connection, this.server.getNetworkCompressionThreshold());
-                }
-            } catch (Throwable t) {
-                t.printStackTrace();
-            }
-        });
-    }
-
 }
