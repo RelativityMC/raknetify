@@ -32,13 +32,13 @@ public class MixinConnectionScreen1 extends Thread {
     @Unique
     private boolean raknetLargeMTU = false;
 
-    @Inject(method = "<init>(Lnet/minecraft/client/gui/screen/ConnectScreen;Ljava/lang/String;Lnet/minecraft/client/network/ServerAddress;Lnet/minecraft/client/MinecraftClient;)V", at = @At("RETURN"))
-    private void onInit(ConnectScreen connectScreen, String string, ServerAddress serverAddress, MinecraftClient minecraftClient, CallbackInfo ci) {
-        final PrefixUtil.Info info = PrefixUtil.getInfo(serverAddress.getAddress());
+    @Inject(method = "<init>*", at = @At("RETURN"))
+    private void onInit(CallbackInfo ci) {
+        final PrefixUtil.Info info = PrefixUtil.getInfo(this.field_33737.getAddress());
         if (info.useRakNet()) {
             this.isRaknet = true;
             this.raknetLargeMTU = info.largeMTU();
-            this.field_33737 = new ServerAddress(info.stripped(), serverAddress.getPort());
+            this.field_33737 = new ServerAddress(info.stripped(), this.field_33737.getPort());
         }
     }
 
