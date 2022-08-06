@@ -6,6 +6,7 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
 import net.minecraft.network.ClientConnection;
+import net.minecraft.network.NetworkState;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -25,17 +26,20 @@ public abstract class MixinClientConnection {
 
     @Shadow public abstract SocketAddress getAddress();
 
+    @Shadow protected abstract NetworkState getState();
+
     @Unique
     private volatile boolean isClosing = false;
 
     @Redirect(method = "disconnect", at = @At(value = "INVOKE", target = "Lio/netty/channel/ChannelFuture;awaitUninterruptibly()Lio/netty/channel/ChannelFuture;", remap = false))
     private ChannelFuture noDisconnectWait(ChannelFuture instance) {
         isClosing = true;
-        if (instance.channel().eventLoop().inEventLoop()) {
-            return instance; // no-op
-        } else {
-            return instance.awaitUninterruptibly();
-        }
+//        if (instance.channel().eventLoop().inEventLoop()) {
+//            return instance; // no-op
+//        } else {
+//            return instance.awaitUninterruptibly();
+//        }
+        return instance;
     }
 
     @Redirect(method = "*", at = @At(value = "INVOKE", target = "Lio/netty/channel/Channel;isOpen()Z", remap = false))
@@ -62,7 +66,7 @@ public abstract class MixinClientConnection {
             System.err.println("Exception caught for connection %s".formatted(this.getAddress()));
             System.err.println(DebugUtil.printChannelDetails(this.channel));
             ex.printStackTrace();
-        } else {
+        } else if (this.getState() != null && this.getState() != NetworkState.HANDSHAKING) {
             System.err.println(ex.toString());
         }
     }
