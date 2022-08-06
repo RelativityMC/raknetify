@@ -2,12 +2,14 @@ package com.ishland.raknetify.fabric.mixin.server;
 
 import com.ishland.raknetify.common.Constants;
 import com.ishland.raknetify.common.connection.RakNetConnectionUtil;
+import com.ishland.raknetify.common.connection.RaknetifyEventLoops;
 import com.ishland.raknetify.common.util.ThreadLocalUtil;
 import com.ishland.raknetify.common.util.NetworkInterfaceListener;
 import io.netty.bootstrap.AbstractBootstrap;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelOption;
+import io.netty.channel.EventLoopGroup;
 import io.netty.channel.FixedRecvByteBufAllocator;
 import io.netty.channel.ServerChannel;
 import io.netty.channel.epoll.Epoll;
@@ -47,11 +49,15 @@ public abstract class MixinServerNetworkIo {
     @Final
     private MinecraftServer server;
 
-    @Shadow public abstract void bind(@Nullable InetAddress address, int port) throws IOException;
+    @Shadow
+    public abstract void bind(@Nullable InetAddress address, int port) throws IOException;
 
-    @Shadow public volatile boolean active;
+    @Shadow
+    public volatile boolean active;
 
-    @Shadow @Final private List<ChannelFuture> channels;
+    @Shadow
+    @Final
+    private List<ChannelFuture> channels;
     @Unique
     private Consumer<NetworkInterfaceListener.InterfaceAddressChangeEvent> raknetify$eventListener = null;
 
@@ -122,17 +128,25 @@ public abstract class MixinServerNetworkIo {
         }
     }
 
+    @Redirect(method = "bind", at = @At(value = "INVOKE", target = "Lio/netty/bootstrap/ServerBootstrap;group(Lio/netty/channel/EventLoopGroup;)Lio/netty/bootstrap/ServerBootstrap;", remap = false))
+    private ServerBootstrap redirectGroup(ServerBootstrap instance, EventLoopGroup group) {
+        final boolean useEpoll = Epoll.isAvailable() && this.server.isUsingNativeTransport();
+        return ThreadLocalUtil.isInitializingRaknet()
+                ? instance.group(useEpoll ? RaknetifyEventLoops.EPOLL_EVENT_LOOP_GROUP.get() : RaknetifyEventLoops.NIO_EVENT_LOOP_GROUP.get())
+                : instance.group(group);
+    }
+
     @Redirect(method = "bind", at = @At(value = "INVOKE", target = "Lio/netty/bootstrap/ServerBootstrap;channel(Ljava/lang/Class;)Lio/netty/bootstrap/AbstractBootstrap;", remap = false))
     private AbstractBootstrap<ServerBootstrap, ServerChannel> redirectChannel(ServerBootstrap instance, Class<? extends ServerSocketChannel> aClass) {
         final boolean useEpoll = Epoll.isAvailable() && this.server.isUsingNativeTransport();
         return ThreadLocalUtil.isInitializingRaknet()
                 ? instance.channelFactory(() -> new RakNetServerChannel(() -> {
-                    final DatagramChannel channel = useEpoll ? new EpollDatagramChannel() : new NioDatagramChannel();
-                    channel.config().setOption(ChannelOption.SO_REUSEADDR, true);
-                    channel.config().setOption(ChannelOption.IP_TOS, RakNetConnectionUtil.DEFAULT_IP_TOS);
-                    channel.config().setRecvByteBufAllocator(new FixedRecvByteBufAllocator(Constants.LARGE_MTU + 512));
-                    return channel;
-                }))
+            final DatagramChannel channel = useEpoll ? new EpollDatagramChannel() : new NioDatagramChannel();
+            channel.config().setOption(ChannelOption.SO_REUSEADDR, true);
+            channel.config().setOption(ChannelOption.IP_TOS, RakNetConnectionUtil.DEFAULT_IP_TOS);
+            channel.config().setRecvByteBufAllocator(new FixedRecvByteBufAllocator(Constants.LARGE_MTU + 512));
+            return channel;
+        }))
                 : instance.channel(aClass);
     }
 
