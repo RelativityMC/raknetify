@@ -32,7 +32,7 @@ public class MixinConnectionScreen1 extends Thread {
     @Unique
     private boolean raknetLargeMTU = false;
 
-    @Inject(method = "<init>*", at = @At("RETURN"))
+    @Inject(method = "<init>*", at = @At("RETURN"), remap = false)
     private void onInit(CallbackInfo ci) {
         final PrefixUtil.Info info = PrefixUtil.getInfo(this.field_33737.getAddress());
         if (info.useRakNet()) {
