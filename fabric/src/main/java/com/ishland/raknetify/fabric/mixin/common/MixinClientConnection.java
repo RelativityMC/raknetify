@@ -2,6 +2,7 @@ package com.ishland.raknetify.fabric.mixin.common;
 
 import com.ishland.raknetify.common.Constants;
 import com.ishland.raknetify.common.util.DebugUtil;
+import com.ishland.raknetify.fabric.common.util.NetworkStates;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
@@ -28,6 +29,7 @@ public abstract class MixinClientConnection {
 
     @Shadow protected abstract NetworkState getState();
 
+    @Shadow private SocketAddress address;
     @Unique
     private volatile boolean isClosing = false;
 
@@ -67,7 +69,7 @@ public abstract class MixinClientConnection {
             System.err.println(DebugUtil.printChannelDetails(this.channel));
             ex.printStackTrace();
         } else if (this.getState() != null && this.getState() != NetworkState.HANDSHAKING) {
-            System.err.println(ex.toString());
+            System.err.println(String.format("%s %s %s", this.address, NetworkStates.getName(this.getState()), ex.toString()));
         }
     }
 
