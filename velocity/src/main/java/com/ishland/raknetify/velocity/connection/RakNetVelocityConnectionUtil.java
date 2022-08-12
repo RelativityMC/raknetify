@@ -73,7 +73,10 @@ public class RakNetVelocityConnectionUtil {
             RaknetifyVelocityPlugin.LOGGER.warn("Connected server ({}) have no underlying connection?", connectedServer);
             return;
         }
-        serverConnection.getChannel().pipeline().addBefore(Connections.HANDLER, RakNetVelocityServerChannelEventListener.NAME, new RakNetVelocityServerChannelEventListener(player.getConnection().getChannel()));
+        final Channel channel = player.getConnection().getChannel();
+        if (channel.config() instanceof RakNet.Config) {
+            serverConnection.getChannel().pipeline().addBefore(Connections.HANDLER, RakNetVelocityServerChannelEventListener.NAME, new RakNetVelocityServerChannelEventListener(channel));
+        }
     }
 
 }
