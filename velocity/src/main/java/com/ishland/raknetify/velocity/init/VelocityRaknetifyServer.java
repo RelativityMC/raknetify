@@ -122,7 +122,7 @@ public class VelocityRaknetifyServer {
                         .channelFactory(() -> new RakNetServerChannel(() -> {
                             final DatagramChannel channel = datagramChannelFactory.newChannel();
                             channel.config().setOption(ChannelOption.IP_TOS, RakNetConnectionUtil.DEFAULT_IP_TOS);
-                            channel.config().setRecvByteBufAllocator(new FixedRecvByteBufAllocator(Constants.LARGE_MTU + 512));
+                            channel.config().setRecvByteBufAllocator(new FixedRecvByteBufAllocator(Constants.LARGE_MTU + 512).maxMessagesPerRead(128));
                             return channel;
                         }))
                         .group(bossGroup, workerGroup)

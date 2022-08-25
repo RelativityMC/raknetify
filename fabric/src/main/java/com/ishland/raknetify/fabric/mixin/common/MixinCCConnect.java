@@ -53,7 +53,9 @@ public class MixinCCConnect {
                         final DatagramChannel channel1 = actuallyUseEpoll ? new EpollDatagramChannel() : new NioDatagramChannel();
                         channel1.config().setOption(ChannelOption.IP_TOS, RakNetConnectionUtil.DEFAULT_IP_TOS);
                         if (initializingRaknetLargeMTU)
-                            channel1.config().setRecvByteBufAllocator(new FixedRecvByteBufAllocator(Constants.LARGE_MTU + 512));
+                            channel1.config().setRecvByteBufAllocator(new FixedRecvByteBufAllocator(Constants.LARGE_MTU + 512).maxMessagesPerRead(128));
+                        else
+                            channel1.config().setRecvByteBufAllocator(new FixedRecvByteBufAllocator(Constants.DEFAULT_MTU + 512).maxMessagesPerRead(128));
                         return channel1;
                     });
                     RakNet.config(channel).setMTU(initializingRaknetLargeMTU ? Constants.LARGE_MTU : Constants.DEFAULT_MTU);

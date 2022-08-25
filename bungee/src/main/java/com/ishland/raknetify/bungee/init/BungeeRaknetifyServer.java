@@ -222,7 +222,7 @@ public class BungeeRaknetifyServer {
                 .channelFactory(() -> new RakNetServerChannel(() -> {
                     final DatagramChannel channel = factory.newChannel();
                     channel.config().setOption(ChannelOption.IP_TOS, RakNetConnectionUtil.DEFAULT_IP_TOS);
-                    channel.config().setRecvByteBufAllocator(new FixedRecvByteBufAllocator(Constants.LARGE_MTU + 512));
+                    channel.config().setRecvByteBufAllocator(new FixedRecvByteBufAllocator(Constants.LARGE_MTU + 512).maxMessagesPerRead(128));
                     return channel;
                 }))
                 .option(ChannelOption.SO_REUSEADDR, true)

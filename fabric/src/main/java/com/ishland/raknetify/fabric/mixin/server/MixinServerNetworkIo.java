@@ -144,7 +144,7 @@ public abstract class MixinServerNetworkIo {
             final DatagramChannel channel = useEpoll ? new EpollDatagramChannel() : new NioDatagramChannel();
             channel.config().setOption(ChannelOption.SO_REUSEADDR, true);
             channel.config().setOption(ChannelOption.IP_TOS, RakNetConnectionUtil.DEFAULT_IP_TOS);
-            channel.config().setRecvByteBufAllocator(new FixedRecvByteBufAllocator(Constants.LARGE_MTU + 512));
+            channel.config().setRecvByteBufAllocator(new FixedRecvByteBufAllocator(Constants.LARGE_MTU + 512).maxMessagesPerRead(128));
             return channel;
         }))
                 : instance.channel(aClass);
