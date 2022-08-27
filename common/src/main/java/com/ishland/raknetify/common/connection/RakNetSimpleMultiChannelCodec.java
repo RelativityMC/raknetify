@@ -54,7 +54,8 @@ public class RakNetSimpleMultiChannelCodec extends MessageToMessageCodec<FrameDa
             return;
         }
 
-        if (msg == SIGNAL_START_MULTICHANNEL && !this.isMultichannelEnabled) {
+        if (msg == SIGNAL_START_MULTICHANNEL) {
+            if (this.isMultichannelEnabled) return;
             if (!this.isMultichannelAvailable()) {
                 System.out.println("Raknetify: [MultiChannellingDataCodec] Failed to start multichannel: not available for %s".formatted(this.descriptiveProtocolStatus));
                 return;

@@ -11,11 +11,11 @@ public class DebugUtil {
 
     public static String printChannelDetails(Channel channel) {
         final StringBuilder b = new StringBuilder();
-        b.append("Channel details for ").append(channel.toString()).append('\n');
+        b.append("Channel details for ").append(channel.toString()).append(' ').append('(').append(channel.getClass().getName()).append(')').append('\n');
         b.append("Connection: ").append(channel.localAddress()).append(" <--> ").append(channel.remoteAddress()).append('\n');
         b.append("Open: ").append(channel.isOpen()).append('\n');
         b.append("Active: ").append(channel.isActive()).append('\n');
-        b.append("Auto Read: ").append(channel.config().isAutoRead());
+        b.append("Auto Read: ").append(channel.config().isAutoRead()).append('\n');
         if (channel.config() instanceof RakNet.Config config) {
             b.append("MTU: ").append(config.getMTU()).append('\n');
             b.append("RTT: %.2f/%.2fms"
@@ -73,7 +73,11 @@ public class DebugUtil {
         b.append("Pipeline: ").append('\n');
         for (String name : channel.pipeline().names()) {
             final ChannelHandler channelHandler = channel.pipeline().get(name);
-            b.append("\t").append(name).append(": \t").append(channelHandler.toString()).append("(").append(channelHandler.getClass().getName()).append(")").append('\n');
+            if (channelHandler == null) {
+                b.append("\t").append(name).append(": \t").append("null").append('\n');
+            } else {
+                b.append("\t").append(name).append(": \t").append(channelHandler.toString()).append("(").append(channelHandler.getClass().getName()).append(")").append('\n');
+            }
         }
 
         if (channel.parent() != null) {

@@ -212,6 +212,7 @@ public class SynchronizationLayer extends ChannelDuplexHandler {
             frameData.setReliability(FramedPacket.Reliability.RELIABLE);
             this.isWaitingForResponse = true;
             ctx.write(frameData, promise).addListener(future -> this.flushQueue(ctx));
+            byteBuf.release();
             return;
         }
         if (isWaitingForResponse) {

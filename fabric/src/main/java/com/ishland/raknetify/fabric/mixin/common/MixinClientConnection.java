@@ -65,8 +65,10 @@ public abstract class MixinClientConnection {
     private void onExceptionCaught(ChannelHandlerContext context, Throwable ex, CallbackInfo ci) {
         if (ex instanceof ClosedChannelException) return;
         if (Constants.DEBUG) {
-            System.err.println("Exception caught for connection %s".formatted(this.getAddress()));
-            System.err.println(DebugUtil.printChannelDetails(this.channel));
+            System.err.println("Exception caught for connection %s".formatted(this.channel));
+            for (String s : DebugUtil.printChannelDetails(this.channel).split("\n")) {
+                System.err.println("  " + s);
+            }
             ex.printStackTrace();
         } else if (this.getState() != null && this.getState() != NetworkState.HANDSHAKING) {
             System.err.println(String.format("%s %s %s", this.address, NetworkStates.getName(this.getState()), ex.toString()));
