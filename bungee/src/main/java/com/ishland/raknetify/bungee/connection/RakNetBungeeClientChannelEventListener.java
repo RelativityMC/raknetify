@@ -1,5 +1,6 @@
 package com.ishland.raknetify.bungee.connection;
 
+import com.google.common.base.Preconditions;
 import com.ishland.raknetify.bungee.RaknetifyBungeePlugin;
 import com.ishland.raknetify.common.connection.MultiChannelingStreamingCompression;
 import com.ishland.raknetify.common.connection.MultiChannellingEncryption;
@@ -9,6 +10,8 @@ import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPromise;
 import net.md_5.bungee.EncryptionUtil;
+import net.md_5.bungee.netty.ChannelWrapper;
+import net.md_5.bungee.netty.HandlerBoss;
 import net.md_5.bungee.netty.PipelineUtils;
 import net.md_5.bungee.protocol.PacketWrapper;
 import net.md_5.bungee.protocol.Protocol;
@@ -21,6 +24,7 @@ import net.md_5.bungee.protocol.packet.SetCompression;
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
+import java.lang.reflect.Field;
 import java.security.GeneralSecurityException;
 import java.util.logging.Level;
 
@@ -39,9 +43,18 @@ public class RakNetBungeeClientChannelEventListener extends ChannelDuplexHandler
         if (this.needResetCompression) {
             RaknetifyBungeePlugin.LOGGER.info("Preventing vanilla compression as streaming compression is enabled");
 
-            // TODO note: this may corrupt bungeecords compression state, find a better way to do this
-            ctx.channel().pipeline().replace("compress", "compress", new ChannelDuplexHandler()); // no-op
-            ctx.channel().pipeline().replace("decompress", "decompress", new ChannelDuplexHandler()); // no-op
+//            // note: this may corrupt bungeecords compression state, find a better way to do this
+//            ctx.channel().pipeline().replace("compress", "compress", new ChannelDuplexHandler()); // no-op
+//            ctx.channel().pipeline().replace("decompress", "decompress", new ChannelDuplexHandler()); // no-op
+
+            final HandlerBoss handlerBoss = ctx.channel().pipeline().get(HandlerBoss.class);
+
+            final Field channelField = HandlerBoss.class.getDeclaredField("channel");
+            channelField.setAccessible(true);
+            final ChannelWrapper channelWrapper = (ChannelWrapper) channelField.get(handlerBoss);
+            Preconditions.checkState(channelWrapper != null, "channelWrapper is null");
+            channelWrapper.setCompressionThreshold(-1);
+
             this.needResetCompression = false;
         }
         if (this.encryptionKey != null) {

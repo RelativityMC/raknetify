@@ -97,6 +97,11 @@ public class SynchronizationLayer extends ChannelDuplexHandler {
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
         super.channelActive(ctx);
+        initializeIfNecessary(ctx);
+    }
+
+    private void initializeIfNecessary(ChannelHandlerContext ctx) {
+        if (initialized) return;
         try {
             this.frameOrderIn = ctx.pipeline().get(FrameOrderIn.class);
             Object frameOrderInQueueArray = accessible(FrameOrderIn.class.getDeclaredField("channels")).get(this.frameOrderIn);
@@ -127,7 +132,8 @@ public class SynchronizationLayer extends ChannelDuplexHandler {
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        if (initialized && msg instanceof FrameData packet && packet.getPacketId() == Constants.RAKNET_SYNC_PACKET_ID) {
+        initializeIfNecessary(ctx);
+        if (msg instanceof FrameData packet && packet.getPacketId() == Constants.RAKNET_SYNC_PACKET_ID) {
             // read
             {
                 if (Constants.DEBUG) System.out.println("Raknetify: Received sync packet");
@@ -181,6 +187,7 @@ public class SynchronizationLayer extends ChannelDuplexHandler {
 
     @Override
     public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
+        initializeIfNecessary(ctx);
         if (msg == SYNC_REQUEST_OBJECT) {
             if (isWaitingForResponse) return;
 
