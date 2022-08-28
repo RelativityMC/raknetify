@@ -2,17 +2,23 @@ plugins {
 	id 'fabric-loom' version '0.12-SNAPSHOT' apply false
 	id 'io.github.juuxel.loom-quiltflower' version '1.7.1' apply false
 	id 'com.github.johnrengelman.shadow' version '7.1.0' apply false
+	id 'org.cadixdev.licenser' version '0.6.1' apply false
 }
 
 subprojects {
 	apply plugin: 'java'
 	apply plugin: 'java-library'
 	apply plugin: 'maven-publish'
+	apply plugin: 'org.cadixdev.licenser'
 
 	sourceCompatibility = JavaVersion.VERSION_17
 	targetCompatibility = JavaVersion.VERSION_17
 
 	version = project.mod_version + "." + getVersionSuffix()
+
+	license {
+		header = rootProject.file('HEADER.txt')
+	}
 
 	repositories {
 		maven { url 'https://jitpack.io' }

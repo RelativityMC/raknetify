@@ -6,6 +6,12 @@ plugins {
     id 'com.github.johnrengelman.shadow'
 }
 
+afterEvaluate {
+    license {
+        header = project.file('HEADER.txt')
+    }
+}
+
 archivesBaseName = project.archives_base_name + "-velocity"
 group = project.maven_group + ".velocity"
 
