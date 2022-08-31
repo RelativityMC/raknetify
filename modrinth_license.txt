@@ -1,0 +1,7 @@
+Licensing
+
+Raknetify for fabric and BungeeCord is licensed under the MIT license,
+you can find the license in the LICENSE file
+
+Raknetify for Velocity is licensed under the GNU General Public License v3.0,
+you can find the license in the velocity/LICENSE file
