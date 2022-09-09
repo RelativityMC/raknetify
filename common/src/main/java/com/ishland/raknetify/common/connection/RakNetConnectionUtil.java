@@ -66,7 +66,7 @@ public class RakNetConnectionUtil {
             config.setRetryDelayNanos(TimeUnit.NANOSECONDS.convert(50, TimeUnit.MILLISECONDS));
             config.setDefaultPendingFrameSets(Constants.DEFAULT_PENDING_FRAME_SETS);
             config.setNACKEnabled(false);
-            config.setNoDelayEnabled(true);
+            config.setNoDelayEnabled(false);
 //            config.setIgnoreResendGauge(true);
 
             initRaknetChannel(channel);
