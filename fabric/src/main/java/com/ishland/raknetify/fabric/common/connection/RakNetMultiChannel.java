@@ -103,12 +103,14 @@ public class RakNetMultiChannel {
             "net/minecraft/class_5892", // DeathMessageS2C
             "net/minecraft/class_2635", // GameMessageS2CPacket
             "net/minecraft/class_7439", // GameMessageS2CPacket
+            "net/minecraft/class_7827", // ProfilelessChatMessageS2CPacket
             "net/minecraft/class_7519", // ChatPreviewStateChangeS2CPacket
             "net/minecraft/class_7438", // ChatMessageS2CPacket
             "net/minecraft/class_7494", // ChatPreviewS2CPacket
             "net/minecraft/class_7618", // MOJMAP: ClientboundPlayerChatHeaderPacket
             "net/minecraft/class_7597", // ChatSuggestionsS2CPacket
             "net/minecraft/class_7617", // MOJMAP: ClientboundDeleteChatPacket
+            "net/minecraft/class_7861", // MOJMAP: ServerboundChatSessionUpdatePacket
             "net/minecraft/class_7640", // UMMAPPED: chat related anyways
             "net/minecraft/class_7495", // ServerMetadataS2CPacket
             "net/minecraft/class_5894", // OverlayMessageS2C
@@ -191,9 +193,11 @@ public class RakNetMultiChannel {
             "net/minecraft/class_2828$class_2829", // PlayerMoveC2SPacket$PositionAndOnGround
             "net/minecraft/class_2828$class_2830", // PlayerMoveC2SPacket$Full
             "net/minecraft/class_2828$class_2831", // PlayerMoveC2SPacket$LookAndOnGround
+            "net/minecraft/class_7828", // PlayerRemoveS2CPacket
 
             "net/minecraft/class_2664", // ExplosionS2C
             "net/minecraft/class_2678", // GameJoinS2C
+            "net/minecraft/class_7832", // FeaturesS2CPacket
             "net/minecraft/class_2668", // GameStateChangeS2C
             "net/minecraft/class_2759", // PlayerSpawnPositionS2CPacket
             "net/minecraft/class_2775", // ItemPickupAnimationS2C
