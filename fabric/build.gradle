@@ -87,43 +87,43 @@ tasks.withType(AbstractArchiveTask) {
 	reproducibleFileOrder = true
 }
 
-modrinth {
-	versionNumber = project.version
-	versionName = project.version + " devbuild"
-	uploadFile = remapShadowJar
-	loaders = ["fabric"]
-}
+afterEvaluate {
+	modrinth {
+		versionNumber = project.version
+		versionName = project.version + " devbuild"
+		uploadFile = remapShadowJar
+		loaders = ["fabric"]
+	}
 
-if (System.getenv("CURSEFORGE_TOKEN")) {
-	curseforge {
-		apiKey = System.getenv("CURSEFORGE_TOKEN")
-		project {
-			id = '631457'
-			changelogType = "markdown"
-			changelog = com.ishland.buildscript.ParseGItHubActionChangelog.getChangelog()
-			releaseType = 'alpha'
+	if (System.getenv("CURSEFORGE_TOKEN")) {
+		curseforge {
+			apiKey = System.getenv("CURSEFORGE_TOKEN")
+			project {
+				id = '631457'
+				changelogType = "markdown"
+				changelog = com.ishland.buildscript.ParseGItHubActionChangelog.getChangelog()
+				releaseType = 'alpha'
 
-			addGameVersion "1.17"
-			addGameVersion "1.17.1"
-			addGameVersion "1.18"
-			addGameVersion "1.18.1"
-			addGameVersion "1.18.2"
-			addGameVersion "1.19"
-			addGameVersion "1.19.1"
-			addGameVersion "1.19.2"
-			addGameVersion "1.19.3"
-			addGameVersion "Fabric"
-			addGameVersion "Java 17"
-			addGameVersion "Java 18"
-			addGameVersion "Server"
-			addGameVersion "Client"
+				addGameVersion "1.17"
+				addGameVersion "1.17.1"
+				addGameVersion "1.18"
+				addGameVersion "1.18.1"
+				addGameVersion "1.18.2"
+				addGameVersion "1.19"
+				addGameVersion "1.19.1"
+				addGameVersion "1.19.2"
+				addGameVersion "1.19.3"
+				addGameVersion "Fabric"
+				addGameVersion "Java 17"
+				addGameVersion "Java 18"
 
-			mainArtifact(remapShadowJar) {
-				displayName = project.version + " devbuild"
+				mainArtifact(remapShadowJar) {
+					displayName = project.version + " devbuild"
+				}
 			}
-		}
-		options {
-			forgeGradleIntegration = false
+			options {
+				forgeGradleIntegration = false
+			}
 		}
 	}
 }

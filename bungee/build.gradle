@@ -66,11 +66,13 @@ tasks.withType(AbstractArchiveTask) {
     reproducibleFileOrder = true
 }
 
-modrinth {
-    versionNumber = project.version "+bungeecord"
-    versionName = project.version + " devbuild for BungeeCord"
-    uploadFile = shadowJar
-    loaders = ["bungeecord", "waterfall"]
+afterEvaluate {
+    modrinth {
+        versionNumber = project.version "+bungeecord"
+        versionName = project.version + " devbuild for BungeeCord"
+        uploadFile = shadowJar
+        loaders = ["bungeecord", "waterfall"]
+    }
 }
 
 task("prepareRunBungee", dependsOn: shadowJar) {
