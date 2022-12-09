@@ -4,6 +4,7 @@ import java.nio.file.StandardCopyOption
 
 plugins {
     id 'com.github.johnrengelman.shadow'
+    id 'com.modrinth.minotaur'
 }
 
 afterEvaluate {
@@ -83,6 +84,14 @@ assemble.dependsOn(shadowJar)
 tasks.withType(AbstractArchiveTask) {
     preserveFileTimestamps = false
     reproducibleFileOrder = true
+}
+
+
+modrinth {
+    versionNumber = project.version "+velocity"
+    versionName = project.version + " devbuild for Velocity"
+    uploadFile = shadowJar
+    loaders = ["velocity"]
 }
 
 task("prepareRunVelocity", dependsOn: shadowJar) {

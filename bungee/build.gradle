@@ -3,6 +3,7 @@ import java.nio.file.StandardCopyOption
 
 plugins {
     id 'com.github.johnrengelman.shadow'
+    id 'com.modrinth.minotaur'
 }
 
 archivesBaseName = project.archives_base_name + "-bungee"
@@ -27,7 +28,7 @@ configurations {
 }
 
 dependencies {
-    implementation 'bungee:BungeeCord:1656'
+    implementation 'bungee:BungeeCord:1672'
 
     shadowInclude implementation(project(":common"))
 }
@@ -63,6 +64,13 @@ assemble.dependsOn(shadowJar)
 tasks.withType(AbstractArchiveTask) {
     preserveFileTimestamps = false
     reproducibleFileOrder = true
+}
+
+modrinth {
+    versionNumber = project.version "+bungeecord"
+    versionName = project.version + " devbuild for BungeeCord"
+    uploadFile = shadowJar
+    loaders = ["bungeecord", "waterfall"]
 }
 
 task("prepareRunBungee", dependsOn: shadowJar) {

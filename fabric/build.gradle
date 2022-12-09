@@ -2,6 +2,8 @@ plugins {
 	id 'fabric-loom'
 	id 'io.github.juuxel.loom-quiltflower'
 	id 'com.github.johnrengelman.shadow'
+	id 'com.modrinth.minotaur'
+	id 'com.matthewprenger.cursegradle'
 }
 
 archivesBaseName = project.archives_base_name + "-fabric"
@@ -83,4 +85,45 @@ afterEvaluate {
 tasks.withType(AbstractArchiveTask) {
 	preserveFileTimestamps = false
 	reproducibleFileOrder = true
+}
+
+modrinth {
+	versionNumber = project.version
+	versionName = project.version + " devbuild"
+	uploadFile = remapShadowJar
+	loaders = ["fabric"]
+}
+
+if (System.getenv("CURSEFORGE_TOKEN")) {
+	curseforge {
+		apiKey = System.getenv("CURSEFORGE_TOKEN")
+		project {
+			id = '631457'
+			changelogType = "markdown"
+			changelog = com.ishland.buildscript.ParseGItHubActionChangelog.getChangelog()
+			releaseType = 'alpha'
+
+			addGameVersion "1.17"
+			addGameVersion "1.17.1"
+			addGameVersion "1.18"
+			addGameVersion "1.18.1"
+			addGameVersion "1.18.2"
+			addGameVersion "1.19"
+			addGameVersion "1.19.1"
+			addGameVersion "1.19.2"
+			addGameVersion "1.19.3"
+			addGameVersion "Fabric"
+			addGameVersion "Java 17"
+			addGameVersion "Java 18"
+			addGameVersion "Server"
+			addGameVersion "Client"
+
+			mainArtifact(remapShadowJar) {
+				displayName = project.version + " devbuild"
+			}
+		}
+		options {
+			forgeGradleIntegration = false
+		}
+	}
 }

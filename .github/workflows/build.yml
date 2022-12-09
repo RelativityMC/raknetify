@@ -39,6 +39,14 @@ jobs:
             ${{ runner.os }}-gradle-
       - name: build
         run: ./gradlew build
+      - name: upload to modrinth and curseforge
+        run: ./gradlew modrinth curseforge
+        if: github.ref == 'refs/heads/master'
+        env:
+          MODRINTH_TOKEN: ${{ secrets.MODRINTH_UPLOAD_TOKEN }}
+          CURSEFORGE_TOKEN: ${{ secrets.CURSEFORGE_API_TOKEN }}
+          GITHUB_EVENT_RAW_PATH: ${{ github.event_path }}
+        continue-on-error: true
       - name: capture build artifacts
         if: ${{ runner.os == 'Linux' && matrix.java == '17' }} # Only upload artifacts built from latest java on one OS
         uses: actions/upload-artifact@v3
