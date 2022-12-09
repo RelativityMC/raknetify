@@ -1,10 +1,10 @@
-plugins {
-	id 'fabric-loom'
-	id 'io.github.juuxel.loom-quiltflower'
-	id 'com.github.johnrengelman.shadow'
-	id 'com.modrinth.minotaur'
-	id 'com.matthewprenger.cursegradle'
-}
+evaluationDependsOn(":")
+
+apply plugin: 'fabric-loom'
+apply plugin: 'io.github.juuxel.loom-quiltflower'
+apply plugin: 'com.github.johnrengelman.shadow'
+apply plugin: 'com.modrinth.minotaur'
+apply plugin: 'com.matthewprenger.cursegradle'
 
 archivesBaseName = project.archives_base_name + "-fabric"
 group = project.maven_group + ".fabric"
