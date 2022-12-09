@@ -86,13 +86,11 @@ tasks.withType(AbstractArchiveTask) {
     reproducibleFileOrder = true
 }
 
-afterEvaluate {
-    modrinth {
-        versionNumber = project.version "+velocity"
-        versionName = project.version + " devbuild for Velocity"
-        uploadFile = shadowJar
-        loaders = ["velocity"]
-    }
+modrinth {
+    versionNumber = rootProject.version "+velocity"
+    versionName = rootProject.version + " devbuild for Velocity"
+    uploadFile = shadowJar
+    loaders = ["velocity"]
 }
 
 task("prepareRunVelocity", dependsOn: shadowJar) {
