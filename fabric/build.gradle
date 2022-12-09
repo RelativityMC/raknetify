@@ -91,7 +91,7 @@ modrinth {
 	versionNumber = project.version
 	versionName = project.version + " devbuild"
 	uploadFile = remapShadowJar
-	loaders = ["fabric"]
+	loaders = ["fabric", "quilt"]
 }
 
 if (System.getenv("CURSEFORGE_TOKEN")) {
