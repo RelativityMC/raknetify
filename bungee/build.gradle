@@ -67,7 +67,7 @@ tasks.withType(AbstractArchiveTask) {
 }
 
 modrinth {
-    versionNumber = rootProject.version "+bungeecord"
+    versionNumber = rootProject.version + "+bungeecord"
     versionName = rootProject.version + " devbuild for BungeeCord"
     uploadFile = shadowJar
     loaders = ["bungeecord", "waterfall"]

@@ -87,7 +87,7 @@ tasks.withType(AbstractArchiveTask) {
 }
 
 modrinth {
-    versionNumber = rootProject.version "+velocity"
+    versionNumber = rootProject.version + "+velocity"
     versionName = rootProject.version + " devbuild for Velocity"
     uploadFile = shadowJar
     loaders = ["velocity"]
