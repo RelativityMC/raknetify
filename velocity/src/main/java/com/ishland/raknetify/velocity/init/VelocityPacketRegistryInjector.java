@@ -36,7 +36,8 @@ public class VelocityPacketRegistryInjector {
 
     public static void inject() {
         try {
-            final StateRegistry.PacketRegistry registry = StateRegistry.PLAY.clientbound;
+            final StateRegistry.PacketRegistry registry = (StateRegistry.PacketRegistry)
+                    accessible(StateRegistry.class.getDeclaredField("clientbound")).get(StateRegistry.PLAY);
             final var versions = (Map<ProtocolVersion, StateRegistry.PacketRegistry.ProtocolRegistry>)
                     accessible(StateRegistry.PacketRegistry.class.getDeclaredField("versions")).get(registry);
             for (StateRegistry.PacketRegistry.ProtocolRegistry value : versions.values()) {
