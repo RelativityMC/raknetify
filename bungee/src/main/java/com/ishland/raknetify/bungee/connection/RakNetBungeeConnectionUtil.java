@@ -95,6 +95,8 @@ public class RakNetBungeeConnectionUtil {
             final ChannelWrapper channelWrapper = (ChannelWrapper) USER_CONNECTION_CH.get(player);
             final Channel channel = channelWrapper.getHandle();
             if (channel != null && channel.config() instanceof RakNet.Config config) {
+
+                // multi-channel setup
                 final RakNetSimpleMultiChannelCodec multiChannelCodec = channel.pipeline().get(RakNetSimpleMultiChannelCodec.class);
                 if (multiChannelCodec != null) {
                     final int protocolVersion = (int) ENCODER_PROTOCOL_VERSION.get(channel.pipeline().get(MinecraftEncoder.class));
@@ -102,6 +104,10 @@ public class RakNetBungeeConnectionUtil {
                     final ProtocolMultiChannelMappings.VersionMapping versionMapping = ProtocolMultiChannelMappings.INSTANCE.mappings.get(protocolVersion);
                     if (versionMapping != null) multiChannelCodec.setSimpleChannelMapping(versionMapping.s2c);
                 }
+
+                // ping update setup
+                channel.pipeline().addBefore(PipelineUtils.BOSS_HANDLER, RakNetBungeePingUpdater.NAME, new RakNetBungeePingUpdater(player));
+
                 RaknetifyBungeePlugin.LOGGER.info(String.format("Raknetify: %s logged in via RakNet, mtu %d", player.getName(), config.getMTU()));
             }
         } catch (Throwable t) {
