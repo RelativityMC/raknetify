@@ -117,7 +117,6 @@ public class RakNetMultiChannel {
             "net/minecraft/class_2748", // ExperienceBarUpdateS2C
             "net/minecraft/class_2749", // HealthUpdateS2C
             "net/minecraft/class_2656", // CooldownUpdateS2CPacket
-            "net/minecraft/class_2772", // PlayerListHeaderS2C
             "net/minecraft/class_2736", // ScoreboardDisplayS2C
             "net/minecraft/class_2751", // ScoreboardDisplayObjectiveUpdateS2C
             "net/minecraft/class_2757", // ScoreboardPlayerUpdateS2C
@@ -152,6 +151,8 @@ public class RakNetMultiChannel {
             "net/minecraft/class_2790", // SynchronizeTagsS2C
 
             "net/minecraft/class_2703", // PlayerListS2C
+            "net/minecraft/class_2772", // PlayerListHeaderS2C
+            "net/minecraft/class_7828", // PlayerRemoveS2CPacket (actually only remove from list)
             "net/minecraft/class_2613", // PlayerSpawnS2C
 
             // 1.16.5
@@ -193,7 +194,6 @@ public class RakNetMultiChannel {
             "net/minecraft/class_2828$class_2829", // PlayerMoveC2SPacket$PositionAndOnGround
             "net/minecraft/class_2828$class_2830", // PlayerMoveC2SPacket$Full
             "net/minecraft/class_2828$class_2831", // PlayerMoveC2SPacket$LookAndOnGround
-            "net/minecraft/class_7828", // PlayerRemoveS2CPacket
 
             "net/minecraft/class_2664", // ExplosionS2C
             "net/minecraft/class_2678", // GameJoinS2C
