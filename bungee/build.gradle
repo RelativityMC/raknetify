@@ -10,17 +10,17 @@ archivesBaseName = project.archives_base_name + "-bungee"
 group = project.maven_group + ".bungee"
 
 repositories {
-    ivy {
-        url 'https://ci.md-5.net/job/'
-        patternLayout {
-//            artifact "[organization]/versions/[module]/builds/[revision]/downloads/[organization]-[module]-[revision](.[ext])"
-            // https://ci.md-5.net/job/BungeeCord/1636/artifact/bootstrap/target/BungeeCord.jar
-            artifact "[module]/[revision]/artifact/bootstrap/target/BungeeCord(.[ext])"
-        }
-        metadataSources {
-            it.artifact()
-        }
-    }
+//    ivy {
+//        url 'https://ci.md-5.net/job/'
+//        patternLayout {
+////            artifact "[organization]/versions/[module]/builds/[revision]/downloads/[organization]-[module]-[revision](.[ext])"
+//            // https://ci.md-5.net/job/BungeeCord/1636/artifact/bootstrap/target/BungeeCord.jar
+//            artifact "[module]/[revision]/artifact/bootstrap/target/BungeeCord(.[ext])"
+//        }
+//        metadataSources {
+//            it.artifact()
+//        }
+//    }
 }
 
 configurations {
@@ -28,7 +28,9 @@ configurations {
 }
 
 dependencies {
-    implementation 'bungee:BungeeCord:1675'
+//    implementation 'bungee:BungeeCord:1675'
+    implementation "net.md-5:bungeecord-proxy:1.+"
+    compileOnly 'org.projectlombok:lombok:1.18.24' // for bungeecord sources
 
     shadowInclude implementation(project(":common"))
 }
