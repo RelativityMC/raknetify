@@ -33,6 +33,7 @@ import io.netty.handler.codec.MessageToMessageCodec;
 import it.unimi.dsi.fastutil.ints.Int2IntMap;
 import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import network.ycc.raknet.frame.FrameData;
 import network.ycc.raknet.packet.FramedPacket;
 
@@ -48,40 +49,62 @@ public class RakNetSimpleMultiChannelCodec extends MessageToMessageCodec<FrameDa
 
     private final int packetId;
 
-    private final IntOpenHashSet unknownPacketIds = new IntOpenHashSet();
-    private Int2IntOpenHashMap channelMapping = null;
-    private String descriptiveProtocolStatus = "unknown protocol";
-
     public RakNetSimpleMultiChannelCodec(int packetId) {
         this.packetId = packetId;
     }
 
-    public void setSimpleChannelMapping(Int2IntMap channelMapping) {
-        if (channelMapping == null) return;
-        this.channelMapping = new Int2IntOpenHashMap(channelMapping);
-        this.channelMapping.defaultReturnValue(Integer.MAX_VALUE);
+    private final ObjectArrayList<OverrideHandler> handlers = new ObjectArrayList<>();
+
+    public void addHandler(OverrideHandler handler) {
+        synchronized (handlers) {
+            handlers.add(handler);
+        }
     }
 
-    public void setDescriptiveProtocolStatus(String descriptiveProtocolStatus) {
-        this.descriptiveProtocolStatus = descriptiveProtocolStatus;
+    public void removeHandler(OverrideHandler handler) {
+        synchronized (handlers) {
+            handlers.remove(handler);
+        }
+    }
+
+    public <T> T getHandler(Class<T> clazz) {
+        synchronized (handlers) {
+            for (OverrideHandler handler : handlers) {
+                if (clazz.isInstance(handler)) return clazz.cast(handler);
+            }
+        }
+        return null;
     }
 
     private boolean isMultichannelEnabled;
 
     private boolean queuePendingWrites = false;
-    private Queue<PendingWrite> pendingWrites = new LinkedList<>();
+    private final Queue<PendingWrite> pendingWrites = new LinkedList<>();
+
+    @Override
+    public void handlerRemoved(ChannelHandlerContext ctx) throws Exception {
+        super.handlerRemoved(ctx);
+        for (PendingWrite pendingWrite : pendingWrites) {
+            pendingWrite.promise.setFailure(new IllegalStateException("Channel closed"));
+            pendingWrite.frameData.release();
+        }
+    }
 
     @Override
     public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
-        if (this.queuePendingWrites) {
-            pendingWrites.add(new PendingWrite(msg, promise, getUserData(msg)));
+        if (this.queuePendingWrites && msg instanceof ByteBuf buf) {
+            final FrameData data = encode0(ctx, buf);
+            if (data != null) {
+                pendingWrites.add(new PendingWrite(data, promise));
+                buf.release();
+            }
             return;
         }
 
         if (msg == SIGNAL_START_MULTICHANNEL) {
             if (this.isMultichannelEnabled) return;
             if (!this.isMultichannelAvailable()) {
-                System.out.println("Raknetify: [MultiChannellingDataCodec] Failed to start multichannel: not available for %s".formatted(this.descriptiveProtocolStatus));
+                System.out.println("Raknetify: [MultiChannellingDataCodec] Failed to start multichannel: not available");
                 return;
             }
             final ByteBuf buf = ctx.alloc().buffer(1).writeByte(0);
@@ -111,6 +134,13 @@ public class RakNetSimpleMultiChannelCodec extends MessageToMessageCodec<FrameDa
 
     protected void encode(ChannelHandlerContext ctx, ByteBuf buf, List<Object> out) {
         if (buf.isReadable()) {
+            final FrameData frameData = encode0(ctx, buf);
+            if (frameData != null) out.add(frameData);
+        }
+    }
+
+    private FrameData encode0(ChannelHandlerContext ctx, ByteBuf buf) {
+        if (buf.isReadable()) {
             final FrameData frameData = FrameData.create(ctx.alloc(), packetId, buf);
             final int packetChannelOverride = isMultichannelEnabled ? getChannelOverride(buf) : 0;
             if (packetChannelOverride >= 0)
@@ -119,8 +149,9 @@ public class RakNetSimpleMultiChannelCodec extends MessageToMessageCodec<FrameDa
                 frameData.setReliability(FramedPacket.Reliability.RELIABLE);
             else if (packetChannelOverride == -2)
                 frameData.setReliability(FramedPacket.Reliability.UNRELIABLE);
-            out.add(frameData);
+            return frameData;
         }
+        return null;
     }
 
     private void flushPendingWrites(ChannelHandlerContext ctx) {
@@ -128,8 +159,7 @@ public class RakNetSimpleMultiChannelCodec extends MessageToMessageCodec<FrameDa
         PendingWrite pendingWrite;
         while ((pendingWrite = this.pendingWrites.poll()) != null) {
             try {
-                this.setUserData(pendingWrite.msg, pendingWrite.userData);
-                this.write(ctx, pendingWrite.msg, pendingWrite.promise);
+                super.write(ctx, pendingWrite.frameData, pendingWrite.promise);
             } catch (Throwable t) {
                 ctx.fireExceptionCaught(t);
             }
@@ -137,27 +167,19 @@ public class RakNetSimpleMultiChannelCodec extends MessageToMessageCodec<FrameDa
     }
 
     protected boolean isMultichannelAvailable() {
-        return this.channelMapping != null;
+        synchronized (handlers) {
+            return !handlers.isEmpty();
+        }
     }
 
     protected int getChannelOverride(ByteBuf buf) {
-        final ByteBuf slice = buf.slice();
-        final int packetId = MathUtil.readVarInt(slice);
-        final int override = this.channelMapping.get(packetId);
-        if (override == Integer.MAX_VALUE) {
-            if (this.unknownPacketIds.add(packetId)) {
-                System.err.println("Raknetify: Unknown packet id %d for %s".formatted(packetId, descriptiveProtocolStatus));
+        synchronized (handlers) {
+            for (OverrideHandler handler : handlers) {
+                final int override = handler.getChannelOverride(buf);
+                if (override != 0) return override;
             }
-            return 7;
         }
-        return override;
-    }
-
-    protected Object getUserData(Object msg) {
-        return null;
-    }
-
-    protected void setUserData(Object msg, Object userData) {
+        return 0;
     }
 
     protected void decode(ChannelHandlerContext ctx, FrameData packet, List<Object> out) {
@@ -173,7 +195,37 @@ public class RakNetSimpleMultiChannelCodec extends MessageToMessageCodec<FrameDa
         }
     }
 
-    private record PendingWrite(Object msg, ChannelPromise promise, Object userData){
+    public interface OverrideHandler {
+        int getChannelOverride(ByteBuf buf);
+    }
+
+    public static class PacketIdBasedOverrideHandler implements OverrideHandler {
+
+        private final IntOpenHashSet unknownPacketIds = new IntOpenHashSet();
+        private final Int2IntOpenHashMap channelMapping;
+        private final String descriptiveProtocolStatus;
+
+        public PacketIdBasedOverrideHandler(Int2IntMap channelMapping, String descriptiveProtocolStatus) {
+            this.channelMapping = new Int2IntOpenHashMap(channelMapping);
+            this.descriptiveProtocolStatus = descriptiveProtocolStatus;
+        }
+
+        @Override
+        public int getChannelOverride(ByteBuf buf) {
+            final ByteBuf slice = buf.slice();
+            final int packetId = MathUtil.readVarInt(slice);
+            final int override = this.channelMapping.get(packetId);
+            if (override == Integer.MAX_VALUE) {
+                if (this.unknownPacketIds.add(packetId)) {
+                    System.err.println("Raknetify: Unknown packet id %d for %s".formatted(packetId, descriptiveProtocolStatus));
+                }
+                return 7;
+            }
+            return override;
+        }
+    }
+
+    private record PendingWrite(FrameData frameData, ChannelPromise promise) {
     }
 
 }

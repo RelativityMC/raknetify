@@ -100,9 +100,16 @@ public class RakNetBungeeConnectionUtil {
                 final RakNetSimpleMultiChannelCodec multiChannelCodec = channel.pipeline().get(RakNetSimpleMultiChannelCodec.class);
                 if (multiChannelCodec != null) {
                     final int protocolVersion = (int) ENCODER_PROTOCOL_VERSION.get(channel.pipeline().get(MinecraftEncoder.class));
-                    multiChannelCodec.setDescriptiveProtocolStatus("protocol version %d".formatted(protocolVersion));
                     final ProtocolMultiChannelMappings.VersionMapping versionMapping = ProtocolMultiChannelMappings.INSTANCE.mappings.get(protocolVersion);
-                    if (versionMapping != null) multiChannelCodec.setSimpleChannelMapping(versionMapping.s2c);
+                    if (versionMapping != null) {
+                        multiChannelCodec.addHandler(new RakNetSimpleMultiChannelCodec.PacketIdBasedOverrideHandler(
+                                versionMapping.s2c,
+                                "protocol version %d".formatted(protocolVersion)
+                        ));
+                    } else {
+                        RaknetifyBungeePlugin.LOGGER.warning("No multi-channel mapping found for protocol version %d, reduced responsiveness is expected"
+                                .formatted(protocolVersion));
+                    }
                 }
 
                 // ping update setup

@@ -24,6 +24,8 @@
 
 package com.ishland.raknetify.fabric.common.connection;
 
+import com.ishland.raknetify.common.connection.RakNetSimpleMultiChannelCodec;
+import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelOutboundHandlerAdapter;
 import io.netty.channel.ChannelPromise;
@@ -49,4 +51,18 @@ public class MultiChannellingPacketCapture extends ChannelOutboundHandlerAdapter
     public void setPacketClass(Class<?> packetClass) {
         this.packetClass = packetClass;
     }
+
+    public RakNetSimpleMultiChannelCodec.OverrideHandler getHandler() {
+        return new CaptureBasedHandler();
+    }
+
+    private class CaptureBasedHandler implements RakNetSimpleMultiChannelCodec.OverrideHandler {
+
+        @Override
+        public int getChannelOverride(ByteBuf buf) {
+            return RakNetMultiChannel.getPacketChannelOverride(packetClass);
+        }
+
+    }
+
 }

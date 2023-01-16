@@ -24,7 +24,7 @@
 
 package com.ishland.raknetify.fabric.mixin.server;
 
-import com.ishland.raknetify.fabric.common.connection.RakNetFabricMultiChannelCodec;
+import com.ishland.raknetify.common.connection.RakNetSimpleMultiChannelCodec;
 import com.ishland.raknetify.fabric.mixin.access.IClientConnection;
 import io.netty.channel.Channel;
 import net.minecraft.network.ClientConnection;
@@ -54,7 +54,7 @@ public class MixinPlayerManager {
             System.err.println("Raknetify: Warning: %s don't have valid channel when logged in, not sending sync packet".formatted(this));
             return;
         }
-        channel.write(RakNetFabricMultiChannelCodec.SIGNAL_START_MULTICHANNEL);
+        channel.write(RakNetSimpleMultiChannelCodec.SIGNAL_START_MULTICHANNEL);
     }
 
 }

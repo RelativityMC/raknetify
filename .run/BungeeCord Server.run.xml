@@ -9,7 +9,7 @@
     <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/run-bungee" />
     <method v="2">
       <option name="Make" enabled="true" />
-      <option name="Gradle.BeforeRunTask" enabled="true" tasks="clean prepareRunBungee" externalProjectPath="$PROJECT_DIR$/bungee" vmOptions="" scriptParameters="" />
+      <option name="Gradle.BeforeRunTask" enabled="false" tasks="prepareRunBungee" externalProjectPath="$PROJECT_DIR$/bungee" vmOptions="" scriptParameters="" />
     </method>
   </configuration>
 </component>

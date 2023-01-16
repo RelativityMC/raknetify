@@ -38,6 +38,9 @@ import io.netty.channel.ChannelDuplexHandler;
 import io.netty.handler.codec.haproxy.HAProxyMessageDecoder;
 import network.ycc.raknet.RakNet;
 
+import java.util.Arrays;
+import java.util.Collections;
+
 public class RakNetVelocityConnectionUtil {
 
     private RakNetVelocityConnectionUtil() {
@@ -73,9 +76,15 @@ public class RakNetVelocityConnectionUtil {
             final RakNetSimpleMultiChannelCodec multiChannelCodec = channel.pipeline().get(RakNetSimpleMultiChannelCodec.class);
             if (multiChannelCodec != null) {
                 final ProtocolVersion protocolVersion = player.getProtocolVersion();
-                multiChannelCodec.setDescriptiveProtocolStatus("%s (%d)".formatted(protocolVersion.getVersionIntroducedIn(), protocolVersion.getProtocol()));
                 final ProtocolMultiChannelMappings.VersionMapping versionMapping = ProtocolMultiChannelMappings.INSTANCE.mappings.get(protocolVersion.getProtocol());
-                if (versionMapping != null) multiChannelCodec.setSimpleChannelMapping(versionMapping.s2c);
+                if (versionMapping != null) {
+                    multiChannelCodec.addHandler(new RakNetSimpleMultiChannelCodec.PacketIdBasedOverrideHandler(
+                            versionMapping.s2c,
+                            "%s (%d)".formatted(protocolVersion.getVersionIntroducedIn(), protocolVersion.getProtocol())
+                    ));
+                } else {
+                    RaknetifyVelocityPlugin.LOGGER.warn("No multi-channel mappings for protocol version {} ({})", protocolVersion.getProtocol(), Arrays.toString(protocolVersion.getVersionsSupportedBy().toArray(String[]::new)));
+                }
             }
             RaknetifyVelocityPlugin.LOGGER.info(String.format("Raknetify: %s logged in via RakNet, mtu %d", evt.getPlayer().getGameProfile().getName(), config.getMTU()));
         }

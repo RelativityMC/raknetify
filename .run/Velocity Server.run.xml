@@ -6,7 +6,7 @@
     <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/run-velocity" />
     <method v="2">
       <option name="Make" enabled="true" />
-      <option name="Gradle.BeforeRunTask" enabled="true" tasks="clean prepareRunVelocity" externalProjectPath="$PROJECT_DIR$/velocity" vmOptions="" scriptParameters="" />
+      <option name="Gradle.BeforeRunTask" enabled="false" tasks="prepareRunVelocity" externalProjectPath="$PROJECT_DIR$/velocity" vmOptions="" scriptParameters="" />
     </method>
   </configuration>
 </component>
