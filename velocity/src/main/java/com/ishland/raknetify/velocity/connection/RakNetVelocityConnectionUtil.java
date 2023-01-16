@@ -24,6 +24,7 @@ import com.ishland.raknetify.common.Constants;
 import com.ishland.raknetify.common.connection.MultiChannelingStreamingCompression;
 import com.ishland.raknetify.common.connection.RakNetConnectionUtil;
 import com.ishland.raknetify.common.connection.RakNetSimpleMultiChannelCodec;
+import com.ishland.raknetify.common.connection.multichannel.CustomPayloadChannel;
 import com.ishland.raknetify.common.data.ProtocolMultiChannelMappings;
 import com.ishland.raknetify.velocity.RaknetifyVelocityPlugin;
 import com.velocitypowered.api.event.connection.LoginEvent;
@@ -33,6 +34,9 @@ import com.velocitypowered.proxy.connection.MinecraftConnection;
 import com.velocitypowered.proxy.connection.backend.VelocityServerConnection;
 import com.velocitypowered.proxy.connection.client.ConnectedPlayer;
 import com.velocitypowered.proxy.network.Connections;
+import com.velocitypowered.proxy.protocol.ProtocolUtils;
+import com.velocitypowered.proxy.protocol.StateRegistry;
+import com.velocitypowered.proxy.protocol.packet.PluginMessage;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.handler.codec.haproxy.HAProxyMessageDecoder;
@@ -78,6 +82,13 @@ public class RakNetVelocityConnectionUtil {
                 final ProtocolVersion protocolVersion = player.getProtocolVersion();
                 final ProtocolMultiChannelMappings.VersionMapping versionMapping = ProtocolMultiChannelMappings.INSTANCE.mappings.get(protocolVersion.getProtocol());
                 if (versionMapping != null) {
+
+                    // handle custom payload separately
+                    final int pluginMessageId = StateRegistry.PLAY.getProtocolRegistry(ProtocolUtils.Direction.CLIENTBOUND, protocolVersion).getPacketId(new PluginMessage());
+                    if (Constants.DEBUG) RaknetifyVelocityPlugin.LOGGER.info("PluginMessage packetId=%d at version=%d".formatted(pluginMessageId, protocolVersion.getProtocol()));
+                    multiChannelCodec.addHandler(new CustomPayloadChannel.OverrideHandler(value -> value == pluginMessageId));
+
+                    // packet id -> channel id
                     multiChannelCodec.addHandler(new RakNetSimpleMultiChannelCodec.PacketIdBasedOverrideHandler(
                             versionMapping.s2c,
                             "%s (%d)".formatted(protocolVersion.getVersionIntroducedIn(), protocolVersion.getProtocol())

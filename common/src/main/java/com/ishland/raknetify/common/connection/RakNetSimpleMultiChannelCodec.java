@@ -55,10 +55,11 @@ public class RakNetSimpleMultiChannelCodec extends MessageToMessageCodec<FrameDa
 
     private final ObjectArrayList<OverrideHandler> handlers = new ObjectArrayList<>();
 
-    public void addHandler(OverrideHandler handler) {
+    public RakNetSimpleMultiChannelCodec addHandler(OverrideHandler handler) {
         synchronized (handlers) {
             handlers.add(handler);
         }
+        return this;
     }
 
     public void removeHandler(OverrideHandler handler) {

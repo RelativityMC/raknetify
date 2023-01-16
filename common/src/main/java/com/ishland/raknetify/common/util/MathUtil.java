@@ -24,6 +24,7 @@
 
 package com.ishland.raknetify.common.util;
 
+import com.google.common.base.Charsets;
 import io.netty.buffer.ByteBuf;
 
 import java.text.CharacterIterator;
@@ -58,9 +59,30 @@ public class MathUtil {
             if (j > 5) {
                 throw new RuntimeException("VarInt too big");
             }
-        } while((b & 128) == 128);
+        } while ((b & 128) == 128);
 
         return i;
+    }
+
+    public static String readString(ByteBuf buf) {
+        return readString(buf, Short.MAX_VALUE);
+    }
+
+    public static String readString(ByteBuf buf, int maxLen) {
+        // Copied from BungeeCord
+        int len = readVarInt(buf);
+        if (len > maxLen * 3) {
+            throw new IllegalArgumentException("Cannot receive string longer than " + maxLen * 3 + " (got " + len + " bytes)");
+        }
+
+        String s = buf.toString(buf.readerIndex(), len, Charsets.UTF_8);
+        buf.readerIndex(buf.readerIndex() + len);
+
+        if (s.length() > maxLen) {
+            throw new IllegalArgumentException("Cannot receive string longer than " + maxLen + " (got " + s.length() + " characters)");
+        }
+
+        return s;
     }
 
 }

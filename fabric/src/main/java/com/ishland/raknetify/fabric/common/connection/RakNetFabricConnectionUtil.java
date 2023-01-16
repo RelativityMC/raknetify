@@ -55,7 +55,9 @@ public class RakNetFabricConnectionUtil {
             channel.pipeline().replace("prepender", "prepender", new ChannelDuplexHandler()); // no-op
             final MultiChannellingPacketCapture handler = new MultiChannellingPacketCapture();
             channel.pipeline().addLast("raknetify-multi-channel-packet-cature", handler);
-            channel.pipeline().get(RakNetSimpleMultiChannelCodec.class).addHandler(handler.getHandler());
+            channel.pipeline().get(RakNetSimpleMultiChannelCodec.class)
+                    .addHandler(handler.getCustomPayloadHandler())
+                    .addHandler(handler.getCaptureBasedHandler());
             channel.pipeline().addLast("raknetify-handle-compression-compatibility", new RakNetCompressionCompatibilityHandler());
         }
     }

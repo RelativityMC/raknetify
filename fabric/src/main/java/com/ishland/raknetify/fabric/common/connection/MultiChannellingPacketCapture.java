@@ -25,10 +25,13 @@
 package com.ishland.raknetify.fabric.common.connection;
 
 import com.ishland.raknetify.common.connection.RakNetSimpleMultiChannelCodec;
+import com.ishland.raknetify.common.connection.multichannel.CustomPayloadChannel;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelOutboundHandlerAdapter;
 import io.netty.channel.ChannelPromise;
+import net.minecraft.network.packet.c2s.play.CustomPayloadC2SPacket;
+import net.minecraft.network.packet.s2c.play.CustomPayloadS2CPacket;
 
 public class MultiChannellingPacketCapture extends ChannelOutboundHandlerAdapter {
 
@@ -52,8 +55,12 @@ public class MultiChannellingPacketCapture extends ChannelOutboundHandlerAdapter
         this.packetClass = packetClass;
     }
 
-    public RakNetSimpleMultiChannelCodec.OverrideHandler getHandler() {
+    public RakNetSimpleMultiChannelCodec.OverrideHandler getCaptureBasedHandler() {
         return new CaptureBasedHandler();
+    }
+
+    public RakNetSimpleMultiChannelCodec.OverrideHandler getCustomPayloadHandler() {
+        return new CustomPayloadChannel.OverrideHandler(value -> packetClass == CustomPayloadS2CPacket.class || packetClass == CustomPayloadC2SPacket.class);
     }
 
     private class CaptureBasedHandler implements RakNetSimpleMultiChannelCodec.OverrideHandler {
