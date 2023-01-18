@@ -323,7 +323,7 @@ public class RakNetMultiChannel {
         channel4.forEach(clazz -> classToChannelIdOverride.put(clazz, 4));
         channel7.forEach(clazz -> classToChannelIdOverride.put(clazz, 7));
         unreliable.forEach(clazz -> classToChannelIdOverride.put(clazz, -2));
-        unreliable.forEach(clazz -> classToChannelIdOverride.put(clazz, Integer.MIN_VALUE));
+        theVoid.forEach(clazz -> classToChannelIdOverride.put(clazz, Integer.MIN_VALUE));
     }
 
 //    private static final ThreadLocal<Class<?>> currentPacketClass = new ThreadLocal<>();
