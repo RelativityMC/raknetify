@@ -185,6 +185,7 @@ public class RakNetMultiChannel {
             "net/minecraft/class_2610", // MobSpawnS2C
             "net/minecraft/class_2612", // PaintingSpawnS2C
             "net/minecraft/class_2606", // ExperienceOrbSpawnS2CPacket
+            "net/minecraft/class_8037", // HurtAnimation (mojmap)
 
             "net/minecraft/class_2885", // PlayerInteractBlockC2S
             "net/minecraft/class_2886", // PlayerInteractItemC2S
@@ -307,6 +308,10 @@ public class RakNetMultiChannel {
     private static final Set<Class<?>> unreliable = createClassSet(new String[]{
     });
 
+    private static final Set<Class<?>> theVoid = createClassSet(new String[]{
+            "net/minecraft/class_8037" // BundleDelimiterPacket
+    });
+
     private static final Object2IntOpenHashMap<Class<?>> classToChannelIdOverride = new Object2IntOpenHashMap<>();
 
     static {
@@ -318,6 +323,7 @@ public class RakNetMultiChannel {
         channel4.forEach(clazz -> classToChannelIdOverride.put(clazz, 4));
         channel7.forEach(clazz -> classToChannelIdOverride.put(clazz, 7));
         unreliable.forEach(clazz -> classToChannelIdOverride.put(clazz, -2));
+        unreliable.forEach(clazz -> classToChannelIdOverride.put(clazz, Integer.MIN_VALUE));
     }
 
 //    private static final ThreadLocal<Class<?>> currentPacketClass = new ThreadLocal<>();

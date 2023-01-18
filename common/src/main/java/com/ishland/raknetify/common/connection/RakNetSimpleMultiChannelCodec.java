@@ -136,14 +136,19 @@ public class RakNetSimpleMultiChannelCodec extends MessageToMessageCodec<FrameDa
     protected void encode(ChannelHandlerContext ctx, ByteBuf buf, List<Object> out) {
         if (buf.isReadable()) {
             final FrameData frameData = encode0(ctx, buf);
-            if (frameData != null) out.add(frameData);
+            if (frameData != null) {
+                out.add(frameData);
+            }
         }
     }
 
     private FrameData encode0(ChannelHandlerContext ctx, ByteBuf buf) {
         if (buf.isReadable()) {
-            final FrameData frameData = FrameData.create(ctx.alloc(), packetId, buf);
             final int packetChannelOverride = isMultichannelEnabled ? getChannelOverride(buf) : 0;
+            if (packetChannelOverride == Integer.MIN_VALUE) {
+                return null; // the void
+            }
+            final FrameData frameData = FrameData.create(ctx.alloc(), packetId, buf);
             if (packetChannelOverride >= 0)
                 frameData.setOrderChannel(packetChannelOverride);
             else if (packetChannelOverride == -1)

@@ -28,6 +28,7 @@ import com.ishland.raknetify.common.connection.MetricsSynchronizationHandler;
 import com.ishland.raknetify.common.connection.MultiChannelingStreamingCompression;
 import com.ishland.raknetify.common.connection.SimpleMetricsLogger;
 import com.ishland.raknetify.fabric.mixin.access.IClientConnection;
+import com.ishland.raknetify.fabric.mixin.access.IClientPlayNetworkHandler;
 import io.netty.channel.Channel;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.hud.DebugHud;
@@ -48,7 +49,7 @@ public class MixinDebugHud {
     private void getLeftText(CallbackInfoReturnable<List<String>> cir) {
         final ClientPlayNetworkHandler networkHandler = MinecraftClient.getInstance().getNetworkHandler();
         if (networkHandler != null) {
-            final ClientConnection connection = networkHandler.getConnection();
+            final ClientConnection connection = ((IClientPlayNetworkHandler) networkHandler).getConnection();
             final Channel channel = ((IClientConnection) connection).getChannel();
             if (channel != null) {
                 if (channel.config() instanceof RakNet.Config config) {

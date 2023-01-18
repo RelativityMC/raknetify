@@ -10,6 +10,7 @@
     "access.INetworkState",
     "access.INetworkStatePacketHandler",
     "access.IPacketEncryptionManager",
+    "access.IServerPlayNetworkHandler",
     "client.MixinClientPlayNetworkHandler",
     "client.MixinConnectionScreen1",
     "client.MixinConnectScreen",
@@ -36,5 +37,8 @@
   ],
   "injectors": {
     "defaultRequire": 1
-  }
+  },
+  "client": [
+    "access.IClientPlayNetworkHandler"
+  ]
 }

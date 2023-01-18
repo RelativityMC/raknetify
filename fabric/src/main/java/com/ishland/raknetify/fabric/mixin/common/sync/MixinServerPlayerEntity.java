@@ -27,6 +27,7 @@ package com.ishland.raknetify.fabric.mixin.common.sync;
 import com.ishland.raknetify.common.connection.RakNetSimpleMultiChannelCodec;
 import com.ishland.raknetify.common.connection.SynchronizationLayer;
 import com.ishland.raknetify.fabric.mixin.access.IClientConnection;
+import com.ishland.raknetify.fabric.mixin.access.IServerPlayNetworkHandler;
 import io.netty.channel.Channel;
 import net.minecraft.entity.Entity;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
@@ -46,7 +47,7 @@ public class MixinServerPlayerEntity {
 
     @Inject(method = "teleport", at = @At(value = "NEW", target = "net/minecraft/network/packet/s2c/play/PlayerRespawnS2CPacket", shift = At.Shift.BEFORE))
     private void beforeTeleportToAnotherDimension(CallbackInfo ci) {
-        final Channel channel = ((IClientConnection) this.networkHandler.connection).getChannel();
+        final Channel channel = ((IClientConnection) ((IServerPlayNetworkHandler) this.networkHandler).getConnection()).getChannel();
         if (channel == null) {
             //noinspection RedundantStringFormatCall
             System.err.println("Raknetify: Warning: %s don't have valid channel when teleporting to another dimension, not sending sync packet".formatted(this));
@@ -59,7 +60,7 @@ public class MixinServerPlayerEntity {
 
     @Inject(method = "teleport", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/PlayerManager;sendPlayerStatus(Lnet/minecraft/server/network/ServerPlayerEntity;)V", shift = At.Shift.AFTER))
     private void afterTeleportToAnotherDimension(CallbackInfo ci) {
-        final Channel channel = ((IClientConnection) this.networkHandler.connection).getChannel();
+        final Channel channel = ((IClientConnection) ((IServerPlayNetworkHandler) this.networkHandler).getConnection()).getChannel();
         if (channel == null) {
             //noinspection RedundantStringFormatCall
             System.err.println("Raknetify: Warning: %s don't have valid channel when teleporting to another dimension, not starting multichannel".formatted(this));
@@ -72,7 +73,7 @@ public class MixinServerPlayerEntity {
 
     @Inject(method = "moveToWorld", at = @At(value = "NEW", target = "net/minecraft/network/packet/s2c/play/PlayerRespawnS2CPacket", shift = At.Shift.BEFORE))
     private void beforeMoveToAnotherWorld(CallbackInfoReturnable<Entity> cir) {
-        final Channel channel = ((IClientConnection) this.networkHandler.connection).getChannel();
+        final Channel channel = ((IClientConnection) ((IServerPlayNetworkHandler) this.networkHandler).getConnection()).getChannel();
         if (channel == null) {
             //noinspection RedundantStringFormatCall
             System.err.println("Raknetify: Warning: %s don't have valid channel when teleporting to another dimension, not sending sync packet".formatted(this));
@@ -85,7 +86,7 @@ public class MixinServerPlayerEntity {
 
     @Inject(method = "moveToWorld", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/PlayerManager;sendPlayerStatus(Lnet/minecraft/server/network/ServerPlayerEntity;)V", shift = At.Shift.AFTER))
     private void afterMoveToAnotherWorld(CallbackInfoReturnable<Entity> cir) {
-        final Channel channel = ((IClientConnection) this.networkHandler.connection).getChannel();
+        final Channel channel = ((IClientConnection) ((IServerPlayNetworkHandler) this.networkHandler).getConnection()).getChannel();
         if (channel == null) {
             //noinspection RedundantStringFormatCall
             System.err.println("Raknetify: Warning: %s don't have valid channel when teleporting to another dimension, not starting multichannel".formatted(this));

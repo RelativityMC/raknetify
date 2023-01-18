@@ -48,10 +48,6 @@ public class MixinServerLoginNetworkAddon {
     @Final
     private ClientConnection connection;
 
-    @Shadow
-    @Final
-    private MinecraftServer server;
-
     @Dynamic("Pseudo")
     @Redirect(method = "sendCompressionPacket()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;getNetworkCompressionThreshold()I"))
     private int stopCompressionIfStreamingCompressionExists(MinecraftServer server) {
