@@ -45,7 +45,7 @@ public class MixinServerPlayerEntity {
 
     @Shadow public ServerPlayNetworkHandler networkHandler;
 
-    @Inject(method = "teleport", at = @At(value = "NEW", target = "net/minecraft/network/packet/s2c/play/PlayerRespawnS2CPacket", shift = At.Shift.BEFORE))
+    @Inject(method = "teleport(Lnet/minecraft/server/world/ServerWorld;DDDFF)V", at = @At(value = "NEW", target = "net/minecraft/network/packet/s2c/play/PlayerRespawnS2CPacket", shift = At.Shift.BEFORE))
     private void beforeTeleportToAnotherDimension(CallbackInfo ci) {
         final Channel channel = ((IClientConnection) ((IServerPlayNetworkHandler) this.networkHandler).getConnection()).getChannel();
         if (channel == null) {
@@ -58,7 +58,7 @@ public class MixinServerPlayerEntity {
         }
     }
 
-    @Inject(method = "teleport", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/PlayerManager;sendPlayerStatus(Lnet/minecraft/server/network/ServerPlayerEntity;)V", shift = At.Shift.AFTER))
+    @Inject(method = "teleport(Lnet/minecraft/server/world/ServerWorld;DDDFF)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/PlayerManager;sendPlayerStatus(Lnet/minecraft/server/network/ServerPlayerEntity;)V", shift = At.Shift.AFTER))
     private void afterTeleportToAnotherDimension(CallbackInfo ci) {
         final Channel channel = ((IClientConnection) ((IServerPlayNetworkHandler) this.networkHandler).getConnection()).getChannel();
         if (channel == null) {

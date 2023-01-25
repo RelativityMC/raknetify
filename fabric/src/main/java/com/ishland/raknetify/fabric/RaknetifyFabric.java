@@ -45,6 +45,8 @@ import net.minecraft.SharedConstants;
 import net.minecraft.network.NetworkSide;
 import net.minecraft.network.NetworkState;
 import net.minecraft.network.packet.Packet;
+import org.spongepowered.asm.mixin.MixinEnvironment;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
