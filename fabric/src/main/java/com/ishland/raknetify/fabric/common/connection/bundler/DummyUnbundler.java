@@ -26,16 +26,15 @@ package com.ishland.raknetify.fabric.common.connection.bundler;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToMessageEncoder;
-import net.minecraft.class_8042;
-import net.minecraft.network.Packet;
-
 import java.util.List;
+import net.minecraft.network.packet.Packet;
+import net.minecraft.network.packet.s2c.play.BundleS2CPacket;
 
 public class DummyUnbundler extends MessageToMessageEncoder<Packet<?>> {
     @Override
     protected void encode(ChannelHandlerContext channelHandlerContext, Packet<?> packet, List<Object> list) throws Exception {
-        if (packet instanceof class_8042 p) {
-            p.method_48324().forEach(list::add);
+        if (packet instanceof BundleS2CPacket p) {
+            p.getPackets().forEach(list::add);
         } else {
             list.add(packet);
         }

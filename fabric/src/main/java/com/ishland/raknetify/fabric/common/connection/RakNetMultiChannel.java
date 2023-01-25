@@ -42,8 +42,7 @@ import net.fabricmc.loader.api.MappingResolver;
 import net.minecraft.SharedConstants;
 import net.minecraft.network.NetworkSide;
 import net.minecraft.network.NetworkState;
-import net.minecraft.network.Packet;
-
+import net.minecraft.network.packet.Packet;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -69,10 +68,12 @@ public class RakNetMultiChannel {
                 //noinspection RedundantStringFormatCall
                 System.err.println("Raknetify: Warning: Failed to remap %s for raknet multi-channel".formatted(intermediary));
             try {
-                classHashSet.add(Class.forName(intermediary));
+                classHashSet.add(Class.forName(intermediary, false, RakNetMultiChannel.class.getClassLoader()));
             } catch (ClassNotFoundException e) {
-                //noinspection RedundantStringFormatCall
-                System.out.println("Raknetify: Warning: %s not found for raknet multi-channel".formatted(intermediary));
+                if (Boolean.getBoolean("raknetify.printNotFoundClasses")) {
+                    //noinspection RedundantStringFormatCall
+                    System.out.println("Raknetify: Warning: %s not found for raknet multi-channel".formatted(intermediary));
+                }
             }
         }
         return classHashSet; // no read-only wrapper for performance

@@ -26,15 +26,14 @@ package com.ishland.raknetify.fabric.common.connection.bundler;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToMessageDecoder;
-import net.minecraft.class_8037;
-import net.minecraft.network.Packet;
-
 import java.util.List;
+import net.minecraft.network.packet.BundleSplitterPacket;
+import net.minecraft.network.packet.Packet;
 
 public class DummyBundler extends MessageToMessageDecoder<Packet<?>> {
     @Override
     protected void decode(ChannelHandlerContext channelHandlerContext, Packet<?> packet, List<Object> list) throws Exception {
-        if (packet instanceof class_8037) {
+        if (packet instanceof BundleSplitterPacket) {
             System.err.println("Raknetify: received bundle delimiter packet from server, this is not supposed to happen, dropping");
             return;
         } else {
