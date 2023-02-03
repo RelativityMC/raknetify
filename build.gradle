@@ -1,5 +1,5 @@
 plugins {
-	id 'fabric-loom' version '0.12-SNAPSHOT' apply false
+	id 'fabric-loom' version '1.1-SNAPSHOT' apply false
 	id 'io.github.juuxel.loom-quiltflower' version '1.7.1' apply false
 	id 'com.github.johnrengelman.shadow' version '7.1.0' apply false
 	id 'org.cadixdev.licenser' version '0.6.1' apply false

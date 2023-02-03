@@ -1,11 +1,11 @@
-name: regenerate mappings
+name: check mappings
 on:
   push:
     branches:
       - 'master'
 
 jobs:
-  genMappings:
+  checjMappings:
     strategy:
       matrix:
         # Use these Java versions
@@ -47,19 +47,10 @@ jobs:
         env:
           MAPPINGS_GEN_FRESH: true
         run: ./genMappings.sh
-      - name: create pull request
-        uses: peter-evans/create-pull-request@v4
-        with:
-          base: ${{ github.head_ref }}
-          commit-message: "[genMappings] regenerate mappings"
-          signoff: true
-          branch: "fix/regenerate-mappings"
-          delete-branch: true
-          title: "[Automated PR] Regenerate Mappings"
-          body: |
-            **This PR is automatically created by GitHub Actions genMappings.yml**  
-            
-            This PR regenerates multichannel mappings used by proxies to reflect changes made in fabric
-          labels: |
-            automated pr
-
+      - name: fail if mappings changed
+        run: |
+          git update-index --refresh
+          if ! git diff-index --quiet HEAD --; then
+              echo "Mappings changed, please commit them"
+              exit 1
+          fi
