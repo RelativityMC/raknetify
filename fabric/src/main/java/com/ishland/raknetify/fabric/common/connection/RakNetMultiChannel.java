@@ -187,6 +187,7 @@ public class RakNetMultiChannel {
             "net/minecraft/class_2612", // PaintingSpawnS2C
             "net/minecraft/class_2606", // ExperienceOrbSpawnS2CPacket
             "net/minecraft/class_8043", // HurtAnimation (mojmap)
+            "net/minecraft/class_8143", // EntityDamageS2C
 
             "net/minecraft/class_2885", // PlayerInteractBlockC2S
             "net/minecraft/class_2886", // PlayerInteractItemC2S
