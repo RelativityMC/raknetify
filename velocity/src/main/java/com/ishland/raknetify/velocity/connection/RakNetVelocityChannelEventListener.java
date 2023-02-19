@@ -27,6 +27,7 @@ import com.ishland.raknetify.common.connection.RakNetSimpleMultiChannelCodec;
 import com.ishland.raknetify.common.connection.SynchronizationLayer;
 import com.ishland.raknetify.velocity.RaknetifyVelocityPlugin;
 import com.velocitypowered.proxy.VelocityServer;
+import com.velocitypowered.proxy.connection.MinecraftConnection;
 import com.velocitypowered.proxy.crypto.EncryptionUtils;
 import com.velocitypowered.proxy.network.Connections;
 import com.velocitypowered.proxy.protocol.VelocityConnectionEvent;
@@ -91,6 +92,14 @@ public class RakNetVelocityChannelEventListener extends ChannelDuplexHandler {
                 RaknetifyVelocityPlugin.LOGGER.info("Preventing vanilla compression as streaming compression is enabled");
                 ctx.channel().pipeline().replace(Connections.COMPRESSION_ENCODER, Connections.COMPRESSION_ENCODER, new ChannelDuplexHandler()); // no-op
                 ctx.channel().pipeline().replace(Connections.COMPRESSION_DECODER, Connections.COMPRESSION_DECODER, new ChannelDuplexHandler()); // no-op
+
+                // sync velocity compression state
+                final MinecraftConnection minecraftConnection = ctx.channel().pipeline().get(MinecraftConnection.class);
+                if (minecraftConnection != null) {
+                    minecraftConnection.setCompressionThreshold(-1);
+                } else {
+                    RaknetifyVelocityPlugin.LOGGER.warn("Unable to sync compression state with velocity");
+                }
             }
         } else if (evt == VelocityConnectionEvent.COMPRESSION_DISABLED) {
             ctx.channel().pipeline().replace(Connections.FRAME_DECODER, Connections.FRAME_DECODER, new ChannelDuplexHandler()); // no-op
