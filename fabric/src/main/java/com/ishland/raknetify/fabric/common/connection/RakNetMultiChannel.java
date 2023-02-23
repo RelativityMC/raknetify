@@ -305,6 +305,7 @@ public class RakNetMultiChannel {
             "net/minecraft/class_2672", // ChunkDataS2CPacket
             "net/minecraft/class_2622", // BlockEntityUpdateS2CPacket
             "net/minecraft/class_2676", // LightUpdateS2CPacket
+            "net/minecraft/class_8212", // BiomeUpdateS2CPacket
     });
 
     private static final Set<Class<?>> unreliable = createClassSet(new String[]{
