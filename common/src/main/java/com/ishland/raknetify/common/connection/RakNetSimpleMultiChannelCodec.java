@@ -27,6 +27,7 @@ package com.ishland.raknetify.common.connection;
 import com.ishland.raknetify.common.Constants;
 import com.ishland.raknetify.common.util.MathUtil;
 import io.netty.buffer.ByteBuf;
+import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPromise;
 import io.netty.handler.codec.MessageToMessageCodec;
@@ -41,7 +42,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 
-public class RakNetSimpleMultiChannelCodec extends MessageToMessageCodec<FrameData, ByteBuf> {
+public class RakNetSimpleMultiChannelCodec extends ChannelDuplexHandler {
 
     public static final String NAME = "raknetify-simple-multi-channel-data-codec";
 
@@ -130,16 +131,15 @@ public class RakNetSimpleMultiChannelCodec extends MessageToMessageCodec<FrameDa
             super.write(ctx, msg, promise);
             return;
         }
-        super.write(ctx, msg, promise);
-    }
 
-    protected void encode(ChannelHandlerContext ctx, ByteBuf buf, List<Object> out) {
-        if (buf.isReadable()) {
+        if (msg instanceof ByteBuf buf && buf.isReadable()) {
             final FrameData frameData = encode0(ctx, buf);
-            if (frameData != null) {
-                out.add(frameData);
-            }
+            ctx.write(frameData, promise);
+            buf.release();
+            return;
         }
+
+        super.write(ctx, msg, promise);
     }
 
     private FrameData encode0(ChannelHandlerContext ctx, ByteBuf buf) {
@@ -186,6 +186,22 @@ public class RakNetSimpleMultiChannelCodec extends MessageToMessageCodec<FrameDa
             }
         }
         return 0;
+    }
+
+    @Override
+    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+        if (msg instanceof FrameData packet && !packet.isFragment() && packet.getDataSize() > 0) {
+            if (packetId == packet.getPacketId()) {
+                ctx.fireChannelRead(packet.createData().skipBytes(1));
+            } else if (packet.getPacketId() == Constants.RAKNET_PING_PACKET_ID) {
+                return;
+            } else {
+                ctx.fireChannelRead(packet.retain());
+            }
+            packet.release();
+            return;
+        }
+        super.channelRead(ctx, msg);
     }
 
     protected void decode(ChannelHandlerContext ctx, FrameData packet, List<Object> out) {
