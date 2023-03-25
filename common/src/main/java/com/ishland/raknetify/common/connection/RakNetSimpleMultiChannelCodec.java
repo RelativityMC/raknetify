@@ -134,7 +134,7 @@ public class RakNetSimpleMultiChannelCodec extends ChannelDuplexHandler {
 
         if (msg instanceof ByteBuf buf && buf.isReadable()) {
             final FrameData frameData = encode0(ctx, buf);
-            ctx.write(frameData, promise);
+            if (frameData != null) ctx.write(frameData, promise);
             buf.release();
             return;
         }
