@@ -21,6 +21,7 @@
 package com.ishland.raknetify.velocity.connection;
 
 import com.ishland.raknetify.common.Constants;
+import com.ishland.raknetify.common.connection.ByteBufCopyDecoder;
 import com.ishland.raknetify.common.connection.MultiChannelingStreamingCompression;
 import com.ishland.raknetify.common.connection.RakNetConnectionUtil;
 import com.ishland.raknetify.common.connection.RakNetSimpleMultiChannelCodec;
@@ -55,6 +56,7 @@ public class RakNetVelocityConnectionUtil {
             RakNetConnectionUtil.initChannel(channel);
 //            channel.pipeline().addAfter(MultiChannelingStreamingCompression.NAME, MultiChannellingDataCodec.NAME, new MultiChannellingDataCodec(Constants.RAKNET_GAME_PACKET_ID));
             channel.pipeline().addAfter(MultiChannelingStreamingCompression.NAME, RakNetSimpleMultiChannelCodec.NAME, new RakNetSimpleMultiChannelCodec(Constants.RAKNET_GAME_PACKET_ID));
+            channel.pipeline().addAfter(RakNetSimpleMultiChannelCodec.NAME, ByteBufCopyDecoder.NAME, new ByteBufCopyDecoder());
         }
     }
 
