@@ -26,21 +26,19 @@ package com.ishland.raknetify.common.connection;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.MessageToMessageDecoder;
+import io.netty.channel.ChannelInboundHandlerAdapter;
 
-import java.util.List;
-
-public class ByteBufCopyDecoder extends MessageToMessageDecoder<ByteBuf> {
+public class ByteBufCopyDecoder extends ChannelInboundHandlerAdapter {
 
     public static final String NAME = "raknetify-byte-buf-copy-decoder";
+
     @Override
-    protected void decode(ChannelHandlerContext ctx, ByteBuf msg, List<Object> out) throws Exception {
-        if (!msg.hasMemoryAddress()) {
-            ByteBuf newBuf = ctx.alloc().buffer(msg.readableBytes());
-            newBuf.writeBytes(msg);
-            out.add(newBuf);
-        } else {
-            out.add(msg);
+    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+        if (msg instanceof ByteBuf buf && !buf.hasMemoryAddress()) {
+            ctx.fireChannelRead(ctx.alloc().directBuffer(buf.readableBytes()).writeBytes(buf));
+            buf.release();
+            return;
         }
+        super.channelRead(ctx, msg);
     }
 }
