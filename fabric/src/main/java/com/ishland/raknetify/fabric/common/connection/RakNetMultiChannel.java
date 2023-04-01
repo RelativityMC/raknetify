@@ -160,6 +160,15 @@ public class RakNetMultiChannel {
             "net/minecraft/class_2755", // TeamS2CPacket
             "net/minecraft/class_2762", // TitleS2CPacket
 
+            // 23w13a_or_b
+            "net/minecraft/class_8258", // ServerboundVoteCastPacket
+            "net/minecraft/class_8483", // ClientboundVoteStartPacket
+            "net/minecraft/class_8478", // ClientboundBulkVoteInfoPacket
+            "net/minecraft/class_8482", // ClientboundVoteProgressInfoPacket
+            "net/minecraft/class_8481", // ClientboundVoteFinishPacket
+            "net/minecraft/class_8479", // ClientboundRuleUpdatePacket
+            "net/minecraft/class_8480", // ClientboundVoteCastResultPacket
+
     });
 
     // Entities related stuff
@@ -215,6 +224,10 @@ public class RakNetMultiChannel {
             // 1.16.5
             "net/minecraft/class_2684", // EntityS2CPacket
             "net/minecraft/class_2698", // CombatEventS2CPacket
+
+            // 23w13a_or_b
+            "net/minecraft/class_8484", // ServerboundCrashVehiclePacket
+
     });
 
     // Primarily used for interactions dependent to world
