@@ -112,6 +112,8 @@ if (System.getenv("CURSEFORGE_TOKEN")) {
 			addGameVersion "1.19.1"
 			addGameVersion "1.19.2"
 			addGameVersion "1.19.3"
+			addGameVersion "1.19.4"
+			addGameVersion "1.20"
 			addGameVersion "Fabric"
 			addGameVersion "Java 17"
 			addGameVersion "Java 18"
