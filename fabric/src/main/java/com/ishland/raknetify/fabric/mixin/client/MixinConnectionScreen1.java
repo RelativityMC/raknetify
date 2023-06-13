@@ -26,8 +26,7 @@ package com.ishland.raknetify.fabric.mixin.client;
 
 import com.ishland.raknetify.fabric.common.connection.RakNetClientConnectionUtil;
 import com.ishland.raknetify.common.util.PrefixUtil;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.ConnectScreen;
+import io.netty.channel.ChannelFuture;
 import net.minecraft.client.network.ServerAddress;
 import net.minecraft.network.ClientConnection;
 import org.spongepowered.asm.mixin.Final;
@@ -66,9 +65,14 @@ public class MixinConnectionScreen1 extends Thread {
         }
     }
 
-    @Redirect(method = "run()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/ClientConnection;connect(Ljava/net/InetSocketAddress;Z)Lnet/minecraft/network/ClientConnection;"))
+    @Redirect(method = "run()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/ClientConnection;connect(Ljava/net/InetSocketAddress;Z)Lnet/minecraft/network/ClientConnection;"), require = 0)
     private ClientConnection connectRaknet(InetSocketAddress address, boolean useEpoll) {
         return this.isRaknet ? RakNetClientConnectionUtil.connect(address, useEpoll, this.raknetLargeMTU) : ClientConnection.connect(address, useEpoll);
+    }
+
+    @Redirect(method = "run()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/ClientConnection;connect(Ljava/net/InetSocketAddress;ZLnet/minecraft/network/ClientConnection;)Lio/netty/channel/ChannelFuture;"), require = 0)
+    private ChannelFuture connectRaknet(InetSocketAddress address, boolean useEpoll, ClientConnection connection) {
+        return this.isRaknet ? RakNetClientConnectionUtil.connect(address, useEpoll, this.raknetLargeMTU, connection) : ClientConnection.connect(address, useEpoll, connection);
     }
 
 }
