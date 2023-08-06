@@ -28,7 +28,9 @@ import com.google.common.collect.Sets;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.ishland.raknetify.common.data.ProtocolMultiChannelMappings;
+import com.ishland.raknetify.fabric.RaknetifyFabric;
 import com.ishland.raknetify.fabric.mixin.access.INetworkState;
+import com.ishland.raknetify.fabric.mixin.access.INetworkStateInternalPacketHandler;
 import com.ishland.raknetify.fabric.mixin.access.INetworkStatePacketHandler;
 import it.unimi.dsi.fastutil.ints.AbstractInt2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2IntArrayMap;
@@ -92,6 +94,11 @@ public class RakNetMultiChannel {
             "net/minecraft/class_2617", // StatisticsS2C
             "net/minecraft/class_2859", // AdvancementTabC2S
             "net/minecraft/class_2729", // SelectAdvancementTabS2C
+    });
+
+    private static final Set<Class<?>> channel0 = createClassSet(new String[]{
+            "net/minecraft/class_8588", // EnterReconfigurationS2CPacket
+            "net/minecraft/class_8591", // AcknowledgeReconfigurationC2SPacket
     });
 
     // Primarily used for interactions independent to world
@@ -319,13 +326,16 @@ public class RakNetMultiChannel {
             "net/minecraft/class_2622", // BlockEntityUpdateS2CPacket
             "net/minecraft/class_2676", // LightUpdateS2CPacket
             "net/minecraft/class_8212", // BiomeUpdateS2CPacket
+            "net/minecraft/class_8738", // ChunkSentS2CPacket
+            "net/minecraft/class_8739", // StartChunkSendS2CPacket
+            "net/minecraft/class_8590", // AcknowledgeChunksC2SPacket
     });
 
     private static final Set<Class<?>> unreliable = createClassSet(new String[]{
     });
 
     private static final Set<Class<?>> theVoid = createClassSet(new String[]{
-            "net/minecraft/class_8037" // BundleDelimiterPacket
+            "net/minecraft/class_8037", // BundleDelimiterPacket
     });
 
     private static final Object2IntOpenHashMap<Class<?>> classToChannelIdOverride = new Object2IntOpenHashMap<>();
@@ -333,6 +343,7 @@ public class RakNetMultiChannel {
     static {
         classToChannelIdOverride.defaultReturnValue(Integer.MAX_VALUE);
         unordered.forEach(clazz -> classToChannelIdOverride.put(clazz, -1));
+        channel0.forEach(clazz -> classToChannelIdOverride.put(clazz, 0));
         channel1.forEach(clazz -> classToChannelIdOverride.put(clazz, 1));
         channel2.forEach(clazz -> classToChannelIdOverride.put(clazz, 2));
         channel3.forEach(clazz -> classToChannelIdOverride.put(clazz, 3));
@@ -381,8 +392,8 @@ public class RakNetMultiChannel {
     }
 
     public static void iterateKnownPackets() {
-        for (Map.Entry<NetworkSide, ? extends NetworkState.PacketHandler<?>> entry : ((INetworkState) (Object) NetworkState.PLAY).getPacketHandlers().entrySet()) {
-            for (Object2IntMap.Entry<Class<? extends Packet<?>>> type : ((INetworkStatePacketHandler) entry.getValue()).getPacketIds().object2IntEntrySet()) {
+        for (Map.Entry<NetworkSide, ?> entry : ((INetworkState) (Object) NetworkState.PLAY).getPacketHandlers().entrySet()) {
+            for (Object2IntMap.Entry<Class<? extends Packet<?>>> type : RaknetifyFabric.getPacketIdsFromPacketHandler(entry.getValue()).object2IntEntrySet()) {
                 getPacketChannelOverride(type.getKey());
             }
         }

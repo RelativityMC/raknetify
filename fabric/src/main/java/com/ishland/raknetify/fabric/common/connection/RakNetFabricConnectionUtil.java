@@ -55,16 +55,19 @@ public class RakNetFabricConnectionUtil {
             channel.pipeline().replace("timeout", "timeout", new ChannelDuplexHandler()); // no-op
             channel.pipeline().replace("splitter", "splitter", new ChannelDuplexHandler()); // no-op
             channel.pipeline().replace("prepender", "prepender", new ChannelDuplexHandler()); // no-op
+            final MultiChannellingPacketCapture handler = new MultiChannellingPacketCapture();
             if (channel.pipeline().names().contains("unbundler")) {
                 channel.pipeline().replace("unbundler", "unbundler", new DummyUnbundler()); // no-op
                 channel.pipeline().replace("bundler", "bundler", new DummyBundler()); // no-op
+                channel.pipeline().addBefore("unbundler", "raknetify-multi-channel-packet-cature", handler);
+            } else {
+                channel.pipeline().addLast("raknetify-multi-channel-packet-cature", handler);
             }
-            final MultiChannellingPacketCapture handler = new MultiChannellingPacketCapture();
-            channel.pipeline().addLast("raknetify-multi-channel-packet-cature", handler);
             channel.pipeline().get(RakNetSimpleMultiChannelCodec.class)
                     .addHandler(handler.getCustomPayloadHandler())
                     .addHandler(handler.getCaptureBasedHandler());
             channel.pipeline().addLast("raknetify-handle-compression-compatibility", new RakNetCompressionCompatibilityHandler());
+            channel.pipeline().addBefore("packet_handler", RakNetFabricChannelEventListener.NAME, new RakNetFabricChannelEventListener());
         }
     }
 

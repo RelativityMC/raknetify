@@ -32,7 +32,4 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(ClientPlayNetworkHandler.class)
 public interface IClientPlayNetworkHandler {
 
-    @Accessor
-    ClientConnection getConnection();
-
 }

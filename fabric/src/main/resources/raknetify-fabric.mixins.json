@@ -8,6 +8,7 @@
   "mixins": [
     "access.IClientConnection",
     "access.INetworkState",
+    "access.INetworkStateInternalPacketHandler",
     "access.INetworkStatePacketHandler",
     "access.IPacketEncryptionManager",
     "access.IServerPlayNetworkHandler",
@@ -30,10 +31,11 @@
     "compat.krypton.MixinServerLoginNetworkHandler",
     "compat.qsl.MixinServerLoginNetworkAddon",
     "server.MixinPlayerManager",
+    "server.MixinServerCommonNetworkHandler",
     "server.MixinServerLoginNetworkHandler",
     "server.MixinServerNetworkIo",
     "server.MixinServerNetworkIo1",
-    "server.MixinServerPlayNetworkHandler"
+    "server.MixinServerPlayNetworkHandler1_20_1"
   ],
   "injectors": {
     "defaultRequire": 1

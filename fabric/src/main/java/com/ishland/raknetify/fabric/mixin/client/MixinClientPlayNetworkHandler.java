@@ -25,6 +25,7 @@
 package com.ishland.raknetify.fabric.mixin.client;
 
 import com.ishland.raknetify.common.connection.RakNetSimpleMultiChannelCodec;
+import com.ishland.raknetify.fabric.common.util.MultiVersionUtil;
 import com.ishland.raknetify.fabric.mixin.access.IClientConnection;
 import io.netty.channel.Channel;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
@@ -40,11 +41,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(ClientPlayNetworkHandler.class)
 public class MixinClientPlayNetworkHandler {
 
-    @Shadow @Final private ClientConnection connection;
-
     @Inject(method = "onGameJoin", at = @At("RETURN"))
     private void postGameJoin(GameJoinS2CPacket packet, CallbackInfo ci) {
-        final Channel channel = ((IClientConnection) this.connection).getChannel();
+        final Channel channel = ((IClientConnection) MultiVersionUtil.ClientPlayNetworkHandler$connection.get((ClientPlayNetworkHandler) (Object) this)).getChannel();
         if (channel == null) {
             //noinspection RedundantStringFormatCall
             System.err.println("Raknetify: Warning: %s don't have valid channel when logged in, not sending sync packet".formatted(this));

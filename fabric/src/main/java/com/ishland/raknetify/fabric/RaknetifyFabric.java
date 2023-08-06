@@ -29,7 +29,9 @@ import com.google.gson.GsonBuilder;
 import com.ishland.raknetify.common.data.ProtocolMultiChannelMappings;
 import com.ishland.raknetify.fabric.common.connection.RakNetMultiChannel;
 import com.ishland.raknetify.common.util.NetworkInterfaceListener;
+import com.ishland.raknetify.fabric.common.util.MultiVersionUtil;
 import com.ishland.raknetify.fabric.mixin.access.INetworkState;
+import com.ishland.raknetify.fabric.mixin.access.INetworkStateInternalPacketHandler;
 import com.ishland.raknetify.fabric.mixin.access.INetworkStatePacketHandler;
 import io.netty.util.ResourceLeakDetector;
 import io.netty.util.internal.SystemPropertyUtil;
@@ -65,6 +67,7 @@ public class RaknetifyFabric implements ModInitializer, PreLaunchEntrypoint {
 
     @Override
     public void onPreLaunch() {
+        MultiVersionUtil.init();
         if (HANDLE_MAPPINGS_ON_PRELAUNCH)
             handleMappings();
     }
@@ -92,8 +95,10 @@ public class RaknetifyFabric implements ModInitializer, PreLaunchEntrypoint {
 
         Int2IntArrayMap s2c = new Int2IntArrayMap();
         Int2IntArrayMap c2s = new Int2IntArrayMap();
-        for (Map.Entry<NetworkSide, ? extends NetworkState.PacketHandler<?>> entry : ((INetworkState) (Object) NetworkState.PLAY).getPacketHandlers().entrySet()) {
-            for (Object2IntMap.Entry<Class<? extends Packet<?>>> type : ((INetworkStatePacketHandler) entry.getValue()).getPacketIds().object2IntEntrySet()) {
+        for (Map.Entry<NetworkSide, ?> entry : ((INetworkState) (Object) NetworkState.PLAY).getPacketHandlers().entrySet()) {
+            final Object value = entry.getValue();
+            final Object2IntMap<Class<? extends Packet<?>>> packetIds = getPacketIdsFromPacketHandler(value);
+            for (Object2IntMap.Entry<Class<? extends Packet<?>>> type : packetIds.object2IntEntrySet()) {
                 if (entry.getKey() == NetworkSide.CLIENTBOUND)
                     s2c.put(type.getIntValue(), RakNetMultiChannel.getPacketChannelOverride(type.getKey()));
                 else if (entry.getKey() == NetworkSide.SERVERBOUND)
@@ -148,6 +153,18 @@ public class RaknetifyFabric implements ModInitializer, PreLaunchEntrypoint {
             }
             if (EXIT_AFTER_SAVE_CHANNEL_MAPPINGS) System.exit(0);
         }
+    }
+
+    public static Object2IntMap<Class<? extends Packet<?>>> getPacketIdsFromPacketHandler(Object value) {
+        Object2IntMap<Class<? extends Packet<?>>> packetIds;
+        if (value instanceof INetworkStateInternalPacketHandler) {
+            packetIds = ((INetworkStateInternalPacketHandler) value).getPacketIds();
+        } else if (value instanceof INetworkStatePacketHandler<?>) {
+            packetIds = ((INetworkStateInternalPacketHandler) ((INetworkStatePacketHandler<?>) value).getBackingHandler()).getPacketIds();
+        } else {
+            throw new IllegalStateException("Unknown packet handler type: " + value.getClass());
+        }
+        return packetIds;
     }
 
 }

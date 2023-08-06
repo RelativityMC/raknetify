@@ -1,0 +1,152 @@
+/*
+ * This file is a part of the Raknetify project, licensed under MIT.
+ *
+ * Copyright (c) 2022-2023 ishland
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+
+package com.ishland.raknetify.fabric.common.util;
+
+import com.google.common.collect.ImmutableList;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.loader.api.FabricLoader;
+import net.fabricmc.loader.api.MappingResolver;
+import net.minecraft.client.network.ClientPlayNetworkHandler;
+import net.minecraft.network.ClientConnection;
+import net.minecraft.server.network.ServerPlayNetworkHandler;
+import net.minecraft.server.network.ServerPlayerEntity;
+import org.spongepowered.asm.mixin.transformer.meta.MixinMerged;
+
+import java.lang.annotation.Annotation;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.VarHandle;
+import java.lang.reflect.Field;
+import java.util.Arrays;
+import java.util.List;
+
+public class MultiVersionUtil {
+
+    private static final String INTERMEDIARY = "intermediary";
+    private static final String CLASSNAME_ServerPlayNetworkHandler = "net.minecraft.class_3244";
+
+    public static final VarHandle ServerPlayNetworkHandler$connection;
+    public static final VarHandle ClientPlayNetworkHandler$connection;
+    public static final VarHandle ServerPlayerEntity$pingMillis1_20_1;
+
+    static {
+        try {
+            final MappingResolver resolver = FabricLoader.getInstance().getMappingResolver();
+
+            {
+                final List<Field> connFields = tryLocateFields(ServerPlayNetworkHandler.class, ClientConnection.class, false);
+                if (connFields.size() != 1) {
+                    throw new IllegalStateException("Ambiguous fields for ClientConnection in ServerPlayNetworkHandler: found " + Arrays.toString(connFields.toArray()));
+                }
+                if (connFields.isEmpty()) {
+                    throw new IllegalStateException("Cannot find field for ClientConnection in ServerPlayNetworkHandler");
+                }
+                final Field connField = connFields.get(0);
+                connField.setAccessible(true);
+                ServerPlayNetworkHandler$connection = MethodHandles
+                        .privateLookupIn(ServerPlayNetworkHandler.class, MethodHandles.lookup())
+                        .unreflectVarHandle(connField);
+            }
+
+            if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
+                final List<Field> connFields = tryLocateFields(ClientPlayNetworkHandler.class, ClientConnection.class, false);
+                if (connFields.size() != 1) {
+                    throw new IllegalStateException("Ambiguous fields for ClientConnection in ClientPlayNetworkHandler: found " + Arrays.toString(connFields.toArray()));
+                }
+                if (connFields.isEmpty()) {
+                    throw new IllegalStateException("Cannot find field for ClientConnection in ClientPlayNetworkHandler");
+                }
+                final Field connField = connFields.get(0);
+                connField.setAccessible(true);
+                ClientPlayNetworkHandler$connection = MethodHandles
+                        .privateLookupIn(ClientPlayNetworkHandler.class, MethodHandles.lookup())
+                        .unreflectVarHandle(connField);
+            } else {
+                ClientPlayNetworkHandler$connection = null;
+            }
+
+            final Field pingMillis1_20_1 = getOrNull(() -> ServerPlayerEntity.class.getDeclaredField(resolver.mapFieldName(INTERMEDIARY, "net.minecraft.class_3222", "field_13967", "I")), NoSuchFieldException.class);
+            if (pingMillis1_20_1 != null) {
+                pingMillis1_20_1.setAccessible(true);
+                ServerPlayerEntity$pingMillis1_20_1 = MethodHandles
+                        .privateLookupIn(ServerPlayerEntity.class, MethodHandles.lookup())
+                        .unreflectVarHandle(pingMillis1_20_1);
+            } else {
+                ServerPlayerEntity$pingMillis1_20_1 = null;
+            }
+        } catch (Throwable t) {
+            throw new RuntimeException(t);
+        }
+    }
+
+    private static List<Field> tryLocateFields(Class<?> clazz, Class<?> fieldType, boolean includeMixinMerged) {
+        final ImmutableList.Builder<Field> builder = ImmutableList.builder();
+        final Class<?> superclass = clazz.getSuperclass();
+        if (superclass != null) {
+            builder.addAll(tryLocateFields(superclass, fieldType, includeMixinMerged));
+        }
+        __outerloop:
+        for (Field field : clazz.getDeclaredFields()) {
+            if (!includeMixinMerged) {
+                for (Annotation annotation : field.getDeclaredAnnotations()) {
+                    if (annotation.annotationType() == MixinMerged.class) {
+                        continue __outerloop;
+                    }
+                }
+            }
+
+            if (field.getType() == fieldType) {
+                builder.add(field);
+            }
+        }
+        return builder.build();
+    }
+
+    public static void init() {
+    }
+
+    public static Class<?> tryLocateClass(String name) {
+        try {
+            return Class.forName(name);
+        } catch (ClassNotFoundException e) {
+            return null;
+        }
+    }
+
+    private static <T> T getOrNull(SupplierThrowable<T> supplier, Class<? extends Throwable> catchException) {
+        try {
+            return supplier.get();
+        } catch (Throwable t) {
+            if (catchException.isInstance(t)) {
+                return null;
+            }
+            throw new RuntimeException(t);
+        }
+    }
+
+    private interface SupplierThrowable<T> {
+        T get() throws Throwable;
+    }
+
+}

@@ -24,8 +24,12 @@
 
 package com.ishland.raknetify.fabric.mixin;
 
+import com.llamalad7.mixinextras.MixinExtrasBootstrap;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.loader.api.FabricLoader;
+import net.fabricmc.loader.api.Version;
+import net.fabricmc.loader.api.VersionParsingException;
+import net.fabricmc.loader.api.metadata.version.VersionPredicate;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
@@ -37,6 +41,7 @@ public class RaknetifyFabricMixinPlugin implements IMixinConfigPlugin {
     @Override
     public void onLoad(String mixinPackage) {
         System.setProperty("raknetserver.maxPacketLoss", String.valueOf(Integer.MAX_VALUE));
+        MixinExtrasBootstrap.init();
     }
 
     @Override
@@ -48,6 +53,20 @@ public class RaknetifyFabricMixinPlugin implements IMixinConfigPlugin {
     public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
         if (mixinClassName.startsWith("com.ishland.raknetify.fabric.mixin.client."))
             return FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT;
+        if (mixinClassName.equals("com.ishland.raknetify.fabric.mixin.server.MixinServerPlayNetworkHandler1_20_1")) {
+            try {
+                return VersionPredicate.parse("<=1.20.1").test(FabricLoader.getInstance().getModContainer("minecraft").get().getMetadata().getVersion());
+            } catch (VersionParsingException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        if (mixinClassName.equals("com.ishland.raknetify.fabric.mixin.server.MixinServerCommonNetworkHandler")) {
+            try {
+                return VersionPredicate.parse(">1.20.1").test(FabricLoader.getInstance().getModContainer("minecraft").get().getMetadata().getVersion());
+            } catch (VersionParsingException e) {
+                throw new RuntimeException(e);
+            }
+        }
         return true;
     }
 

@@ -34,6 +34,7 @@ public class NetworkStates {
             case PLAY -> "PLAY";
             case STATUS -> "STATUS";
             case LOGIN -> "LOGIN";
+            default -> state.toString();
         };
     }
 

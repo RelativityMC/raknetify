@@ -27,10 +27,12 @@ package com.ishland.raknetify.fabric.mixin.client;
 import com.ishland.raknetify.fabric.mixin.access.IClientConnection;
 import io.netty.channel.Channel;
 import net.minecraft.client.network.MultiplayerServerListPinger;
+import net.minecraft.client.network.ServerAddress;
 import net.minecraft.client.network.ServerInfo;
 import net.minecraft.network.ClientConnection;
 import net.minecraft.network.listener.ClientQueryPacketListener;
 import network.ycc.raknet.RakNet;
+import org.spongepowered.asm.mixin.Dynamic;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -60,7 +62,13 @@ public abstract class MixinMultiplayerServerListPinger1 implements ClientQueryPa
         }
     }
 
-    @Redirect(method = "onDisconnected(Lnet/minecraft/text/Text;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/MultiplayerServerListPinger;ping(Ljava/net/InetSocketAddress;Lnet/minecraft/client/network/ServerInfo;)V"))
+    @Redirect(method = "onDisconnected(Lnet/minecraft/text/Text;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/MultiplayerServerListPinger;ping(Ljava/net/InetSocketAddress;Lnet/minecraft/client/network/ServerAddress;Lnet/minecraft/client/network/ServerInfo;)V"), require = 0)
+    private void noPingRaknet(MultiplayerServerListPinger instance, InetSocketAddress socketAddress, ServerAddress address, ServerInfo serverInfo) {
+        // no-op
+    }
+
+    @Dynamic
+    @Redirect(method = "onDisconnected(Lnet/minecraft/text/Text;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/MultiplayerServerListPinger;method_3001(Ljava/net/InetSocketAddress;Lnet/minecraft/client/network/ServerInfo;)V"), require = 0)
     private void noPingRaknet(MultiplayerServerListPinger instance, InetSocketAddress address, ServerInfo info) {
         // no-op
     }

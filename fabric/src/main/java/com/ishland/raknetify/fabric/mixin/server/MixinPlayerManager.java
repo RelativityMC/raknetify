@@ -31,22 +31,45 @@ import net.minecraft.network.ClientConnection;
 import net.minecraft.server.PlayerManager;
 import net.minecraft.server.network.ServerPlayerEntity;
 import network.ycc.raknet.RakNet;
+import org.spongepowered.asm.mixin.Dynamic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Surrogate;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(PlayerManager.class)
 public class MixinPlayerManager {
 
-    @Inject(method = "onPlayerConnect", at = @At("HEAD"))
+    @Dynamic
+    @Inject(method = {"onPlayerConnect", "method_12975"}, at = @At("HEAD"))
+    private void onJoin(ClientConnection connection, ServerPlayerEntity player, int latency, CallbackInfo ci) {
+        if (((IClientConnection) connection).getChannel().config() instanceof RakNet.Config config) {
+            System.out.println(String.format("Raknetify: %s logged in via RakNet, mtu %d", player.getName().getString(), config.getMTU()));
+        }
+    }
+
+    @Surrogate
     private void onJoin(ClientConnection connection, ServerPlayerEntity player, CallbackInfo ci) {
         if (((IClientConnection) connection).getChannel().config() instanceof RakNet.Config config) {
             System.out.println(String.format("Raknetify: %s logged in via RakNet, mtu %d", player.getName().getString(), config.getMTU()));
         }
     }
 
-    @Inject(method = "onPlayerConnect", at = @At("RETURN"))
+
+    @Dynamic
+    @Inject(method = {"onPlayerConnect", "method_12975"}, at = @At("RETURN"))
+    private void postJoin(ClientConnection connection, ServerPlayerEntity player, int latency, CallbackInfo ci) {
+        final Channel channel = ((IClientConnection) connection).getChannel();
+        if (channel == null) {
+            //noinspection RedundantStringFormatCall
+            System.err.println("Raknetify: Warning: %s don't have valid channel when logged in, not sending sync packet".formatted(this));
+            return;
+        }
+        channel.write(RakNetSimpleMultiChannelCodec.SIGNAL_START_MULTICHANNEL);
+    }
+
+    @Surrogate
     private void postJoin(ClientConnection connection, ServerPlayerEntity player, CallbackInfo ci) {
         final Channel channel = ((IClientConnection) connection).getChannel();
         if (channel == null) {

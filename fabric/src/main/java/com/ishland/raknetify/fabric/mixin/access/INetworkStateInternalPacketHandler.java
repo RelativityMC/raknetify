@@ -24,19 +24,16 @@
 
 package com.ishland.raknetify.fabric.mixin.access;
 
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import net.minecraft.network.NetworkState;
-import net.minecraft.network.listener.PacketListener;
+import net.minecraft.network.packet.Packet;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
-import org.spongepowered.asm.mixin.gen.Invoker;
 
-@Mixin(NetworkState.PacketHandler.class)
-public interface INetworkStatePacketHandler<T extends PacketListener> {
+@Mixin(NetworkState.InternalPacketHandler.class)
+public interface INetworkStateInternalPacketHandler {
 
     @Accessor
-    NetworkState.InternalPacketHandler<T> getBackingHandler();
-
-    @Invoker
-    NetworkState invokeGetState();
-
+    Object2IntMap<Class<? extends Packet<?>>> getPacketIds();
+    
 }

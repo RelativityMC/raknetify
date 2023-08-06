@@ -26,6 +26,7 @@ package com.ishland.raknetify.fabric.mixin.common;
 
 import com.ishland.raknetify.common.Constants;
 import com.ishland.raknetify.common.connection.RakNetConnectionUtil;
+import com.ishland.raknetify.common.connection.RaknetifyEventLoops;
 import com.ishland.raknetify.common.util.ThreadLocalUtil;
 import io.netty.bootstrap.AbstractBootstrap;
 import io.netty.bootstrap.Bootstrap;
@@ -51,20 +52,10 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
 import java.net.InetSocketAddress;
+import java.util.function.Supplier;
 
 @Mixin(ClientConnection.class)
 public class MixinCCConnect {
-
-    @Shadow
-    private Channel channel;
-
-    @Shadow
-    @Final
-    public static Lazy<EpollEventLoopGroup> EPOLL_CLIENT_IO_GROUP;
-
-    @Shadow
-    @Final
-    public static Lazy<NioEventLoopGroup> CLIENT_IO_GROUP;
 
     @Dynamic("method_10753 for compat")
     @Redirect(method = {"connect(Ljava/net/InetSocketAddress;ZLnet/minecraft/network/ClientConnection;)Lio/netty/channel/ChannelFuture;", "connect(Ljava/net/InetSocketAddress;Z)Lnet/minecraft/network/ClientConnection;", "method_10753"}, at = @At(value = "INVOKE", target = "Lio/netty/bootstrap/Bootstrap;channel(Ljava/lang/Class;)Lio/netty/bootstrap/AbstractBootstrap;", remap = false), require = 1)
@@ -83,7 +74,7 @@ public class MixinCCConnect {
                         return channel1;
                     });
                     RakNet.config(channel).setMTU(initializingRaknetLargeMTU ? Constants.LARGE_MTU : Constants.DEFAULT_MTU);
-                    channel.setProvidedEventLoop(actuallyUseEpoll ? EPOLL_CLIENT_IO_GROUP.get().next() : CLIENT_IO_GROUP.get().next());
+                    channel.setProvidedEventLoop(actuallyUseEpoll ? RaknetifyEventLoops.EPOLL_EVENT_LOOP_GROUP.get().next() : RaknetifyEventLoops.NIO_EVENT_LOOP_GROUP.get().next());
                     return channel;
                 })
                 : instance.channel(aClass);
