@@ -42,7 +42,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class MixinPlayerManager {
 
     @Dynamic
-    @Inject(method = {"onPlayerConnect", "method_12975"}, at = @At("HEAD"))
+    @Inject(method = {"onPlayerConnect", "method_12975"}, at = @At("HEAD"), require = 0)
     private void onJoin(ClientConnection connection, ServerPlayerEntity player, int latency, CallbackInfo ci) {
         if (((IClientConnection) connection).getChannel().config() instanceof RakNet.Config config) {
             System.out.println(String.format("Raknetify: %s logged in via RakNet, mtu %d", player.getName().getString(), config.getMTU()));
@@ -58,7 +58,7 @@ public class MixinPlayerManager {
 
 
     @Dynamic
-    @Inject(method = {"onPlayerConnect", "method_12975"}, at = @At("RETURN"))
+    @Inject(method = {"onPlayerConnect", "method_12975"}, at = @At("RETURN"), require = 0)
     private void postJoin(ClientConnection connection, ServerPlayerEntity player, int latency, CallbackInfo ci) {
         final Channel channel = ((IClientConnection) connection).getChannel();
         if (channel == null) {
