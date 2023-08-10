@@ -25,6 +25,7 @@
 package com.ishland.raknetify.fabric.common.connection;
 
 import com.ishland.raknetify.common.util.ThreadLocalUtil;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import io.netty.channel.ChannelFuture;
 import net.minecraft.network.ClientConnection;
 
@@ -35,11 +36,11 @@ public class RakNetClientConnectionUtil {
     private RakNetClientConnectionUtil() {
     }
 
-    public static ClientConnection connect(InetSocketAddress address, boolean useEpoll, boolean largeMTU) {
+    public static ClientConnection connect(InetSocketAddress address, boolean useEpoll, boolean largeMTU, Operation<ClientConnection> original) {
         try {
             ThreadLocalUtil.setInitializingRaknet(true);
             ThreadLocalUtil.setInitializingRaknetLargeMTU(largeMTU);
-            return ClientConnection.connect(address, useEpoll);
+            return original.call(address, useEpoll);
         } finally {
             ThreadLocalUtil.setInitializingRaknet(false);
             ThreadLocalUtil.setInitializingRaknetLargeMTU(false);

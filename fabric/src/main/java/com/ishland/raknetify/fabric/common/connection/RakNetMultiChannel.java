@@ -94,6 +94,9 @@ public class RakNetMultiChannel {
             "net/minecraft/class_2617", // StatisticsS2C
             "net/minecraft/class_2859", // AdvancementTabC2S
             "net/minecraft/class_2729", // SelectAdvancementTabS2C
+
+            "net/minecraft/class_2935", // QueryPingC2SPacket
+            "net/minecraft/class_2923", // PingResultS2CPacket
     });
 
     private static final Set<Class<?>> channel0 = createClassSet(new String[]{
