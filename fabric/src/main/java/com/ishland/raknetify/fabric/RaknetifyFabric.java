@@ -97,8 +97,6 @@ public class RaknetifyFabric implements ModInitializer, PreLaunchEntrypoint {
     }
 
     private static void handleMappings() {
-        auditMixins();
-
         RakNetMultiChannel.init();
         RakNetMultiChannel.iterateKnownPackets();
         NetworkInterfaceListener.init();
@@ -116,6 +114,7 @@ public class RaknetifyFabric implements ModInitializer, PreLaunchEntrypoint {
             }
         }
         if (SAVE_CHANNEL_MAPPINGS) {
+            auditMixins();
             final Gson gson = new GsonBuilder()
                     .setPrettyPrinting()
                     .create();
