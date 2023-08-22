@@ -42,6 +42,7 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.entrypoint.PreLaunchEntrypoint;
 import net.minecraft.SharedConstants;
 import net.minecraft.network.NetworkSide;
@@ -82,6 +83,9 @@ public class RaknetifyFabric implements ModInitializer, PreLaunchEntrypoint {
 
     @Override
     public void onInitialize() {
+        if (FabricLoader.getInstance().isDevelopmentEnvironment())
+            auditMixins();
+
         if (!HANDLE_MAPPINGS_ON_PRELAUNCH)
             handleMappings();
 

@@ -41,6 +41,7 @@
     "defaultRequire": 1
   },
   "client": [
-    "access.IClientPlayNetworkHandler"
+    "access.IClientPlayNetworkHandler",
+    "client.MixinMultiplayerServerListPinger1_20_2"
   ]
 }

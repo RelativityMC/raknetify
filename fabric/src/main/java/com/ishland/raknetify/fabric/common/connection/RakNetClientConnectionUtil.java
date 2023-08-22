@@ -36,11 +36,15 @@ public class RakNetClientConnectionUtil {
     private RakNetClientConnectionUtil() {
     }
 
-    public static ClientConnection connect(InetSocketAddress address, boolean useEpoll, boolean largeMTU, Operation<ClientConnection> original) {
+    public static ClientConnection connect(InetSocketAddress address, boolean useEpoll, boolean largeMTU, Operation<ClientConnection> original, boolean hasPerformanceLog) {
         try {
             ThreadLocalUtil.setInitializingRaknet(true);
             ThreadLocalUtil.setInitializingRaknetLargeMTU(largeMTU);
-            return original.call(address, useEpoll);
+            if (hasPerformanceLog) {
+                return original.call(address, useEpoll, null);
+            } else {
+                return original.call(address, useEpoll);
+            }
         } finally {
             ThreadLocalUtil.setInitializingRaknet(false);
             ThreadLocalUtil.setInitializingRaknetLargeMTU(false);

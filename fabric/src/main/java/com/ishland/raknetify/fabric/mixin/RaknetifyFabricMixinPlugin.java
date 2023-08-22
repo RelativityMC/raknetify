@@ -38,6 +38,20 @@ import java.util.List;
 import java.util.Set;
 
 public class RaknetifyFabricMixinPlugin implements IMixinConfigPlugin {
+
+    private static final boolean PRE_1_20_2;
+    private static final boolean POST_1_20_2;
+
+    static {
+        try {
+            PRE_1_20_2 = VersionPredicate.parse("<=1.20.1").test(FabricLoader.getInstance().getModContainer("minecraft").get().getMetadata().getVersion());
+            POST_1_20_2 = VersionPredicate.parse(">1.20.1").test(FabricLoader.getInstance().getModContainer("minecraft").get().getMetadata().getVersion());
+        } catch (VersionParsingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+
     @Override
     public void onLoad(String mixinPackage) {
         System.setProperty("raknetserver.maxPacketLoss", String.valueOf(Integer.MAX_VALUE));
@@ -51,22 +65,19 @@ public class RaknetifyFabricMixinPlugin implements IMixinConfigPlugin {
 
     @Override
     public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
-        if (mixinClassName.startsWith("com.ishland.raknetify.fabric.mixin.client."))
-            return FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT;
-        if (mixinClassName.equals("com.ishland.raknetify.fabric.mixin.server.MixinServerPlayNetworkHandler1_20_1")) {
-            try {
-                return VersionPredicate.parse("<=1.20.1").test(FabricLoader.getInstance().getModContainer("minecraft").get().getMetadata().getVersion());
-            } catch (VersionParsingException e) {
-                throw new RuntimeException(e);
+        if (mixinClassName.startsWith("com.ishland.raknetify.fabric.mixin.client.")) {
+            if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
+                if (mixinClassName.equals("com.ishland.raknetify.fabric.mixin.client.MixinMultiplayerServerListPinger1_20_2"))
+                    return POST_1_20_2;
+                return true;
+            } else {
+                return false;
             }
         }
-        if (mixinClassName.equals("com.ishland.raknetify.fabric.mixin.server.MixinServerCommonNetworkHandler")) {
-            try {
-                return VersionPredicate.parse(">1.20.1").test(FabricLoader.getInstance().getModContainer("minecraft").get().getMetadata().getVersion());
-            } catch (VersionParsingException e) {
-                throw new RuntimeException(e);
-            }
-        }
+        if (mixinClassName.equals("com.ishland.raknetify.fabric.mixin.server.MixinServerPlayNetworkHandler1_20_1"))
+            return PRE_1_20_2;
+        if (mixinClassName.equals("com.ishland.raknetify.fabric.mixin.server.MixinServerCommonNetworkHandler"))
+            return POST_1_20_2;
         return true;
     }
 
