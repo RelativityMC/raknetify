@@ -41,9 +41,11 @@ import net.md_5.bungee.protocol.PacketWrapper;
 import net.md_5.bungee.protocol.Protocol;
 import net.md_5.bungee.protocol.packet.Commands;
 import net.md_5.bungee.protocol.packet.EncryptionResponse;
+import net.md_5.bungee.protocol.packet.FinishConfiguration;
 import net.md_5.bungee.protocol.packet.Login;
 import net.md_5.bungee.protocol.packet.Respawn;
 import net.md_5.bungee.protocol.packet.SetCompression;
+import net.md_5.bungee.protocol.packet.StartConfiguration;
 
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
@@ -95,7 +97,7 @@ public class RakNetBungeeClientChannelEventListener extends ChannelDuplexHandler
                 needResetCompression = true;
                 return;
             }
-        } else if (msg instanceof Respawn || msg instanceof Login) {
+        } else if (msg instanceof Respawn || msg instanceof Login || msg instanceof StartConfiguration || msg instanceof FinishConfiguration) {
             ctx.write(SynchronizationLayer.SYNC_REQUEST_OBJECT); // sync
             super.write(ctx, msg, promise);
             return;
