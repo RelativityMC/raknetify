@@ -101,7 +101,11 @@ public abstract class MixinClientConnection {
             }
             ex.printStackTrace();
         } else {
-            final Object handler = this.channel.attr(raknetify$getProtocolAttributeKey(this.getSide())).get();
+            Object handler;
+            handler = this.channel.attr(AttributeKey.valueOf("protocol")).get(); // pre-1.20.2
+            if (handler == null) {
+                handler = this.channel.attr(raknetify$getProtocolAttributeKey(this.getSide())).get();
+            }
             final NetworkState state;
             if (handler instanceof INetworkStatePacketHandler<?> access) {
                 state = access.invokeGetState();
