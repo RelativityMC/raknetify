@@ -107,10 +107,10 @@ public abstract class MixinClientConnection {
                 handler = this.channel.attr(raknetify$getProtocolAttributeKey(this.getSide())).get();
             }
             final NetworkState state;
-            if (handler instanceof INetworkStatePacketHandler<?> access) {
-                state = access.invokeGetState();
-            } else if (handler instanceof NetworkState state1) {
+            if (handler instanceof NetworkState state1) {
                 state = state1;
+            } else if (handler instanceof INetworkStatePacketHandler<?> access) {
+                state = access.invokeGetState();
             } else {
                 throw new IllegalStateException("Unknown handler type: " + handler.getClass().getName());
             }
