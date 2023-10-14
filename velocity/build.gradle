@@ -40,7 +40,7 @@ dependencies {
 //    api 'com.velocitypowered:velocity-api:3.1.1'
 //    annotationProcessor 'com.velocitypowered:velocity-api:3.1.1'
 
-    implementation 'velocity:3.2.0-SNAPSHOT:261'
+    implementation 'velocity:3.2.0-SNAPSHOT:275'
 //    annotationProcessor 'velocity:3.1.2-SNAPSHOT:139'
 
     shadowInclude implementation(project(":common"))

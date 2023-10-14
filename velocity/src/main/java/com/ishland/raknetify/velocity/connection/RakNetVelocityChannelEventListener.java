@@ -36,6 +36,8 @@ import com.velocitypowered.proxy.protocol.packet.EncryptionResponse;
 import com.velocitypowered.proxy.protocol.packet.JoinGame;
 import com.velocitypowered.proxy.protocol.packet.Respawn;
 import com.velocitypowered.proxy.protocol.packet.SetCompression;
+import com.velocitypowered.proxy.protocol.packet.config.FinishedUpdate;
+import com.velocitypowered.proxy.protocol.packet.config.StartUpdate;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPromise;
@@ -58,7 +60,7 @@ public class RakNetVelocityChannelEventListener extends ChannelDuplexHandler {
                 promise.setSuccess(); // swallow SetCompression packet
                 return;
             }
-        } else if (msg instanceof Respawn || msg instanceof JoinGame) {
+        } else if (msg instanceof Respawn || msg instanceof JoinGame || msg instanceof StartUpdate || msg instanceof FinishedUpdate) {
             ctx.write(SynchronizationLayer.SYNC_REQUEST_OBJECT); // sync
             super.write(ctx, msg, promise);
             return;
