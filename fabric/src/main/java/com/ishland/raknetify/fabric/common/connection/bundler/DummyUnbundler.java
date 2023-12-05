@@ -24,19 +24,31 @@
 
 package com.ishland.raknetify.fabric.common.connection.bundler;
 
+import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.MessageToMessageEncoder;
-import java.util.List;
+import io.netty.channel.ChannelOutboundHandlerAdapter;
+import io.netty.channel.ChannelPromise;
+
+import io.netty.util.concurrent.PromiseCombiner;
+import net.minecraft.network.listener.ClientPlayPacketListener;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.play.BundleS2CPacket;
 
-public class DummyUnbundler extends MessageToMessageEncoder<Packet<?>> {
+public class DummyUnbundler extends ChannelOutboundHandlerAdapter {
+
     @Override
-    protected void encode(ChannelHandlerContext channelHandlerContext, Packet<?> packet, List<Object> list) throws Exception {
-        if (packet instanceof BundleS2CPacket p) {
-            p.getPackets().forEach(list::add);
-        } else {
-            list.add(packet);
+    public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) {
+        if (msg instanceof BundleS2CPacket p) {
+            @SuppressWarnings("deprecation") final PromiseCombiner combiner = new PromiseCombiner();
+            for (Packet<ClientPlayPacketListener> p1 : p.getPackets()) {
+                final ChannelPromise promise1 = ctx.newPromise();
+                ctx.write(p1, promise1);
+                combiner.add((ChannelFuture) promise1);
+            }
+            combiner.finish(promise);
+            return;
         }
+        ctx.write(msg, promise);
     }
+
 }

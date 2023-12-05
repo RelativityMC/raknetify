@@ -25,19 +25,21 @@
 package com.ishland.raknetify.fabric.common.connection.bundler;
 
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.codec.MessageToMessageDecoder;
 import java.util.List;
 import net.minecraft.network.packet.BundleSplitterPacket;
 import net.minecraft.network.packet.Packet;
+import org.jetbrains.annotations.NotNull;
 
-public class DummyBundler extends MessageToMessageDecoder<Packet<?>> {
+public class DummyBundler extends ChannelInboundHandlerAdapter {
+
     @Override
-    protected void decode(ChannelHandlerContext channelHandlerContext, Packet<?> packet, List<Object> list) throws Exception {
-        if (packet instanceof BundleSplitterPacket) {
+    public void channelRead(@NotNull ChannelHandlerContext ctx, @NotNull Object msg) {
+        if (msg instanceof BundleSplitterPacket) {
             System.err.println("Raknetify: received bundle delimiter packet from server, this is not supposed to happen, dropping");
             return;
-        } else {
-            list.add(packet);
         }
+        ctx.fireChannelRead(msg);
     }
 }
