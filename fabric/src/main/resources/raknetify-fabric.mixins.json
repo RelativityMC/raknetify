@@ -14,7 +14,6 @@
     "access.IServerPlayNetworkHandler",
     "client.MixinClientPlayNetworkHandler",
     "client.MixinConnectionScreen1",
-    "client.MixinConnectScreen",
     "client.MixinMultiplayerServerListPinger",
     "client.MixinMultiplayerServerListPinger1",
     "client.hud.MixinDebugHud",

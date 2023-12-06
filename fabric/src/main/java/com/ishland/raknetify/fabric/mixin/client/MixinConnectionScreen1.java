@@ -44,7 +44,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.net.InetSocketAddress;
 
-@Mixin(targets = "net/minecraft/client/gui/screen/ConnectScreen$1")
+@Mixin(targets = "net/minecraft/client/gui/screen/multiplayer/ConnectScreen$1")
 public class MixinConnectionScreen1 extends Thread {
 
     @Mutable

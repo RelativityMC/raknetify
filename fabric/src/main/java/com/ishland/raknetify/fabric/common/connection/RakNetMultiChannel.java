@@ -90,6 +90,7 @@ public class RakNetMultiChannel {
 
             "net/minecraft/class_2720", // ResourcePackSendS2C
             "net/minecraft/class_2856", // ResourcePackStatusC2S
+            "net/minecraft/class_9053", // ResourcePackRemoveS2CPacket
 
             "net/minecraft/class_2617", // StatisticsS2C
             "net/minecraft/class_2859", // AdvancementTabC2S
@@ -131,6 +132,7 @@ public class RakNetMultiChannel {
             "net/minecraft/class_2736", // ScoreboardDisplayS2C
             "net/minecraft/class_2751", // ScoreboardDisplayObjectiveUpdateS2C
             "net/minecraft/class_2757", // ScoreboardPlayerUpdateS2C
+            "net/minecraft/class_9006", // ScoreboardScoreResetS2CPacket
             "net/minecraft/class_2779", // AdvancementUpdateS2CPacket
             "net/minecraft/class_2641", // CommandTreeS2C
             "net/minecraft/class_2639", // CommandSuggestionsS2C
@@ -277,6 +279,7 @@ public class RakNetMultiChannel {
             "net/minecraft/class_2868", // UpdateSelectedSlotC2S
             "net/minecraft/class_2875", // UpdateStructureBlockC2S
             "net/minecraft/class_2695", // CraftFailedResponseS2CPacket
+            "net/minecraft/class_8875", // SlotChangedStateC2SPacket
 
             "net/minecraft/class_5889", // WorldBorderInitializeS2C
             "net/minecraft/class_5895", // WorldBorderCenterChangedS2C
@@ -290,6 +293,9 @@ public class RakNetMultiChannel {
 
             "net/minecraft/class_2817", // CustomPayloadC2SPacket
             "net/minecraft/class_2658", // CustomPayloadS2CPacket
+
+            "net/minecraft/class_8914", // TickStepS2CPacket
+            "net/minecraft/class_8913", // UpdateTickRateS2CPacket
 
             // 1.16.5
             "net/minecraft/class_2809", // ConfirmScreenActionC2SPacket
