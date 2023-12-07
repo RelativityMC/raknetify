@@ -69,7 +69,7 @@ public class MixinConnectionScreen1 extends Thread {
     }
 
     @Dynamic
-    @WrapOperation(method = "run()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/ClientConnection;connect(Ljava/net/InetSocketAddress;Z)Lnet/minecraft/network/ClientConnection;"), require = 0)
+    @WrapOperation(method = "run()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/ClientConnection;method_10753(Ljava/net/InetSocketAddress;Z)Lnet/minecraft/network/ClientConnection;"), require = 0)
     private ClientConnection connectRaknet(InetSocketAddress address, boolean useEpoll, Operation<ClientConnection> original) {
         return this.isRaknet ? RakNetClientConnectionUtil.connect(address, useEpoll, this.raknetLargeMTU, original, false) : original.call(address, useEpoll);
     }

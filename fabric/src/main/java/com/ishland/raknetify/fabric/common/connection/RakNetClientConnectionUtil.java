@@ -37,6 +37,7 @@ public class RakNetClientConnectionUtil {
     }
 
     public static ClientConnection connect(InetSocketAddress address, boolean useEpoll, boolean largeMTU, Operation<ClientConnection> original, boolean hasPerformanceLog) {
+        System.out.println("aaa");
         try {
             ThreadLocalUtil.setInitializingRaknet(true);
             ThreadLocalUtil.setInitializingRaknetLargeMTU(largeMTU);
@@ -52,6 +53,7 @@ public class RakNetClientConnectionUtil {
     }
 
     public static ChannelFuture connect(InetSocketAddress address, boolean useEpoll, boolean largeMTU, ClientConnection connection) {
+        System.out.println("aaaa");
         try {
             ThreadLocalUtil.setInitializingRaknet(true);
             ThreadLocalUtil.setInitializingRaknetLargeMTU(largeMTU);
