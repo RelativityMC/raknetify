@@ -125,11 +125,13 @@ public class RakNetSimpleMultiChannelCodec extends ChannelDuplexHandler {
             promise.trySuccess();
             return;
         }
-        if (msg == SynchronizationLayer.SYNC_REQUEST_OBJECT && this.isMultichannelEnabled) {
-            if (Constants.DEBUG) System.out.println("Raknetify: [MultiChannellingDataCodec] Stopped multichannel");
-            this.isMultichannelEnabled = false;
-            super.write(ctx, msg, promise);
-            return;
+        if (msg == SynchronizationLayer.SYNC_REQUEST_OBJECT) {
+            if (this.isMultichannelEnabled) {
+                if (Constants.DEBUG) System.out.println("Raknetify: [MultiChannellingDataCodec] Stopped multichannel");
+                this.isMultichannelEnabled = false;
+                super.write(ctx, msg, promise);
+            }
+            return; // discard sync request when multichannel is not active
         }
 
         if (msg instanceof ByteBuf buf && buf.isReadable()) {
