@@ -5,14 +5,12 @@ under unreliable and rate-limited connections.
 # Features
 - Higher reliability and lower latency under unreliable and rate-limited client connections.
 - Uses RakNet's multiple channels with priorities to achieve higher responsiveness. 
-- Supports ViaVersion client-side and ViaVersion server-side. (MultiConnect compatibility is unknown)
+- Supports ViaVersion client-side and ViaVersion server-side.
 
 # How to use it?
 
 ## Prerequisites
-- Raknetify is currently confirmed to be working on Minecraft Release 1.17.1 - 1.19.2 
-  other Minecraft versions are not tested.  
-  It may work on newer Minecraft versions. If it doesn't, feel free to report to us.  
+- Raknetify is designed to work on Minecraft 1.17.1+
   Note: On proxies such as Velocity and BungeeCord, **unsupported client version** will cause
   multi-channelling failing to initialize, causing **reduced responsiveness**.  
 - You need to have a UDP port opened at the same port number of your normal server port. 
