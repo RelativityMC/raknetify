@@ -37,7 +37,7 @@ import com.velocitypowered.proxy.connection.client.ConnectedPlayer;
 import com.velocitypowered.proxy.network.Connections;
 import com.velocitypowered.proxy.protocol.ProtocolUtils;
 import com.velocitypowered.proxy.protocol.StateRegistry;
-import com.velocitypowered.proxy.protocol.packet.PluginMessage;
+import com.velocitypowered.proxy.protocol.packet.PluginMessagePacket;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.handler.codec.haproxy.HAProxyMessageDecoder;
@@ -86,7 +86,7 @@ public class RakNetVelocityConnectionUtil {
                 if (versionMapping != null) {
 
                     // handle custom payload separately
-                    final int pluginMessageId = StateRegistry.PLAY.getProtocolRegistry(ProtocolUtils.Direction.CLIENTBOUND, protocolVersion).getPacketId(new PluginMessage());
+                    final int pluginMessageId = StateRegistry.PLAY.getProtocolRegistry(ProtocolUtils.Direction.CLIENTBOUND, protocolVersion).getPacketId(new PluginMessagePacket());
                     if (Constants.DEBUG) RaknetifyVelocityPlugin.LOGGER.info("PluginMessage packetId=%d at version=%d".formatted(pluginMessageId, protocolVersion.getProtocol()));
                     multiChannelCodec.addHandler(new CustomPayloadChannel.OverrideHandler(value -> value == pluginMessageId));
 

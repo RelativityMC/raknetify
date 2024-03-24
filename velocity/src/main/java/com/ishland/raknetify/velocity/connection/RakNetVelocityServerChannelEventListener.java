@@ -23,7 +23,7 @@ package com.ishland.raknetify.velocity.connection;
 import com.google.common.base.Preconditions;
 import com.ishland.raknetify.common.Constants;
 import com.ishland.raknetify.velocity.RaknetifyVelocityPlugin;
-import com.velocitypowered.proxy.protocol.packet.KeepAlive;
+import com.velocitypowered.proxy.protocol.packet.KeepAlivePacket;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandler;
@@ -46,7 +46,7 @@ public class RakNetVelocityServerChannelEventListener extends ChannelDuplexHandl
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        if (msg instanceof KeepAlive) {
+        if (msg instanceof KeepAlivePacket) {
             if (Constants.DEBUG) RaknetifyVelocityPlugin.LOGGER.info("Received downstream keepalive, swallowing it");
             final long rttNanos = RakNet.config(clientChannel).getRTTNanos();
 //            RaknetifyVelocityPlugin.PROXY.getScheduler().buildTask(RaknetifyVelocityPlugin.INSTANCE, () -> ctx.write(msg))

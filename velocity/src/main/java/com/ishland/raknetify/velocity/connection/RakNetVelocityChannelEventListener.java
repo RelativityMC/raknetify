@@ -31,13 +31,13 @@ import com.velocitypowered.proxy.connection.MinecraftConnection;
 import com.velocitypowered.proxy.crypto.EncryptionUtils;
 import com.velocitypowered.proxy.network.Connections;
 import com.velocitypowered.proxy.protocol.VelocityConnectionEvent;
-import com.velocitypowered.proxy.protocol.packet.AvailableCommands;
-import com.velocitypowered.proxy.protocol.packet.EncryptionResponse;
-import com.velocitypowered.proxy.protocol.packet.JoinGame;
-import com.velocitypowered.proxy.protocol.packet.Respawn;
-import com.velocitypowered.proxy.protocol.packet.SetCompression;
-import com.velocitypowered.proxy.protocol.packet.config.FinishedUpdate;
-import com.velocitypowered.proxy.protocol.packet.config.StartUpdate;
+import com.velocitypowered.proxy.protocol.packet.AvailableCommandsPacket;
+import com.velocitypowered.proxy.protocol.packet.EncryptionResponsePacket;
+import com.velocitypowered.proxy.protocol.packet.JoinGamePacket;
+import com.velocitypowered.proxy.protocol.packet.RespawnPacket;
+import com.velocitypowered.proxy.protocol.packet.SetCompressionPacket;
+import com.velocitypowered.proxy.protocol.packet.config.FinishedUpdatePacket;
+import com.velocitypowered.proxy.protocol.packet.config.StartUpdatePacket;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPromise;
@@ -53,18 +53,18 @@ public class RakNetVelocityChannelEventListener extends ChannelDuplexHandler {
 
     @Override
     public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
-        if (msg instanceof SetCompression) {
+        if (msg instanceof SetCompressionPacket) {
             final MultiChannelingStreamingCompression compression = ctx.channel().pipeline().get(MultiChannelingStreamingCompression.class);
             if (compression != null && compression.isActive()) {
                 RaknetifyVelocityPlugin.LOGGER.info("Preventing vanilla compression as streaming compression is enabled");
                 promise.setSuccess(); // swallow SetCompression packet
                 return;
             }
-        } else if (msg instanceof Respawn || msg instanceof JoinGame || msg instanceof StartUpdate || msg instanceof FinishedUpdate) {
+        } else if (msg instanceof RespawnPacket || msg instanceof JoinGamePacket || msg instanceof StartUpdatePacket || msg instanceof FinishedUpdatePacket) {
             ctx.write(SynchronizationLayer.SYNC_REQUEST_OBJECT); // sync
             super.write(ctx, msg, promise);
             return;
-        } else if (msg instanceof AvailableCommands) {
+        } else if (msg instanceof AvailableCommandsPacket) {
             ctx.write(RakNetSimpleMultiChannelCodec.SIGNAL_START_MULTICHANNEL);
             super.write(ctx, msg, promise);
             return;
@@ -74,7 +74,7 @@ public class RakNetVelocityChannelEventListener extends ChannelDuplexHandler {
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        if (msg instanceof EncryptionResponse packet) {
+        if (msg instanceof EncryptionResponsePacket packet) {
             try {
                 byte[] secret = EncryptionUtils.decryptRsa(((VelocityServer) RaknetifyVelocityPlugin.PROXY).getServerKeyPair(), packet.getSharedSecret());
                 this.encryptionKey = new SecretKeySpec(secret, "AES");

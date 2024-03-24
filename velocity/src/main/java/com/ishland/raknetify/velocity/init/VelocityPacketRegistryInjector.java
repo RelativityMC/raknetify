@@ -23,7 +23,7 @@ package com.ishland.raknetify.velocity.init;
 import com.velocitypowered.api.network.ProtocolVersion;
 import com.velocitypowered.proxy.protocol.MinecraftPacket;
 import com.velocitypowered.proxy.protocol.StateRegistry;
-import com.velocitypowered.proxy.protocol.packet.Respawn;
+import com.velocitypowered.proxy.protocol.packet.RespawnPacket;
 import io.netty.util.collection.IntObjectMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 
@@ -45,10 +45,10 @@ public class VelocityPacketRegistryInjector {
                         accessible(StateRegistry.PacketRegistry.ProtocolRegistry.class.getDeclaredField("packetClassToId")).get(value);
                 final var packetIdToSupplier = (IntObjectMap<Supplier<? extends MinecraftPacket>>)
                         accessible(StateRegistry.PacketRegistry.ProtocolRegistry.class.getDeclaredField("packetIdToSupplier")).get(value);
-                if (packetClassToId.containsKey(Respawn.class)) {
-                    final int packetId = packetClassToId.getInt(Respawn.class);
+                if (packetClassToId.containsKey(RespawnPacket.class)) {
+                    final int packetId = packetClassToId.getInt(RespawnPacket.class);
                     if (!packetIdToSupplier.containsKey(packetId)) {
-                        packetIdToSupplier.put(packetId, Respawn::new); // make respawn packet no longer encodeOnly
+                        packetIdToSupplier.put(packetId, RespawnPacket::new); // make respawn packet no longer encodeOnly
                     }
                 }
             }

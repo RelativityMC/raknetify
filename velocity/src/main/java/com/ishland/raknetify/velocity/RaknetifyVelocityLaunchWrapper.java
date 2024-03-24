@@ -59,6 +59,7 @@ public class RaknetifyVelocityLaunchWrapper {
     private static boolean isCompatible() {
         try {
             Class.forName("com.velocitypowered.proxy.crypto.EncryptionUtils");
+            Class.forName("com.velocitypowered.proxy.protocol.packet.PluginMessagePacket");
             return true;
         } catch (ClassNotFoundException e) {
             return false;
