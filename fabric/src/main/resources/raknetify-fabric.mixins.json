@@ -7,9 +7,10 @@
   "mixinPriority": 1010,
   "mixins": [
     "access.IClientConnection",
-    "access.INetworkState",
+    "access.INetworkState1_20_4",
     "access.INetworkStateInternalPacketHandler",
-    "access.INetworkStatePacketHandler",
+    "access.IPacketCodecDispatcher",
+    "access.IPacketCodecDispatcherPacketType",
     "access.IPacketEncryptionManager",
     "access.IServerPlayNetworkHandler",
     "client.MixinClientPlayNetworkHandler",
@@ -42,6 +43,7 @@
   },
   "client": [
     "access.IClientPlayNetworkHandler",
-    "client.MixinMultiplayerServerListPinger1_20_2"
+    "client.MixinMultiplayerServerListPinger1_20_2",
+    "client.MixinMultiplayerServerListPinger1_20_5"
   ]
 }

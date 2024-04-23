@@ -22,33 +22,11 @@
  * THE SOFTWARE.
  */
 
-package com.ishland.raknetify.fabric.common.connection.bundler;
+package com.ishland.raknetify.fabric.mixin.access;
 
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelOutboundHandlerAdapter;
-import io.netty.channel.ChannelPromise;
+import net.minecraft.network.handler.PacketCodecDispatcher;
+import org.spongepowered.asm.mixin.Mixin;
 
-import io.netty.util.concurrent.PromiseCombiner;
-import net.minecraft.network.listener.ClientPlayPacketListener;
-import net.minecraft.network.packet.Packet;
-import net.minecraft.network.packet.s2c.play.BundleS2CPacket;
-
-public class DummyUnbundler extends ChannelOutboundHandlerAdapter {
-
-    @Override
-    public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) {
-        if (msg instanceof BundleS2CPacket p) {
-            @SuppressWarnings("deprecation") final PromiseCombiner combiner = new PromiseCombiner();
-            for (Packet<ClientPlayPacketListener> p1 : p.getPackets()) {
-                final ChannelPromise promise1 = ctx.newPromise();
-                ctx.write(p1, promise1);
-                combiner.add((ChannelFuture) promise1);
-            }
-            combiner.finish(promise);
-            return;
-        }
-        ctx.write(msg, promise);
-    }
-
+@Mixin(PacketCodecDispatcher.PacketType.class)
+public interface IPacketCodecDispatcherPacketType {
 }

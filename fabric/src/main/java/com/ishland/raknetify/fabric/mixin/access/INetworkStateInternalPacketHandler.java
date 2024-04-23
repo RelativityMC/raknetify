@@ -25,15 +25,15 @@
 package com.ishland.raknetify.fabric.mixin.access;
 
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
-import net.minecraft.network.NetworkState;
+import net.minecraft.network.NetworkPhase;
 import net.minecraft.network.packet.Packet;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(NetworkState.InternalPacketHandler.class)
+@Mixin(targets = "net/minecraft/class_2539$class_4532")
 public interface INetworkStateInternalPacketHandler {
 
-    @Accessor
+    @Accessor(value = "field_20596")
     Object2IntMap<Class<? extends Packet<?>>> getPacketIds();
     
 }

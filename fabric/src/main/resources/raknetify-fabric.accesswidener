@@ -1,8 +1,6 @@
 accessWidener v1 named
 
-accessible    class     net/minecraft/network/NetworkState$InternalPacketHandler
-
-extendable    class     net/minecraft/network/NetworkState$InternalPacketHandler
+accessible    class    net/minecraft/network/handler/PacketCodecDispatcher$PacketType
 
 accessible    method    net/minecraft/network/encryption/PacketEncryptionManager    <init>                   (Ljavax/crypto/Cipher;)V
 accessible    method    net/minecraft/client/network/MultiplayerServerListPinger    createPlayerCountText    (II)Lnet/minecraft/text/Text;

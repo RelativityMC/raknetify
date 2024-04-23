@@ -45,10 +45,14 @@ public class MultiVersionUtil {
 
     private static final String INTERMEDIARY = "intermediary";
     private static final String CLASSNAME_ServerPlayNetworkHandler = "net.minecraft.class_3244";
+    private static final String CLASSNAME_NetworkStatePacketHandler = "net.minecraft.class_2539$class_8698";
+    private static final String CLASSNAME_NetworkState$InternalPacketHandler = "net.minecraft.class_2539$class_4532";
 
     public static final VarHandle ServerPlayNetworkHandler$connection;
     public static final VarHandle ClientPlayNetworkHandler$connection;
     public static final VarHandle ServerPlayerEntity$pingMillis1_20_1;
+    public static final Class<?> clazzNetworkStatePacketHandler;
+    public static final VarHandle NetworkStatePacketHandler$backingHandler1_20_2;
 
     static {
         try {
@@ -86,14 +90,33 @@ public class MultiVersionUtil {
                 ClientPlayNetworkHandler$connection = null;
             }
 
-            final Field pingMillis1_20_1 = getOrNull(() -> ServerPlayerEntity.class.getDeclaredField(resolver.mapFieldName(INTERMEDIARY, "net.minecraft.class_3222", "field_13967", "I")), NoSuchFieldException.class);
-            if (pingMillis1_20_1 != null) {
-                pingMillis1_20_1.setAccessible(true);
-                ServerPlayerEntity$pingMillis1_20_1 = MethodHandles
-                        .privateLookupIn(ServerPlayerEntity.class, MethodHandles.lookup())
-                        .unreflectVarHandle(pingMillis1_20_1);
-            } else {
-                ServerPlayerEntity$pingMillis1_20_1 = null;
+            {
+                final Field pingMillis1_20_1 = getOrNull(() -> ServerPlayerEntity.class.getDeclaredField(resolver.mapFieldName(INTERMEDIARY, "net.minecraft.class_3222", "field_13967", "I")), NoSuchFieldException.class);
+                if (pingMillis1_20_1 != null) {
+                    pingMillis1_20_1.setAccessible(true);
+                    ServerPlayerEntity$pingMillis1_20_1 = MethodHandles
+                            .privateLookupIn(ServerPlayerEntity.class, MethodHandles.lookup())
+                            .unreflectVarHandle(pingMillis1_20_1);
+                } else {
+                    ServerPlayerEntity$pingMillis1_20_1 = null;
+                }
+            }
+
+            {
+                clazzNetworkStatePacketHandler = getOrNull(() -> Class.forName(CLASSNAME_NetworkStatePacketHandler), ClassNotFoundException.class);
+                if (clazzNetworkStatePacketHandler != null) {
+                    final Field backingHandler1_20_2 = getOrNull(() -> clazzNetworkStatePacketHandler.getDeclaredField(resolver.mapFieldName(INTERMEDIARY, CLASSNAME_NetworkStatePacketHandler, "field_45674", "L" + resolver.mapClassName(INTERMEDIARY, CLASSNAME_NetworkState$InternalPacketHandler) + ";")), NoSuchFieldException.class);
+                    if (backingHandler1_20_2 != null) {
+                        backingHandler1_20_2.setAccessible(true);
+                        NetworkStatePacketHandler$backingHandler1_20_2 = MethodHandles
+                                .privateLookupIn(clazzNetworkStatePacketHandler, MethodHandles.lookup())
+                                .unreflectVarHandle(backingHandler1_20_2);
+                    } else {
+                        NetworkStatePacketHandler$backingHandler1_20_2 = null;
+                    }
+                } else {
+                    NetworkStatePacketHandler$backingHandler1_20_2 = null;
+                }
             }
         } catch (Throwable t) {
             throw new RuntimeException(t);
@@ -134,13 +157,16 @@ public class MultiVersionUtil {
         }
     }
 
-    private static <T> T getOrNull(SupplierThrowable<T> supplier, Class<? extends Throwable> catchException) {
+    private static <T> T getOrNull(SupplierThrowable<T> supplier, Class<? extends Throwable>... catchExceptions) {
         try {
             return supplier.get();
         } catch (Throwable t) {
-            if (catchException.isInstance(t)) {
-                return null;
+            for (Class<? extends Throwable> catchException : catchExceptions) {
+                if (catchException.isInstance(t)) {
+                    return null;
+                }
             }
+
             throw new RuntimeException(t);
         }
     }

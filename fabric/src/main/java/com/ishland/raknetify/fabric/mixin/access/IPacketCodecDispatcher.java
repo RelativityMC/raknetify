@@ -24,19 +24,17 @@
 
 package com.ishland.raknetify.fabric.mixin.access;
 
-import net.minecraft.network.NetworkState;
-import net.minecraft.network.listener.PacketListener;
+import io.netty.buffer.ByteBuf;
+import net.minecraft.network.handler.PacketCodecDispatcher;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
-import org.spongepowered.asm.mixin.gen.Invoker;
 
-@Mixin(NetworkState.PacketHandler.class)
-public interface INetworkStatePacketHandler<T extends PacketListener> {
+import java.util.List;
+
+@Mixin(PacketCodecDispatcher.class)
+public interface IPacketCodecDispatcher<B extends ByteBuf, V, T> {
 
     @Accessor
-    NetworkState.InternalPacketHandler<T> getBackingHandler();
-
-    @Invoker
-    NetworkState invokeGetState();
+    List<PacketCodecDispatcher.PacketType<B, V, T>> getPacketTypes();
 
 }

@@ -22,24 +22,23 @@
  * THE SOFTWARE.
  */
 
-package com.ishland.raknetify.fabric.common.connection.bundler;
+package com.ishland.raknetify.fabric.mixin.access;
 
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInboundHandlerAdapter;
-import io.netty.handler.codec.MessageToMessageDecoder;
-import java.util.List;
-import net.minecraft.network.packet.BundleSplitterPacket;
-import net.minecraft.network.packet.Packet;
-import org.jetbrains.annotations.NotNull;
+import net.minecraft.network.NetworkPhase;
+import net.minecraft.network.NetworkSide;
+import org.spongepowered.asm.mixin.Dynamic;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Pseudo;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
-public class DummyBundler extends ChannelInboundHandlerAdapter {
+import java.util.Map;
 
-    @Override
-    public void channelRead(@NotNull ChannelHandlerContext ctx, @NotNull Object msg) {
-        if (msg instanceof BundleSplitterPacket) {
-            System.err.println("Raknetify: received bundle delimiter packet from server, this is not supposed to happen, dropping");
-            return;
-        }
-        ctx.fireChannelRead(msg);
-    }
+@Pseudo
+@Mixin(targets = "net/minecraft/class_2539")
+public interface INetworkState1_20_4 {
+
+    @Dynamic
+    @Accessor(value = "field_20595", remap = false)
+    Map<NetworkSide, ?> getPacketHandlers();
+
 }

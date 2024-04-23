@@ -22,19 +22,35 @@
  * THE SOFTWARE.
  */
 
-package com.ishland.raknetify.fabric.mixin.access;
+package com.ishland.raknetify.fabric.common.util;
 
-import net.minecraft.network.NetworkSide;
-import net.minecraft.network.NetworkState;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
+import org.objectweb.asm.Type;
+import org.objectweb.asm.signature.SignatureReader;
+import org.objectweb.asm.signature.SignatureVisitor;
+import org.spongepowered.asm.util.asm.ASM;
 
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
-@Mixin(NetworkState.class)
-public interface INetworkState {
+public class FieldSignatureParser extends SignatureVisitor {
 
-    @Accessor
-    Map<NetworkSide, ?> getPacketHandlers();
+    private final List<Type> results = new ArrayList<>();
 
+    private FieldSignatureParser() {
+        super(ASM.API_VERSION);
+    }
+
+    public static List<Type> parse(String signature) {
+        if (signature == null || signature.isEmpty()) {
+            return List.of();
+        }
+        FieldSignatureParser parser = new FieldSignatureParser();
+        new SignatureReader(signature).acceptType(parser);
+        return parser.results;
+    }
+
+    @Override
+    public void visitClassType(String name) {
+        results.add(Type.getObjectType(name));
+    }
 }

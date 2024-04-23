@@ -27,16 +27,15 @@ package com.ishland.raknetify.fabric.mixin.common;
 import com.ishland.raknetify.common.Constants;
 import com.ishland.raknetify.common.util.DebugUtil;
 import com.ishland.raknetify.fabric.common.util.NetworkStates;
-import com.ishland.raknetify.fabric.mixin.access.INetworkStateInternalPacketHandler;
-import com.ishland.raknetify.fabric.mixin.access.INetworkStatePacketHandler;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.util.AttributeKey;
 import net.minecraft.network.ClientConnection;
+import net.minecraft.network.NetworkPhase;
 import net.minecraft.network.NetworkSide;
-import net.minecraft.network.NetworkState;
-import org.spongepowered.asm.mixin.Final;
+import net.minecraft.network.listener.PacketListener;
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -60,6 +59,7 @@ public abstract class MixinClientConnection {
 
     @Shadow public abstract NetworkSide getSide();
 
+    @Shadow private volatile @Nullable PacketListener packetListener;
     @Unique
     private volatile boolean isClosing = false;
 
@@ -101,30 +101,23 @@ public abstract class MixinClientConnection {
             }
             ex.printStackTrace();
         } else {
-            Object handler;
-            handler = this.channel.attr(AttributeKey.valueOf("protocol")).get(); // pre-1.20.2
-            if (handler == null) {
-                handler = this.channel.attr(raknetify$getProtocolAttributeKey(this.getSide())).get();
-            }
-            final NetworkState state;
-            if (handler instanceof NetworkState state1) {
-                state = state1;
-            } else if (handler instanceof INetworkStatePacketHandler<?> access) {
-                state = access.invokeGetState();
+            final NetworkPhase state;
+            Object handler = this.channel.attr(AttributeKey.valueOf("protocol")).get(); // pre-1.20.2
+            if (handler != null) {
+                if (handler instanceof NetworkPhase state1) {
+                    state = state1;
+                } else {
+                    System.err.println("Unknown handler type: " + handler.getClass().getName());
+                    state = null;
+                }
             } else {
-                throw new IllegalStateException("Unknown handler type: " + handler.getClass().getName());
+                final PacketListener packetListener1 = this.packetListener;
+                state = packetListener1 != null ? packetListener1.getPhase() : null;
             }
-            if (state != null && state != NetworkState.HANDSHAKING) {
+            if (state != null && state != NetworkPhase.HANDSHAKING) {
                 System.err.println(String.format("%s %s %s", this.address, NetworkStates.getName(state), ex.toString()));
             }
         }
-    }
-
-    private static AttributeKey<?> raknetify$getProtocolAttributeKey(NetworkSide side) {
-        return switch(side) {
-            case CLIENTBOUND -> ClientConnection.CLIENTBOUND_PROTOCOL_KEY;
-            case SERVERBOUND -> ClientConnection.SERVERBOUND_PROTOCOL_KEY;
-        };
     }
 
 }

@@ -24,11 +24,11 @@
 
 package com.ishland.raknetify.fabric.common.util;
 
-import net.minecraft.network.NetworkState;
+import net.minecraft.network.NetworkPhase;
 
 public class NetworkStates {
 
-    public static String getName(NetworkState state) {
+    public static String getName(NetworkPhase state) {
         return switch (state) {
             case HANDSHAKING -> "HANDSHAKING";
             case PLAY -> "PLAY";

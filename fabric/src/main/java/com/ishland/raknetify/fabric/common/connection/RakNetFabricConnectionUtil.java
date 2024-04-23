@@ -29,13 +29,9 @@ import com.ishland.raknetify.common.connection.MultiChannelingStreamingCompressi
 import com.ishland.raknetify.common.connection.RakNetConnectionUtil;
 import com.ishland.raknetify.common.connection.RakNetSimpleMultiChannelCodec;
 import com.ishland.raknetify.fabric.common.compat.viafabric.ViaFabricCompatInjector;
-import com.ishland.raknetify.fabric.common.connection.bundler.DummyBundler;
-import com.ishland.raknetify.fabric.common.connection.bundler.DummyUnbundler;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelDuplexHandler;
 import network.ycc.raknet.RakNet;
-
-import static com.ishland.raknetify.common.util.ReflectionUtil.accessible;
 
 public class RakNetFabricConnectionUtil {
 
@@ -57,8 +53,6 @@ public class RakNetFabricConnectionUtil {
             channel.pipeline().replace("prepender", "prepender", new ChannelDuplexHandler()); // no-op
             final MultiChannellingPacketCapture handler = new MultiChannellingPacketCapture();
             if (channel.pipeline().names().contains("unbundler")) {
-                channel.pipeline().replace("unbundler", "unbundler", new DummyUnbundler()); // no-op
-                channel.pipeline().replace("bundler", "bundler", new DummyBundler()); // no-op
                 channel.pipeline().addBefore("unbundler", "raknetify-multi-channel-packet-cature", handler);
             } else {
                 channel.pipeline().addLast("raknetify-multi-channel-packet-cature", handler);

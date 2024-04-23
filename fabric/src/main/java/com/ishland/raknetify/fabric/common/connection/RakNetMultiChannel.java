@@ -25,35 +25,19 @@
 package com.ishland.raknetify.fabric.common.connection;
 
 import com.google.common.collect.Sets;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.ishland.raknetify.common.data.ProtocolMultiChannelMappings;
 import com.ishland.raknetify.fabric.RaknetifyFabric;
-import com.ishland.raknetify.fabric.mixin.access.INetworkState;
-import com.ishland.raknetify.fabric.mixin.access.INetworkStateInternalPacketHandler;
-import com.ishland.raknetify.fabric.mixin.access.INetworkStatePacketHandler;
-import it.unimi.dsi.fastutil.ints.AbstractInt2ObjectMap;
-import it.unimi.dsi.fastutil.ints.Int2IntArrayMap;
-import it.unimi.dsi.fastutil.ints.Int2IntMap;
-import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import com.ishland.raknetify.fabric.mixin.access.INetworkState1_20_4;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.MappingResolver;
-import net.minecraft.SharedConstants;
+import net.minecraft.network.NetworkPhase;
 import net.minecraft.network.NetworkSide;
-import net.minecraft.network.NetworkState;
 import net.minecraft.network.packet.Packet;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
-import java.util.Comparator;
+
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 public class RakNetMultiChannel {
 
@@ -103,6 +87,8 @@ public class RakNetMultiChannel {
     private static final Set<Class<?>> channel0 = createClassSet(new String[]{
             "net/minecraft/class_8588", // EnterReconfigurationS2CPacket
             "net/minecraft/class_8591", // AcknowledgeReconfigurationC2SPacket
+
+            "net/minecraft/class_9151", // ServerTransferS2CPacket
     });
 
     // Primarily used for interactions independent to world
@@ -139,6 +125,7 @@ public class RakNetMultiChannel {
 
             "net/minecraft/class_2805", // RequestCommandCompletionsC2S
             "net/minecraft/class_7472", // CommandExecutionC2SPacket
+            "net/minecraft/class_9449", // ChatCommandSignedC2SPacket
             "net/minecraft/class_7496", // RequestChatPreviewC2SPacket
             "net/minecraft/class_2811", // ButtonClickC2S
             "net/minecraft/class_2797", // ChatMessageC2S
@@ -181,6 +168,11 @@ public class RakNetMultiChannel {
             "net/minecraft/class_8479", // ClientboundRuleUpdatePacket
             "net/minecraft/class_8480", // ClientboundVoteCastResultPacket
 
+            "net/minecraft/class_9088", // CookieRequestS2CPacket
+            "net/minecraft/class_9150", // StoreCookieS2CPacket
+            "net/minecraft/class_9091", // CookieResponseC2SPacket
+            "net/minecraft/class_9178", // DebugSampleS2CPacket
+            "net/minecraft/class_9179", // DebugSampleSubscriptionC2SPacket
     });
 
     // Entities related stuff
@@ -240,6 +232,8 @@ public class RakNetMultiChannel {
             // 23w13a_or_b
             "net/minecraft/class_8484", // ServerboundCrashVehiclePacket
 
+            // 1.20.5
+            "net/minecraft/class_9632", // ProjectilePowerS2CPacket
     });
 
     // Primarily used for interactions dependent to world
@@ -345,6 +339,7 @@ public class RakNetMultiChannel {
 
     private static final Set<Class<?>> theVoid = createClassSet(new String[]{
             "net/minecraft/class_8037", // BundleDelimiterPacket
+            "net/minecraft/class_9093", // BundleDelimiterS2CPacket
     });
 
     private static final Object2IntOpenHashMap<Class<?>> classToChannelIdOverride = new Object2IntOpenHashMap<>();
@@ -398,14 +393,6 @@ public class RakNetMultiChannel {
     }
 
     public static void init() {
-    }
-
-    public static void iterateKnownPackets() {
-        for (Map.Entry<NetworkSide, ?> entry : ((INetworkState) (Object) NetworkState.PLAY).getPacketHandlers().entrySet()) {
-            for (Object2IntMap.Entry<Class<? extends Packet<?>>> type : RaknetifyFabric.getPacketIdsFromPacketHandler(entry.getValue()).object2IntEntrySet()) {
-                getPacketChannelOverride(type.getKey());
-            }
-        }
     }
 
 }

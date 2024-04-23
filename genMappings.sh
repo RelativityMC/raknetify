@@ -1,11 +1,11 @@
 #!/bin/bash
 
-loader_version=0.15.0
-installer_version=0.11.0
+loader_version=0.15.10
+installer_version=1.0.1
 
 #declare -a vers
 if [[ -z "$@" ]]; then
-  vers="1.17 1.17.1 1.18.1 1.18.2 1.19 1.19.2 1.19.3 1.19.4 23w13a_or_b 1.20.1 1.20.2 1.20.3"
+  vers="1.17 1.17.1 1.18.1 1.18.2 1.19 1.19.2 1.19.3 1.19.4 23w13a_or_b 1.20.1 1.20.2 1.20.3 1.20.5-rc2"
 else
   vers=$@
 fi
@@ -34,7 +34,7 @@ do
 
   sleep 1
 
-  java -Draknetify.saveChannelMappings=true -Draknetify.saveChannelMappings.exit=true -Draknetify.handleMappingsOnPreLaunch=true -jar fabric-server-mc"$version".jar || exit 1
+  java -Draknetify.saveChannelMappings=true -Draknetify.saveChannelMappings.exit=true -jar fabric-server-mc"$version".jar || exit 1
 done
 
 cp channelMappings.json ../common/src/main/resources/raknetify-channel-mappings.json
