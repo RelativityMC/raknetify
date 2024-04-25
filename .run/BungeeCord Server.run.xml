@@ -4,7 +4,7 @@
       <entry exclude="true" path="$PROJECT_DIR$/bungee/build/classes/java/main" />
     </classpathModifications>
     <option name="MAIN_CLASS_NAME" value="net.md_5.bungee.BungeeCordLauncher" />
-    <module name="com.ishland.raknetify.bungee.raknetify.bungee.main" />
+    <module name="bungee.raknetify.bungee.main" />
     <option name="VM_PARAMETERS" value="-Xmx1G -Draknetify.debug=true -Dio.netty.leakDetection.level=advanced" />
     <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/run-bungee" />
     <method v="2">
