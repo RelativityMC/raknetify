@@ -42,14 +42,15 @@ import java.net.InetSocketAddress;
 @Mixin(MultiplayerServerListPinger.class)
 public abstract class MixinMultiplayerServerListPinger {
 
-    @Redirect(method = "add", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ServerAddress;parse(Ljava/lang/String;)Lnet/minecraft/client/network/ServerAddress;"))
+    @Dynamic
+    @Redirect(method = {"add", "method_3003"}, at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ServerAddress;parse(Ljava/lang/String;)Lnet/minecraft/client/network/ServerAddress;"))
     private ServerAddress modifyRaknetAddress(String address) {
         final PrefixUtil.Info info = PrefixUtil.getInfo(address);
         return ServerAddress.parse(info.stripped());
     }
 
     @Dynamic
-    @WrapOperation(method = "add", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/ClientConnection;method_10753(Ljava/net/InetSocketAddress;Z)Lnet/minecraft/network/ClientConnection;"), require = 0)
+    @WrapOperation(method = {"add", "method_3003"}, at = @At(value = "INVOKE", target = "Lnet/minecraft/network/ClientConnection;method_10753(Ljava/net/InetSocketAddress;Z)Lnet/minecraft/network/ClientConnection;"), require = 0)
     private ClientConnection redirectConnect(InetSocketAddress address, boolean useEpoll, Operation<ClientConnection> original, ServerInfo entry, Runnable runnable) {
         final PrefixUtil.Info info = PrefixUtil.getInfo(entry.address);
         return info.useRakNet() ? RakNetClientConnectionUtil.connect(address, useEpoll, info.largeMTU(), original, false) : original.call(address, useEpoll);
