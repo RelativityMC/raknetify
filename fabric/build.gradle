@@ -121,9 +121,14 @@ if (System.getenv("CURSEFORGE_TOKEN")) {
 			addGameVersion "1.20.3"
 			addGameVersion "1.20.4"
 			addGameVersion "1.20.5"
+			addGameVersion "1.20.6"
 			addGameVersion "Fabric"
 			addGameVersion "Java 17"
 			addGameVersion "Java 18"
+			addGameVersion "Java 19"
+			addGameVersion "Java 20"
+			addGameVersion "Java 21"
+			addGameVersion "Java 22"
 
 			mainArtifact(remapShadowJar) {
 				displayName = project.version + " devbuild"
