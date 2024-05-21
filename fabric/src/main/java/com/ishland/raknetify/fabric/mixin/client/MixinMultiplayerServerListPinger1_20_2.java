@@ -42,7 +42,7 @@ import java.net.InetSocketAddress;
 public class MixinMultiplayerServerListPinger1_20_2 {
 
     @Dynamic
-    @WrapOperation(method = "add", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/ClientConnection;connect(Ljava/net/InetSocketAddress;ZLnet/minecraft/class_8743;)Lnet/minecraft/network/ClientConnection;"))
+    @WrapOperation(method = {"add", "method_3003"}, at = @At(value = "INVOKE", target = "Lnet/minecraft/network/ClientConnection;method_10753(Ljava/net/InetSocketAddress;ZLnet/minecraft/class_8743;)Lnet/minecraft/network/ClientConnection;"))
     private ClientConnection redirectConnect(InetSocketAddress address, boolean useEpoll, DebugSampleLog log, Operation<ClientConnection> original, ServerInfo entry, Runnable runnable) {
         final PrefixUtil.Info info = PrefixUtil.getInfo(entry.address);
         return info.useRakNet() ? RakNetClientConnectionUtil.connect(address, useEpoll, info.largeMTU(), original, true) : original.call(address, useEpoll, null);
