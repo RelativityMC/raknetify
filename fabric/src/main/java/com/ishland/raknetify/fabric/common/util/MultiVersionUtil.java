@@ -30,16 +30,20 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.MappingResolver;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.network.ClientConnection;
+import net.minecraft.network.NetworkState;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import org.spongepowered.asm.mixin.transformer.meta.MixinMerged;
 
 import java.lang.annotation.Annotation;
+import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Function;
 
 public class MultiVersionUtil {
 
@@ -47,12 +51,14 @@ public class MultiVersionUtil {
     private static final String CLASSNAME_ServerPlayNetworkHandler = "net.minecraft.class_3244";
     private static final String CLASSNAME_NetworkStatePacketHandler = "net.minecraft.class_2539$class_8698";
     private static final String CLASSNAME_NetworkState$InternalPacketHandler = "net.minecraft.class_2539$class_4532";
+    private static final String CLASSNAME_NetworkState$Factory = "net.minecraft.class_9127$class_9128";
 
     public static final VarHandle ServerPlayNetworkHandler$connection;
     public static final VarHandle ClientPlayNetworkHandler$connection;
     public static final VarHandle ServerPlayerEntity$pingMillis1_20_1;
     public static final Class<?> clazzNetworkStatePacketHandler;
     public static final VarHandle NetworkStatePacketHandler$backingHandler1_20_2;
+    public static final MethodHandle NetworkState$Factory$bind;
 
     static {
         try {
@@ -116,6 +122,21 @@ public class MultiVersionUtil {
                     }
                 } else {
                     NetworkStatePacketHandler$backingHandler1_20_2 = null;
+                }
+            }
+
+            {
+                Method factoryBind = getOrNull(() -> NetworkState.Factory.class.getDeclaredMethod("bind" /* actually not obfuscated in 1.20.6 */, Function.class), NoSuchMethodException.class, NoClassDefFoundError.class);
+                if (factoryBind == null) {
+                    factoryBind = getOrNull(() -> NetworkState.Factory.class.getDeclaredMethod(resolver.mapMethodName(INTERMEDIARY, CLASSNAME_NetworkState$Factory, "method_61107", "(Ljava/util/function/Function;)L%s;".formatted(resolver.mapClassName(INTERMEDIARY, "net/minecraft/class_9127"))), Function.class), NoSuchMethodException.class, NoClassDefFoundError.class);
+                }
+                if (factoryBind != null) {
+                    factoryBind.setAccessible(true);
+                    NetworkState$Factory$bind = MethodHandles
+                            .privateLookupIn(NetworkState.Factory.class, MethodHandles.lookup())
+                            .unreflect(factoryBind);
+                } else {
+                    NetworkState$Factory$bind = null;
                 }
             }
         } catch (Throwable t) {

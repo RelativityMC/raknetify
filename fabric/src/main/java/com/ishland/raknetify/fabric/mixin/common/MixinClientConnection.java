@@ -63,7 +63,7 @@ public abstract class MixinClientConnection {
     @Unique
     private volatile boolean isClosing = false;
 
-    @Redirect(method = "disconnect", at = @At(value = "INVOKE", target = "Lio/netty/channel/ChannelFuture;awaitUninterruptibly()Lio/netty/channel/ChannelFuture;", remap = false))
+    @Redirect(method = {"disconnect(Lnet/minecraft/text/Text;)V", "disconnect(Lnet/minecraft/network/DisconnectionInfo;)V"}, at = @At(value = "INVOKE", target = "Lio/netty/channel/ChannelFuture;awaitUninterruptibly()Lio/netty/channel/ChannelFuture;", remap = false), require = 1)
     private ChannelFuture noDisconnectWait(ChannelFuture instance) {
         isClosing = true;
 //        if (instance.channel().eventLoop().inEventLoop()) {

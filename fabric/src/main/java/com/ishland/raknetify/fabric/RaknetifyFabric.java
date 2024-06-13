@@ -35,7 +35,6 @@ import com.ishland.raknetify.fabric.mixin.RaknetifyFabricMixinPlugin;
 import com.ishland.raknetify.fabric.mixin.access.INetworkState1_20_4;
 import com.ishland.raknetify.fabric.mixin.access.INetworkStateInternalPacketHandler;
 import com.ishland.raknetify.fabric.mixin.access.IPacketCodecDispatcher;
-import com.llamalad7.mixinextras.utils.GenericParamParser;
 import io.netty.buffer.ByteBuf;
 import io.netty.util.ResourceLeakDetector;
 import io.netty.util.internal.SystemPropertyUtil;
@@ -52,7 +51,9 @@ import net.fabricmc.loader.api.entrypoint.PreLaunchEntrypoint;
 import net.minecraft.SharedConstants;
 import net.minecraft.network.NetworkPhase;
 import net.minecraft.network.NetworkSide;
+import net.minecraft.network.NetworkState;
 import net.minecraft.network.RegistryByteBuf;
+import net.minecraft.network.listener.ClientPlayPacketListener;
 import net.minecraft.network.listener.ServerPlayPacketListener;
 import net.minecraft.network.packet.CommonPackets;
 import net.minecraft.network.packet.CookiePackets;
@@ -62,7 +63,6 @@ import net.minecraft.network.packet.PingPackets;
 import net.minecraft.network.packet.PlayPackets;
 import net.minecraft.network.state.PlayStateFactories;
 import org.objectweb.asm.Type;
-import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.FieldNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -75,13 +75,11 @@ import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
-import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -126,7 +124,7 @@ public class RaknetifyFabric implements ModInitializer, PreLaunchEntrypoint {
 
         Int2IntArrayMap s2c = new Int2IntArrayMap();
         Int2IntArrayMap c2s = new Int2IntArrayMap();
-        if (!RaknetifyFabricMixinPlugin.POST_1_20_5) {
+        if (!RaknetifyFabricMixinPlugin.AFTER_1_20_4) {
             for (Map.Entry<NetworkSide, ?> entry : ((INetworkState1_20_4) (Object) NetworkPhase.PLAY).getPacketHandlers().entrySet()) {
                 final Object value = entry.getValue();
                 final Object2IntMap<Class<? extends Packet<?>>> packetIds = getPacketIdsFromPacketHandler(value);
@@ -138,14 +136,22 @@ public class RaknetifyFabric implements ModInitializer, PreLaunchEntrypoint {
                 }
             }
         } else {
-            final List<PacketType<Packet<? super ServerPlayPacketListener>>> c2sPacketTypes =
-                    ((IPacketCodecDispatcher<ByteBuf, Packet<? super ServerPlayPacketListener>, PacketType<Packet<? super ServerPlayPacketListener>>>)
-                            PlayStateFactories.C2S.bind(RegistryByteBuf.makeFactory(null)).codec()).getPacketTypes()
-                            .stream().map(byteBufPacketPacketTypePacketType -> byteBufPacketPacketTypePacketType.id()).toList();
-            final List<PacketType<Packet<? super ServerPlayPacketListener>>> s2cPacketTypes =
-                    ((IPacketCodecDispatcher<ByteBuf, Packet<? super ServerPlayPacketListener>, PacketType<Packet<? super ServerPlayPacketListener>>>)
-                            PlayStateFactories.S2C.bind(RegistryByteBuf.makeFactory(null)).codec()).getPacketTypes()
-                            .stream().map(byteBufPacketPacketTypePacketType -> byteBufPacketPacketTypePacketType.id()).toList();
+            final List<PacketType<Packet<? super ServerPlayPacketListener>>> c2sPacketTypes;
+            try {
+                c2sPacketTypes = ((IPacketCodecDispatcher<ByteBuf, Packet<? super ServerPlayPacketListener>, PacketType<Packet<? super ServerPlayPacketListener>>>)
+                        ((NetworkState<ServerPlayPacketListener>) MultiVersionUtil.NetworkState$Factory$bind.invoke(PlayStateFactories.C2S, RegistryByteBuf.makeFactory(null))).codec()).getPacketTypes()
+                        .stream().map(byteBufPacketPacketTypePacketType -> byteBufPacketPacketTypePacketType.id()).toList();
+            } catch (Throwable e) {
+                throw new RuntimeException(e);
+            }
+            final List<PacketType<Packet<? super ServerPlayPacketListener>>> s2cPacketTypes;
+            try {
+                s2cPacketTypes = ((IPacketCodecDispatcher<ByteBuf, Packet<? super ServerPlayPacketListener>, PacketType<Packet<? super ServerPlayPacketListener>>>)
+                       ((NetworkState<ClientPlayPacketListener>) MultiVersionUtil.NetworkState$Factory$bind.invoke(PlayStateFactories.S2C, RegistryByteBuf.makeFactory(null))).codec()).getPacketTypes()
+                        .stream().map(byteBufPacketPacketTypePacketType -> byteBufPacketPacketTypePacketType.id()).toList();
+            } catch (Throwable e) {
+                throw new RuntimeException(e);
+            }
 
             record FieldNodeClazzPair(FieldNode fieldNode, Class<?> clazz) {
             }
@@ -201,8 +207,8 @@ public class RaknetifyFabric implements ModInitializer, PreLaunchEntrypoint {
                 c2s.put(i, RakNetMultiChannel.getPacketChannelOverride(clazz));
 //                System.out.println("Mapped packet type: " + c2sPacketType + " to channel " + RakNetMultiChannel.getPacketChannelOverride(clazz));
             }
-
         }
+
         if (SAVE_CHANNEL_MAPPINGS) {
             auditMixins();
             final Gson gson = new GsonBuilder()

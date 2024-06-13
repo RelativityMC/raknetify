@@ -62,13 +62,14 @@ public abstract class MixinMultiplayerServerListPinger1 implements ClientQueryPa
         }
     }
 
-    @Redirect(method = "onDisconnected(Lnet/minecraft/text/Text;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/MultiplayerServerListPinger;ping(Ljava/net/InetSocketAddress;Lnet/minecraft/client/network/ServerAddress;Lnet/minecraft/client/network/ServerInfo;)V"), require = 0)
+    @Dynamic
+    @Redirect(method = {"method_10839(Lnet/minecraft/class_2561;)V", "onDisconnected"}, at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/MultiplayerServerListPinger;ping(Ljava/net/InetSocketAddress;Lnet/minecraft/client/network/ServerAddress;Lnet/minecraft/client/network/ServerInfo;)V"), require = 0)
     private void noPingRaknet(MultiplayerServerListPinger instance, InetSocketAddress socketAddress, ServerAddress address, ServerInfo serverInfo) {
         // no-op
     }
 
     @Dynamic
-    @Redirect(method = "onDisconnected(Lnet/minecraft/text/Text;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/MultiplayerServerListPinger;method_3001(Ljava/net/InetSocketAddress;Lnet/minecraft/client/network/ServerInfo;)V"), require = 0)
+    @Redirect(method = "method_10839(Lnet/minecraft/class_2561;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/MultiplayerServerListPinger;method_3001(Ljava/net/InetSocketAddress;Lnet/minecraft/client/network/ServerInfo;)V"), require = 0)
     private void noPingRaknet(MultiplayerServerListPinger instance, InetSocketAddress address, ServerInfo info) {
         // no-op
     }

@@ -1,11 +1,11 @@
 #!/bin/bash
 
-loader_version=0.15.10
+loader_version=0.15.11
 installer_version=1.0.1
 
 #declare -a vers
 if [[ -z "$@" ]]; then
-  vers="1.17 1.17.1 1.18.1 1.18.2 1.19 1.19.2 1.19.3 1.19.4 23w13a_or_b 1.20.1 1.20.2 1.20.4 1.20.6"
+  vers="1.17 1.17.1 1.18.1 1.18.2 1.19 1.19.2 1.19.3 1.19.4 23w13a_or_b 1.20.1 1.20.2 1.20.4 1.20.6 1.21-rc1"
 else
   vers=$@
 fi
