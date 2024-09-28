@@ -44,6 +44,7 @@ public class CustomPayloadChannel {
         identifier2channel = new Object2IntOpenHashMap<>();
         identifier2channel.defaultReturnValue(0);
         identifier2channel.put("porting_lib:extra_data_entity_spawn", 2);
+        identifier2channel.put("porting_lib:extra_entity_spawn_data", 2); // https://github.com/Fabricators-of-Create/Porting-Lib/commit/4b0cd845731f89eafd9fb39e13e1a7d87f5e14a4
     }
 
     public static class OverrideHandler implements RakNetSimpleMultiChannelCodec.OverrideHandler {
