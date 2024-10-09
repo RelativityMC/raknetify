@@ -54,5 +54,7 @@ jobs:
           git update-index --refresh
           if ! git diff-index --quiet HEAD --; then
               echo "Mappings changed, please commit them"
+              git diff
+              git diff --staged
               exit 1
           fi
