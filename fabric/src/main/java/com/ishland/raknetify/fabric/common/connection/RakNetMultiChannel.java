@@ -138,7 +138,6 @@ public class RakNetMultiChannel {
             "net/minecraft/class_2803", // ClientStatusC2S
             "net/minecraft/class_4210", // UpdateDifficultyC2S
             "net/minecraft/class_4211", // UpdateDifficultyLockC2S
-            "net/minecraft/class_4463", // PlayerActionResponseS2C
             "net/minecraft/class_2708", // PlayerPositionLookS2C
 
             "net/minecraft/class_2846", // PlayerActionC2S
@@ -345,6 +344,7 @@ public class RakNetMultiChannel {
             "net/minecraft/class_8738", // ChunkSentS2CPacket
             "net/minecraft/class_8739", // StartChunkSendS2CPacket
             "net/minecraft/class_8590", // AcknowledgeChunksC2SPacket
+            "net/minecraft/class_4463", // PlayerActionResponseS2C
     });
 
     private static final Set<Class<?>> unreliable = createClassSet(new String[]{
