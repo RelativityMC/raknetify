@@ -196,6 +196,7 @@ public class RakNetMultiChannel {
             "net/minecraft/class_2744", // EntityEquipmentUpdateS2C
             "net/minecraft/class_2752", // EntityPassengerSetS2C
             "net/minecraft/class_2777", // EntityPositionS2C
+            "net/minecraft/class_10264", // EntityPositionSyncS2CPacket
             "net/minecraft/class_2781", // EntityAttributesS2C
             "net/minecraft/class_2783", // EntityStatusEffectS2C
             "net/minecraft/class_2718", // RemoveEntityStatusEffectS2C
@@ -204,6 +205,7 @@ public class RakNetMultiChannel {
             "net/minecraft/class_2606", // ExperienceOrbSpawnS2CPacket
             "net/minecraft/class_8043", // HurtAnimation (mojmap)
             "net/minecraft/class_8143", // EntityDamageS2C
+            "net/minecraft/class_9833", // MoveMinecartAlongTrackS2CPacket
 
             "net/minecraft/class_2885", // PlayerInteractBlockC2S
             "net/minecraft/class_2886", // PlayerInteractItemC2S
@@ -213,6 +215,7 @@ public class RakNetMultiChannel {
             "net/minecraft/class_2828$class_2829", // PlayerMoveC2SPacket$PositionAndOnGround
             "net/minecraft/class_2828$class_2830", // PlayerMoveC2SPacket$Full
             "net/minecraft/class_2828$class_2831", // PlayerMoveC2SPacket$LookAndOnGround
+            "net/minecraft/class_9836", // ClientTickEndC2SPacket: used to track movement on vanilla server
 
             "net/minecraft/class_2664", // ExplosionS2C
             "net/minecraft/class_2678", // GameJoinS2C
@@ -227,6 +230,7 @@ public class RakNetMultiChannel {
             "net/minecraft/class_2836", // BoatPaddleStateC2S
             "net/minecraft/class_2833", // VehicleMoveC2S
             "net/minecraft/class_2879", // HandSwingC2S
+            "net/minecraft/class_10265", // PlayerRotationS2CPaket
 
             // 1.16.5
             "net/minecraft/class_2684", // EntityS2CPacket
@@ -258,6 +262,9 @@ public class RakNetMultiChannel {
             "net/minecraft/class_2713", // UnlockRecipesS2C
             "net/minecraft/class_2735", // UpdateSelectedSlotS2C
             "net/minecraft/class_3943", // SetTradeOffersS2C
+            "net/minecraft/class_10266", // RecipeBookAddS2CPacket
+            "net/minecraft/class_10268", // RecipeBookRemoveS2CPacket
+            "net/minecraft/class_10269", // RecipeBookSettingsS2CPacket
 
             "net/minecraft/class_2820", // BookUpdateC2S
             "net/minecraft/class_2853", // RecipeBookDataC2S
@@ -277,6 +284,9 @@ public class RakNetMultiChannel {
             "net/minecraft/class_2875", // UpdateStructureBlockC2S
             "net/minecraft/class_2695", // CraftFailedResponseS2CPacket
             "net/minecraft/class_8875", // SlotChangedStateC2SPacket
+            "net/minecraft/class_9834", // SetCursorItemS2CPacket
+            "net/minecraft/class_9835", // SetPlayerInventoryS2CPacket
+            "net/minecraft/class_9837", // BundleItemSelectedC2SPacket
 
             "net/minecraft/class_5889", // WorldBorderInitializeS2C
             "net/minecraft/class_5895", // WorldBorderCenterChangedS2C
