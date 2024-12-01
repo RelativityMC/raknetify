@@ -97,7 +97,11 @@ public abstract class MixinServerNetworkIo {
                         while (iterator.hasNext()) {
                             final InetAddress inetAddress = iterator.next();
                             System.out.println("Starting raknetify server on %s".formatted(inetAddress));
-                            bind(inetAddress, hasPortOverride ? raknetify$portOverride : port);
+                            try {
+                                bind(inetAddress, hasPortOverride ? raknetify$portOverride : port);
+                            } catch (IOException t) {
+                                System.out.println("**** FAILED TO BIND TO PORT! %s".formatted(t.getMessage()));
+                            }
                         }
                     }
 
