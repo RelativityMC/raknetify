@@ -1,7 +1,7 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="Velocity Server" type="Application" factoryName="Application">
     <option name="MAIN_CLASS_NAME" value="com.velocitypowered.proxy.Velocity" />
-    <module name="RaknetFabric.velocity.raknetify.velocity.main" />
+    <module name="raknetify.velocity.main" />
     <option name="VM_PARAMETERS" value="-Xmx1G -Draknetify.debug=true -Dio.netty.leakDetection.level=advanced" />
     <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/run-velocity" />
     <method v="2">
