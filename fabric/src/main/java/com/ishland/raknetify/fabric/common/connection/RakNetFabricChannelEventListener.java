@@ -26,9 +26,11 @@ package com.ishland.raknetify.fabric.common.connection;
 
 import com.ishland.raknetify.common.connection.RakNetSimpleMultiChannelCodec;
 import com.ishland.raknetify.common.connection.SynchronizationLayer;
+import com.ishland.raknetify.fabric.mixin.RaknetifyFabricMixinPlugin;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPromise;
+import net.minecraft.network.handler.NetworkStateTransitions;
 import net.minecraft.network.packet.c2s.play.AcknowledgeReconfigurationC2SPacket;
 import net.minecraft.network.packet.s2c.play.CommandTreeS2CPacket;
 import net.minecraft.network.packet.s2c.play.EnterReconfigurationS2CPacket;
@@ -64,6 +66,12 @@ public class RakNetFabricChannelEventListener extends ChannelDuplexHandler {
         }
         if (msg instanceof CommandTreeS2CPacket) {
             ctx.write(RakNetSimpleMultiChannelCodec.SIGNAL_START_MULTICHANNEL);
+        }
+        if (RaknetifyFabricMixinPlugin.AFTER_1_20_5) {
+            if (msg instanceof NetworkStateTransitions.DecoderTransitioner || msg instanceof NetworkStateTransitions.EncoderTransitioner) {
+                ctx.write(RakNetNetworkTransitionUtil.handleTransition(msg), promise);
+                return;
+            }
         }
         super.write(ctx, msg, promise);
     }

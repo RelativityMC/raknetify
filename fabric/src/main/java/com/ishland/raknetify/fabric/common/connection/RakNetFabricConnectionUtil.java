@@ -31,9 +31,14 @@ import com.ishland.raknetify.common.connection.RakNetSimpleMultiChannelCodec;
 import com.ishland.raknetify.fabric.common.compat.viafabric.ViaFabricCompatInjector;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelDuplexHandler;
+import io.netty.channel.ChannelHandler;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelPipeline;
 import network.ycc.raknet.RakNet;
 
 public class RakNetFabricConnectionUtil {
+
+    public static final String NAME_RAKNETIFY_MULTI_CHANNEL_PACKET_CATURE = "raknetify-multi-channel-packet-cature";
 
     private RakNetFabricConnectionUtil() {
     }
@@ -52,16 +57,25 @@ public class RakNetFabricConnectionUtil {
             channel.pipeline().replace("splitter", "splitter", new ChannelDuplexHandler()); // no-op
             channel.pipeline().replace("prepender", "prepender", new ChannelDuplexHandler()); // no-op
             final MultiChannellingPacketCapture handler = new MultiChannellingPacketCapture();
-            if (channel.pipeline().names().contains("unbundler")) {
-                channel.pipeline().addBefore("unbundler", "raknetify-multi-channel-packet-cature", handler);
-            } else {
-                channel.pipeline().addLast("raknetify-multi-channel-packet-cature", handler);
-            }
+            channel.pipeline().addLast(NAME_RAKNETIFY_MULTI_CHANNEL_PACKET_CATURE, handler);
+            onPipelineReorder(channel.pipeline());
             channel.pipeline().get(RakNetSimpleMultiChannelCodec.class)
                     .addHandler(handler.getCustomPayloadHandler())
                     .addHandler(handler.getCaptureBasedHandler());
             channel.pipeline().addLast("raknetify-handle-compression-compatibility", new RakNetCompressionCompatibilityHandler());
             channel.pipeline().addBefore("packet_handler", RakNetFabricChannelEventListener.NAME, new RakNetFabricChannelEventListener());
+        }
+    }
+
+    static void onPipelineReorder(ChannelPipeline pipeline) {
+        if (pipeline.get("encoder") == null) {
+//            System.out.println("Reordering failed: no encoder");
+            return;
+        }
+//        System.out.println("Reordering");
+        ChannelHandler handler = pipeline.remove(RakNetFabricConnectionUtil.NAME_RAKNETIFY_MULTI_CHANNEL_PACKET_CATURE);
+        if (handler != null) {
+            pipeline.addAfter("encoder", RakNetFabricConnectionUtil.NAME_RAKNETIFY_MULTI_CHANNEL_PACKET_CATURE, handler);
         }
     }
 
