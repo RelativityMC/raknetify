@@ -28,7 +28,7 @@ configurations {
 }
 
 dependencies {
-    implementation 'bungee:BungeeCord:1881'
+    implementation 'bungee:BungeeCord:1887'
 //    implementation "net.md-5:bungeecord-proxy:1.+"
 //    compileOnly 'org.projectlombok:lombok:1.18.24' // for bungeecord sources
 
