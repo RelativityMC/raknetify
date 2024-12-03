@@ -25,8 +25,10 @@
 package com.ishland.raknetify.fabric.common.compat.viafabric;
 
 import com.google.common.base.Preconditions;
+import com.ishland.raknetify.fabric.mixin.RaknetifyFabricMixinPlugin;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelPipeline;
 import io.netty.handler.codec.MessageToMessageDecoder;
 import io.netty.handler.codec.MessageToMessageEncoder;
 import net.fabricmc.loader.api.FabricLoader;
@@ -46,7 +48,17 @@ public class ViaFabricCompatInjector {
                 final Class<?> userConnectionClass = Class.forName("com.viaversion.viaversion.api.connection.UserConnection");
 
                 final Class<?> protocolPipelineImplClass = Class.forName("com.viaversion.viaversion.protocol.ProtocolPipelineImpl");
-                protocolPipelineImplClass.getConstructor(userConnectionClass).newInstance(user);
+                Object protocolPipeline = protocolPipelineImplClass.getConstructor(userConnectionClass).newInstance(user);
+
+                if (RaknetifyFabricMixinPlugin.AFTER_1_20_2) {
+                    Class<?> protocolPipelineClass = Class.forName("com.viaversion.viaversion.api.protocol.ProtocolPipeline");
+                    Class<?> protocolClass = Class.forName("com.viaversion.viaversion.api.protocol.Protocol");
+                    if ((boolean) userConnectionClass.getMethod("isClientSide").invoke(user)) {
+                        Class<?> hostnameParserProtocolClass = Class.forName("com.viaversion.fabric.common.protocol.HostnameParserProtocol");
+                        Object hostnameParserProtocolInstance = hostnameParserProtocolClass.getField("INSTANCE").get(null);
+                        protocolPipelineClass.getMethod("add", protocolClass).invoke(protocolPipeline, hostnameParserProtocolInstance);
+                    }
+                }
 
                 final Class<?> commonTransformerClass = Class.forName("com.viaversion.fabric.common.handler.CommonTransformer");
                 final String handlerEncoderName = (String) commonTransformerClass.getField("HANDLER_ENCODER_NAME").get(null);
@@ -58,14 +70,26 @@ public class ViaFabricCompatInjector {
                 @SuppressWarnings("unchecked") final Class<? extends MessageToMessageDecoder<ByteBuf>> fabricDecodeHandlerClass = (Class<? extends MessageToMessageDecoder<ByteBuf>>) Class.forName("com.viaversion.fabric.common.handler.FabricDecodeHandler");
                 final MessageToMessageDecoder<ByteBuf> fabricDecodeHandler = fabricDecodeHandlerClass.getConstructor(userConnectionClass).newInstance(user);
 
-                channel.pipeline().addBefore("encoder", handlerEncoderName, fabricEncodeHandler);
-                channel.pipeline().addBefore("decoder", handlerDecoderName, fabricDecodeHandler);
+                channel.pipeline().addBefore(determineEncoderName(channel.pipeline()), handlerEncoderName, fabricEncodeHandler);
+                channel.pipeline().addBefore(determineDecoderName(channel.pipeline()), handlerDecoderName, fabricDecodeHandler);
             } catch (Throwable t) {
                 //noinspection RedundantStringFormatCall
                 System.err.println(String.format("Raknetify: Could not inject ViaVersion compatibility into RakNet channel %s: %s", channel, t));
                 t.printStackTrace();
             }
         }
+    }
+
+    private static String determineEncoderName(ChannelPipeline pipeline) {
+        if (pipeline.get("encoder") != null) return "encoder";
+        if (pipeline.get("outbound_config") != null) return "outbound_config";
+        throw new UnsupportedOperationException();
+    }
+
+    private static String determineDecoderName(ChannelPipeline pipeline) {
+        if (pipeline.get("decoder") != null) return "decoder";
+        if (pipeline.get("inbound_config") != null) return "inbound_config";
+        throw new UnsupportedOperationException();
     }
 
 }

@@ -39,12 +39,14 @@ import java.util.Set;
 public class RaknetifyFabricMixinPlugin implements IMixinConfigPlugin {
 
     public static final boolean AFTER_1_20_1;
+    public static final boolean AFTER_1_20_2;
     public static final boolean AFTER_1_20_4;
     public static final boolean AFTER_1_20_5;
 
     static {
         try {
             AFTER_1_20_1 = VersionPredicate.parse(">1.20.1").test(FabricLoader.getInstance().getModContainer("minecraft").get().getMetadata().getVersion());
+            AFTER_1_20_2 = VersionPredicate.parse(">1.20.2").test(FabricLoader.getInstance().getModContainer("minecraft").get().getMetadata().getVersion());
             AFTER_1_20_4 = VersionPredicate.parse(">1.20.4").test(FabricLoader.getInstance().getModContainer("minecraft").get().getMetadata().getVersion());
             AFTER_1_20_5 = VersionPredicate.parse(">1.20.5").test(FabricLoader.getInstance().getModContainer("minecraft").get().getMetadata().getVersion());
         } catch (VersionParsingException e) {
