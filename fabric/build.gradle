@@ -46,6 +46,16 @@ java {
 
 loom {
 	accessWidenerPath = file("src/main/resources/raknetify-fabric.accesswidener")
+	runs {
+		server {
+			vmArgs "-Draknetify.debug=true", "-Dio.netty.leakDetection.level=advanced"
+			ideConfigGenerated(true)
+		}
+		client {
+			vmArgs "-Draknetify.debug=true", "-Dio.netty.leakDetection.level=advanced"
+			ideConfigGenerated(true)
+		}
+	}
 }
 
 jar {
