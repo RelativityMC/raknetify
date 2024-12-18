@@ -21,6 +21,7 @@
     "common.MixinCCConnect",
     "common.MixinClientConnection",
     "common.MixinClientConnection1",
+    "common.MixinClientConnection1_20_2",
     "common.encryption.MixinClientConnection",
     "common.encryption.MixinPacketDecryptor",
     "common.encryption.MixinPacketEncryptionManager",

@@ -257,6 +257,10 @@ public class SimpleMetricsLogger implements RakNet.MetricsLogger {
         return measureTrafficOutFormatted;
     }
 
+    public long getBytesIn() {
+        return bytesIn;
+    }
+
     // ========== Misc ==========
 
     private MetricsSynchronizationHandler metricsSynchronizationHandler;
