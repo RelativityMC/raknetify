@@ -28,38 +28,42 @@ import com.ishland.raknetify.common.Constants;
 import com.ishland.raknetify.common.connection.RakNetConnectionUtil;
 import com.ishland.raknetify.common.connection.RaknetifyEventLoops;
 import com.ishland.raknetify.common.util.ThreadLocalUtil;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import io.netty.bootstrap.AbstractBootstrap;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelOption;
+import io.netty.channel.EventLoopGroup;
 import io.netty.channel.FixedRecvByteBufAllocator;
 import io.netty.channel.epoll.Epoll;
 import io.netty.channel.epoll.EpollDatagramChannel;
-import io.netty.channel.epoll.EpollEventLoopGroup;
-import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.DatagramChannel;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioDatagramChannel;
 import net.minecraft.network.ClientConnection;
-import net.minecraft.util.Lazy;
 import network.ycc.raknet.RakNet;
 import network.ycc.raknet.client.channel.RakNetClientThreadedChannel;
 import org.spongepowered.asm.mixin.Dynamic;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
 
 import java.net.InetSocketAddress;
-import java.util.function.Supplier;
 
 @Mixin(ClientConnection.class)
 public class MixinCCConnect {
 
     @Dynamic("method_10753 for compat")
-    @Redirect(method = {"connect(Ljava/net/InetSocketAddress;ZLnet/minecraft/network/ClientConnection;)Lio/netty/channel/ChannelFuture;", "method_10753(Ljava/net/InetSocketAddress;Z)Lnet/minecraft/network/ClientConnection;", "method_10753"}, at = @At(value = "INVOKE", target = "Lio/netty/bootstrap/Bootstrap;channel(Ljava/lang/Class;)Lio/netty/bootstrap/AbstractBootstrap;", remap = false), require = 1)
-    private static AbstractBootstrap<Bootstrap, Channel> redirectChannel(Bootstrap instance, Class<? extends SocketChannel> aClass, InetSocketAddress address, boolean useEpoll) {
+    @WrapOperation(method = {"connect(Ljava/net/InetSocketAddress;ZLnet/minecraft/network/ClientConnection;)Lio/netty/channel/ChannelFuture;", "method_10753(Ljava/net/InetSocketAddress;Z)Lnet/minecraft/network/ClientConnection;", "method_10753"}, at = @At(value = "INVOKE", target = "Lio/netty/bootstrap/Bootstrap;group(Lio/netty/channel/EventLoopGroup;)Lio/netty/bootstrap/AbstractBootstrap;", remap = false), require = 1)
+    private static AbstractBootstrap<Bootstrap, Channel> redirectGroup(Bootstrap instance, EventLoopGroup eventLoopGroup, Operation<AbstractBootstrap<Bootstrap, Channel>> original, InetSocketAddress address, boolean useEpoll) {
+        return ThreadLocalUtil.isInitializingRaknet()
+                ? original.call(instance, RaknetifyEventLoops.DEFAULT_CLIENT_EVENT_LOOP_GROUP.get())
+                : original.call(instance, eventLoopGroup);
+    }
+
+    @Dynamic("method_10753 for compat")
+    @WrapOperation(method = {"connect(Ljava/net/InetSocketAddress;ZLnet/minecraft/network/ClientConnection;)Lio/netty/channel/ChannelFuture;", "method_10753(Ljava/net/InetSocketAddress;Z)Lnet/minecraft/network/ClientConnection;", "method_10753"}, at = @At(value = "INVOKE", target = "Lio/netty/bootstrap/Bootstrap;channel(Ljava/lang/Class;)Lio/netty/bootstrap/AbstractBootstrap;", remap = false), require = 1)
+    private static AbstractBootstrap<Bootstrap, Channel> redirectChannel(Bootstrap instance, Class<? extends SocketChannel> aClass, Operation<AbstractBootstrap<Bootstrap, Channel>> original, InetSocketAddress address, boolean useEpoll) {
         boolean actuallyUseEpoll = Epoll.isAvailable() && useEpoll;
         return ThreadLocalUtil.isInitializingRaknet()
                 ? instance.channelFactory(() -> {
@@ -74,10 +78,10 @@ public class MixinCCConnect {
                         return channel1;
                     });
                     RakNet.config(channel).setMTU(initializingRaknetLargeMTU ? Constants.LARGE_MTU : Constants.DEFAULT_MTU);
-                    channel.setProvidedEventLoop(actuallyUseEpoll ? RaknetifyEventLoops.EPOLL_EVENT_LOOP_GROUP.get().next() : RaknetifyEventLoops.NIO_EVENT_LOOP_GROUP.get().next());
+                    channel.setProvidedParentEventLoop(actuallyUseEpoll ? RaknetifyEventLoops.EPOLL_CLIENT_EVENT_LOOP_GROUP.get().next() : RaknetifyEventLoops.NIO_CLIENT_EVENT_LOOP_GROUP.get().next());
                     return channel;
                 })
-                : instance.channel(aClass);
+                : original.call(instance, aClass);
     }
 
 }

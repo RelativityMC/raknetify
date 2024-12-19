@@ -29,6 +29,8 @@ import com.ishland.raknetify.common.connection.RakNetConnectionUtil;
 import com.ishland.raknetify.common.connection.RaknetifyEventLoops;
 import com.ishland.raknetify.common.util.ThreadLocalUtil;
 import com.ishland.raknetify.common.util.NetworkInterfaceListener;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import io.netty.bootstrap.AbstractBootstrap;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
@@ -51,7 +53,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.io.IOException;
@@ -156,26 +157,30 @@ public abstract class MixinServerNetworkIo {
         }
     }
 
-    @Redirect(method = "bind", at = @At(value = "INVOKE", target = "Lio/netty/bootstrap/ServerBootstrap;group(Lio/netty/channel/EventLoopGroup;)Lio/netty/bootstrap/ServerBootstrap;", remap = false))
-    private ServerBootstrap redirectGroup(ServerBootstrap instance, EventLoopGroup group) {
+    @WrapOperation(method = "bind", at = @At(value = "INVOKE", target = "Lio/netty/bootstrap/ServerBootstrap;group(Lio/netty/channel/EventLoopGroup;)Lio/netty/bootstrap/ServerBootstrap;", remap = false))
+    private ServerBootstrap redirectGroup(ServerBootstrap instance, EventLoopGroup group, Operation<ServerBootstrap> original) {
         final boolean useEpoll = Epoll.isAvailable() && this.server.isUsingNativeTransport();
         return ThreadLocalUtil.isInitializingRaknet()
-                ? instance.group(useEpoll ? RaknetifyEventLoops.EPOLL_EVENT_LOOP_GROUP.get() : RaknetifyEventLoops.NIO_EVENT_LOOP_GROUP.get())
-                : instance.group(group);
+                ? original.call(instance, useEpoll ? RaknetifyEventLoops.EPOLL_EVENT_LOOP_GROUP.get() : RaknetifyEventLoops.NIO_EVENT_LOOP_GROUP.get())
+                : original.call(instance, group);
     }
 
-    @Redirect(method = "bind", at = @At(value = "INVOKE", target = "Lio/netty/bootstrap/ServerBootstrap;channel(Ljava/lang/Class;)Lio/netty/bootstrap/AbstractBootstrap;", remap = false))
-    private AbstractBootstrap<ServerBootstrap, ServerChannel> redirectChannel(ServerBootstrap instance, Class<? extends ServerSocketChannel> aClass) {
+    @WrapOperation(method = "bind", at = @At(value = "INVOKE", target = "Lio/netty/bootstrap/ServerBootstrap;channel(Ljava/lang/Class;)Lio/netty/bootstrap/AbstractBootstrap;", remap = false))
+    private AbstractBootstrap<ServerBootstrap, ServerChannel> redirectChannel(ServerBootstrap instance, Class<? extends ServerSocketChannel> aClass, Operation<AbstractBootstrap<ServerBootstrap, ServerChannel>> original) {
         final boolean useEpoll = Epoll.isAvailable() && this.server.isUsingNativeTransport();
         return ThreadLocalUtil.isInitializingRaknet()
-                ? instance.channelFactory(() -> new RakNetServerChannel(() -> {
-            final DatagramChannel channel = useEpoll ? new EpollDatagramChannel() : new NioDatagramChannel();
-            channel.config().setOption(ChannelOption.SO_REUSEADDR, true);
-            channel.config().setOption(ChannelOption.IP_TOS, RakNetConnectionUtil.DEFAULT_IP_TOS);
-            channel.config().setRecvByteBufAllocator(new FixedRecvByteBufAllocator(Constants.LARGE_MTU + 512).maxMessagesPerRead(128));
+                ? instance.channelFactory(() -> {
+            RakNetServerChannel channel = new RakNetServerChannel(() -> {
+                final DatagramChannel channel1 = useEpoll ? new EpollDatagramChannel() : new NioDatagramChannel();
+                channel1.config().setOption(ChannelOption.SO_REUSEADDR, true);
+                channel1.config().setOption(ChannelOption.IP_TOS, RakNetConnectionUtil.DEFAULT_IP_TOS);
+                channel1.config().setRecvByteBufAllocator(new FixedRecvByteBufAllocator(Constants.LARGE_MTU + 512).maxMessagesPerRead(128));
+                return channel1;
+            });
+            channel.setProvidedApplicationEventLoop(RaknetifyEventLoops.DEFAULT_EVENT_LOOP_GROUP.get().next());
             return channel;
-        }))
-                : instance.channel(aClass);
+        })
+                : original.call(instance, aClass);
     }
 
 }

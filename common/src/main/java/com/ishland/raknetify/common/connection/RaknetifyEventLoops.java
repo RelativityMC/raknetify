@@ -26,6 +26,7 @@ package com.ishland.raknetify.common.connection;
 
 import com.google.common.base.Suppliers;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import io.netty.channel.DefaultEventLoopGroup;
 import io.netty.channel.epoll.EpollEventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.util.concurrent.FastThreadLocalThread;
@@ -39,7 +40,18 @@ public class RaknetifyEventLoops {
                             0,
                             new ThreadFactoryBuilder()
                                     .setThreadFactory(FastThreadLocalThread::new)
-                                    .setNameFormat("Raknetify NIO #%d")
+                                    .setNameFormat("Netty Server NIO Raknetify #%d")
+                                    .setDaemon(true)
+                                    .build()
+                    )
+            );
+
+    public static final Supplier<NioEventLoopGroup> NIO_CLIENT_EVENT_LOOP_GROUP =
+            Suppliers.memoize(() -> new NioEventLoopGroup(
+                            0,
+                            new ThreadFactoryBuilder()
+                                    .setThreadFactory(FastThreadLocalThread::new)
+                                    .setNameFormat("Netty Client NIO Raknetify #%d")
                                     .setDaemon(true)
                                     .build()
                     )
@@ -50,7 +62,40 @@ public class RaknetifyEventLoops {
                             0,
                             new ThreadFactoryBuilder()
                                     .setThreadFactory(FastThreadLocalThread::new)
-                                    .setNameFormat("Raknetify Epoll #%d")
+                                    .setNameFormat("Netty Server Epoll Raknetify  #%d")
+                                    .setDaemon(true)
+                                    .build()
+                    )
+            );
+
+    public static final Supplier<EpollEventLoopGroup> EPOLL_CLIENT_EVENT_LOOP_GROUP =
+            Suppliers.memoize(() -> new EpollEventLoopGroup(
+                            0,
+                            new ThreadFactoryBuilder()
+                                    .setThreadFactory(FastThreadLocalThread::new)
+                                    .setNameFormat("Netty Client Epoll Raknetify  #%d")
+                                    .setDaemon(true)
+                                    .build()
+                    )
+            );
+
+    public static final Supplier<DefaultEventLoopGroup> DEFAULT_EVENT_LOOP_GROUP =
+            Suppliers.memoize(() -> new DefaultEventLoopGroup(
+                            0,
+                            new ThreadFactoryBuilder()
+                                    .setThreadFactory(FastThreadLocalThread::new)
+                                    .setNameFormat("Netty Server App Raknetify #%d")
+                                    .setDaemon(true)
+                                    .build()
+                    )
+            );
+
+    public static final Supplier<DefaultEventLoopGroup> DEFAULT_CLIENT_EVENT_LOOP_GROUP =
+            Suppliers.memoize(() -> new DefaultEventLoopGroup(
+                            0,
+                            new ThreadFactoryBuilder()
+                                    .setThreadFactory(FastThreadLocalThread::new)
+                                    .setNameFormat("Netty Client App Raknetify #%d")
                                     .setDaemon(true)
                                     .build()
                     )
