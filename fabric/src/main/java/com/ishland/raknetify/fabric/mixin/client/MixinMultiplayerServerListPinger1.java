@@ -25,6 +25,7 @@
 package com.ishland.raknetify.fabric.mixin.client;
 
 import com.ishland.raknetify.fabric.mixin.access.IClientConnection;
+import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
 import io.netty.channel.Channel;
 import net.minecraft.client.network.MultiplayerServerListPinger;
 import net.minecraft.client.network.ServerAddress;
@@ -63,15 +64,17 @@ public abstract class MixinMultiplayerServerListPinger1 implements ClientQueryPa
     }
 
     @Dynamic
-    @Redirect(method = {"method_10839(Lnet/minecraft/class_2561;)V", "onDisconnected"}, at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/MultiplayerServerListPinger;ping(Ljava/net/InetSocketAddress;Lnet/minecraft/client/network/ServerAddress;Lnet/minecraft/client/network/ServerInfo;)V"), require = 0)
-    private void noPingRaknet(MultiplayerServerListPinger instance, InetSocketAddress socketAddress, ServerAddress address, ServerInfo serverInfo) {
-        // no-op
+    @WrapWithCondition(method = {"method_10839(Lnet/minecraft/class_2561;)V", "onDisconnected"}, at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/MultiplayerServerListPinger;ping(Ljava/net/InetSocketAddress;Lnet/minecraft/client/network/ServerAddress;Lnet/minecraft/client/network/ServerInfo;)V"), require = 0)
+    private boolean noPingRaknet(MultiplayerServerListPinger instance, InetSocketAddress socketAddress, ServerAddress address, ServerInfo serverInfo) {
+        final Channel channel = ((IClientConnection) field_3774).getChannel();
+        return !(channel.config() instanceof RakNet.Config);
     }
 
     @Dynamic
-    @Redirect(method = "method_10839(Lnet/minecraft/class_2561;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/MultiplayerServerListPinger;method_3001(Ljava/net/InetSocketAddress;Lnet/minecraft/client/network/ServerInfo;)V"), require = 0)
-    private void noPingRaknet(MultiplayerServerListPinger instance, InetSocketAddress address, ServerInfo info) {
-        // no-op
+    @WrapWithCondition(method = "method_10839(Lnet/minecraft/class_2561;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/MultiplayerServerListPinger;method_3001(Ljava/net/InetSocketAddress;Lnet/minecraft/client/network/ServerInfo;)V"), require = 0)
+    private boolean noPingRaknet(MultiplayerServerListPinger instance, InetSocketAddress address, ServerInfo info) {
+        final Channel channel = ((IClientConnection) field_3774).getChannel();
+        return !(channel.config() instanceof RakNet.Config);
     }
 
 }
