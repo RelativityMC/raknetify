@@ -1,8 +1,5 @@
 name: check mappings
-on:
-  push:
-    branches:
-      - 'master'
+on: [pull_request, push]
 
 jobs:
   checkMappings:
