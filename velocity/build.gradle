@@ -46,11 +46,11 @@ dependencies {
     shadowInclude implementation(project(":common"))
 
     // copied here to workaround incomplete fastutil in velocity
-    api("com.github.RelativityMC.netty-raknet:netty-raknet-common:${project.netty_raknet_version}") {
+    api("com.github.RelativityMC.netty-raknet:netty-raknet-common") {
         transitive = false
     }
-    api("com.github.RelativityMC.netty-raknet:netty-raknet-client:${project.netty_raknet_version}")
-    api("com.github.RelativityMC.netty-raknet:netty-raknet-server:${project.netty_raknet_version}")
+    api("com.github.RelativityMC.netty-raknet:netty-raknet-client")
+    api("com.github.RelativityMC.netty-raknet:netty-raknet-server")
 }
 
 processResources {

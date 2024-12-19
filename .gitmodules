@@ -1,0 +1,3 @@
+[submodule "netty-raknet"]
+	path = netty-raknet
+	url = https://github.com/RelativityMC/netty-raknet.git

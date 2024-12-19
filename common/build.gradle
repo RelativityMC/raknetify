@@ -1,9 +1,9 @@
 dependencies {
-    api("com.github.RelativityMC.netty-raknet:netty-raknet-common:${project.netty_raknet_version}") {
+    api("com.github.RelativityMC.netty-raknet:netty-raknet-common") {
         transitive = false
     }
-    api("com.github.RelativityMC.netty-raknet:netty-raknet-client:${project.netty_raknet_version}")
-    api("com.github.RelativityMC.netty-raknet:netty-raknet-server:${project.netty_raknet_version}")
+    api("com.github.RelativityMC.netty-raknet:netty-raknet-client")
+    api("com.github.RelativityMC.netty-raknet:netty-raknet-server")
     api("org.apache.commons:commons-math3:3.6.1")
 
     //noinspection GradlePackageUpdate
