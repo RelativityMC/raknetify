@@ -43,10 +43,10 @@ import java.net.InetSocketAddress;
 public abstract class MixinMultiplayerServerListPinger {
 
     @Dynamic
-    @Redirect(method = {"add", "method_3003"}, at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ServerAddress;parse(Ljava/lang/String;)Lnet/minecraft/client/network/ServerAddress;"))
-    private ServerAddress modifyRaknetAddress(String address) {
+    @WrapOperation(method = {"add", "method_3003"}, at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ServerAddress;parse(Ljava/lang/String;)Lnet/minecraft/client/network/ServerAddress;"))
+    private ServerAddress modifyRaknetAddress(String address, Operation<ServerAddress> original) {
         final PrefixUtil.Info info = PrefixUtil.getInfo(address);
-        return ServerAddress.parse(info.stripped());
+        return original.call(info.stripped());
     }
 
     @Dynamic

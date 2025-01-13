@@ -43,6 +43,7 @@
   "client": [
     "access.IClientPlayNetworkHandler",
     "client.MixinMultiplayerServerListPinger1_20_2",
-    "client.MixinMultiplayerServerListPinger1_20_5"
+    "client.MixinMultiplayerServerListPinger1_20_5",
+    "common.MixinServerAddress"
   ]
 }

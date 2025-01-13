@@ -1,8 +1,5 @@
 name: check mappings
-on:
-  push:
-    branches:
-      - 'master'
+on: [pull_request, push]
 
 jobs:
   checkMappings:
@@ -20,6 +17,7 @@ jobs:
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
+          submodules: true
       - name: validate gradle wrapper
         uses: gradle/wrapper-validation-action@v1
       - name: setup jdk ${{ matrix.java }}

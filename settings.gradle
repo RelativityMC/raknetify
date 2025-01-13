@@ -11,6 +11,14 @@ pluginManagement {
 
 rootProject.name = "raknetify"
 
+includeBuild('netty-raknet') {
+    dependencySubstitution {
+        substitute module("com.github.RelativityMC.netty-raknet:netty-raknet-common") using project(":netty-raknet-common")
+        substitute module("com.github.RelativityMC.netty-raknet:netty-raknet-client") using project(":netty-raknet-client")
+        substitute module("com.github.RelativityMC.netty-raknet:netty-raknet-server") using project(":netty-raknet-server")
+    }
+}
+
 include "fabric"
 include "velocity"
 include "bungee"
