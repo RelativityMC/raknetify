@@ -9,6 +9,9 @@
     "ishland"
   ],
   "contact": {
+    "sources": "https://github.com/RelativityMC/raknetify/",
+    "issues": "https://github.com/RelativityMC/raknetify/issues",
+    "homepage": "https://modrinth.com/plugin/raknetify"
   },
 
   "license": "MIT",
