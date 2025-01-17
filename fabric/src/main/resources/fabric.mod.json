@@ -5,6 +5,7 @@
   "name": "Raknetify (Fabric)",
   "description": "A Fabric mod that allows using RakNet as Minecraft networking backend. ",
   "authors": [
+    "RelativityMC",
     "ishland"
   ],
   "contact": {
