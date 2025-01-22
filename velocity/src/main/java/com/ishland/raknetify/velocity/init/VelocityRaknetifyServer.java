@@ -55,6 +55,8 @@ import static com.ishland.raknetify.common.util.ReflectionUtil.accessible;
 
 public class VelocityRaknetifyServer {
 
+    private static final int portOverride = Integer.getInteger("raknetify.velocity.portOverride", -1);
+
     private static final Method INIT_CHANNEL;
 
     static {
@@ -133,9 +135,12 @@ public class VelocityRaknetifyServer {
             final EventLoopGroup bossGroup = (EventLoopGroup) accessible(ConnectionManager.class.getDeclaredField("bossGroup")).get(cm);
             final EventLoopGroup workerGroup = (EventLoopGroup) accessible(ConnectionManager.class.getDeclaredField("workerGroup")).get(cm);
 
+            final boolean hasPortOverride = portOverride > 0 && portOverride < 65535;
+            InetSocketAddress actualAddress = hasPortOverride ? new InetSocketAddress(address.getAddress(), portOverride) : address;
+
             synchronized (channels) {
                 for (ChannelFuture future : channels) {
-                    if (future.channel().localAddress().equals(address)) return;
+                    if (future.channel().localAddress().equals(actualAddress)) return;
                 }
 
                 ChannelFuture future = new ServerBootstrap()
@@ -154,7 +159,7 @@ public class VelocityRaknetifyServer {
                                 RakNetVelocityConnectionUtil.postInitChannel(channel, false);
                             }
                         })
-                        .localAddress(address)
+                        .localAddress(actualAddress)
                         .bind()
                         .syncUninterruptibly();
 
