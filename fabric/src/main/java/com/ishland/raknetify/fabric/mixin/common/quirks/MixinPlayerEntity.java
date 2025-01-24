@@ -25,9 +25,11 @@
 package com.ishland.raknetify.fabric.mixin.common.quirks;
 
 import com.ishland.raknetify.fabric.common.quirks.ClientHungerManager;
-import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.entity.EntityType;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.HungerManager;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -35,13 +37,17 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(PlayerEntity.class)
-public class MixinPlayerEntity {
+public abstract class MixinPlayerEntity extends LivingEntity {
 
     @Shadow protected HungerManager hungerManager;
 
+    protected MixinPlayerEntity(EntityType<? extends LivingEntity> entityType, World world) {
+        super(entityType, world);
+    }
+
     @Inject(method = "<init>", at = @At("RETURN"), remap = false)
     private void replaceHungerManager(CallbackInfo ci) {
-        if ((Object) this instanceof ClientPlayerEntity) {
+        if (this.getWorld().isClient) {
             this.hungerManager = ClientHungerManager.from(this.hungerManager);
         }
     }
