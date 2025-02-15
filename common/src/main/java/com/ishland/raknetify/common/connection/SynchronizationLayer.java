@@ -286,12 +286,6 @@ public class SynchronizationLayer extends ChannelDuplexHandler {
         this.reliabilityHandlerPendingFrameSets.clear();
     }
 
-    @Override
-    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        flush(ctx);
-        super.exceptionCaught(ctx, cause);
-    }
-
     private void flushQueue(ChannelHandlerContext ctx) {
         if (!isWaitingForResponse) {
             if (Constants.DEBUG) System.out.println("Raknetify: Ignoring duplicate call to flushQueue()");
