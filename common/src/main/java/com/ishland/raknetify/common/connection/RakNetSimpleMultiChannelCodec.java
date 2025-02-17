@@ -193,14 +193,17 @@ public class RakNetSimpleMultiChannelCodec extends ChannelDuplexHandler {
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         if (msg instanceof FrameData packet && !packet.isFragment() && packet.getDataSize() > 0) {
-            if (packetId == packet.getPacketId()) {
-                ctx.fireChannelRead(packet.createData().skipBytes(1));
-            } else if (packet.getPacketId() == Constants.RAKNET_PING_PACKET_ID) {
-                return;
-            } else {
-                ctx.fireChannelRead(packet.retain());
+            try {
+                if (packetId == packet.getPacketId()) {
+                    ctx.fireChannelRead(packet.createData().skipBytes(1));
+                } else if (packet.getPacketId() == Constants.RAKNET_PING_PACKET_ID) {
+                    return;
+                } else {
+                    ctx.fireChannelRead(packet.retain());
+                }
+            } finally {
+                packet.release();
             }
-            packet.release();
             return;
         }
         super.channelRead(ctx, msg);
