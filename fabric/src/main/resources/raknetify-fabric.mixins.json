@@ -27,6 +27,7 @@
     "common.encryption.MixinPacketEncryptionManager",
     "common.encryption.MixinPacketEncryptor",
     "common.quirks.MixinPlayerEntity",
+    "common.quirks.MixinSampleSubscriptionTracker",
     "compat.fabricapi.MixinServerLoginNetworkAddon",
     "compat.krypton.MixinServerLoginNetworkHandler",
     "compat.qsl.MixinServerLoginNetworkAddon",
