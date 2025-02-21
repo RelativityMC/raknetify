@@ -30,7 +30,6 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPromise;
-import io.netty.handler.codec.MessageToMessageCodec;
 import it.unimi.dsi.fastutil.ints.Int2IntMap;
 import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
@@ -146,7 +145,7 @@ public class RakNetSimpleMultiChannelCodec extends ChannelDuplexHandler {
 
     private FrameData encode0(ChannelHandlerContext ctx, ByteBuf buf) {
         if (buf.isReadable()) {
-            final int packetChannelOverride = getChannelOverride(buf);
+            final int packetChannelOverride = getChannelOverride(buf, !isMultichannelEnabled);
             if (packetChannelOverride == Integer.MIN_VALUE) {
                 return null; // the void
             }
@@ -182,10 +181,10 @@ public class RakNetSimpleMultiChannelCodec extends ChannelDuplexHandler {
         }
     }
 
-    protected int getChannelOverride(ByteBuf buf) {
+    protected int getChannelOverride(ByteBuf buf, boolean suppressWarning) {
         synchronized (handlers) {
             for (OverrideHandler handler : handlers) {
-                final int override = handler.getChannelOverride(buf);
+                final int override = handler.getChannelOverride(buf, suppressWarning);
                 if (override != 0) return override;
             }
         }
@@ -225,7 +224,7 @@ public class RakNetSimpleMultiChannelCodec extends ChannelDuplexHandler {
     }
 
     public interface OverrideHandler {
-        int getChannelOverride(ByteBuf buf);
+        int getChannelOverride(ByteBuf buf, boolean suppressWarning);
     }
 
     public static class PacketIdBasedOverrideHandler implements OverrideHandler {
@@ -240,13 +239,15 @@ public class RakNetSimpleMultiChannelCodec extends ChannelDuplexHandler {
         }
 
         @Override
-        public int getChannelOverride(ByteBuf buf) {
+        public int getChannelOverride(ByteBuf buf, boolean suppressWarning) {
             final ByteBuf slice = buf.slice();
             final int packetId = MathUtil.readVarInt(slice);
             final int override = this.channelMapping.get(packetId);
             if (override == Integer.MAX_VALUE) {
-                if (this.unknownPacketIds.add(packetId)) {
-                    System.err.println("Raknetify: Unknown packet id %d for %s".formatted(packetId, descriptiveProtocolStatus));
+                if (!suppressWarning) {
+                    if (this.unknownPacketIds.add(packetId)) {
+                        System.err.println("Raknetify: Unknown packet id %d for %s".formatted(packetId, descriptiveProtocolStatus));
+                    }
                 }
                 return 7;
             }

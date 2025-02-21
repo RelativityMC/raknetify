@@ -25,18 +25,11 @@
 package com.ishland.raknetify.fabric.common.connection;
 
 import com.google.common.collect.Sets;
-import com.ishland.raknetify.fabric.RaknetifyFabric;
-import com.ishland.raknetify.fabric.mixin.access.INetworkState1_20_4;
-import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.MappingResolver;
-import net.minecraft.network.NetworkPhase;
-import net.minecraft.network.NetworkSide;
-import net.minecraft.network.packet.Packet;
 
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 public class RakNetMultiChannel {
@@ -394,17 +387,19 @@ public class RakNetMultiChannel {
 
     private static final Set<Class<?>> foundUnknownClasses = Sets.newConcurrentHashSet();
 
-    public static int getPacketChannelOverride(Class<?> clazz) {
+    public static int getPacketChannelOverride(Class<?> clazz, boolean suppressWarning) {
         if (clazz == null) {
             System.err.println("Raknetify: Warning: Tried to send packet without setting packet class");
             return 0;
         }
         int channelOverride = classToChannelIdOverride.getInt(clazz);
         if (channelOverride == Integer.MAX_VALUE) {
-            if (foundUnknownClasses.add(clazz)) {
-                final MappingResolver mappingResolver = FabricLoader.getInstance().getMappingResolver();
-                final String intermediary = mappingResolver.unmapClassName("intermediary", clazz.getName());
-                System.err.println("Raknetify: Warning: unknown packet type %s (%s) for raknet multi-channel".formatted(intermediary.replace('.', '/'), clazz.getName()));
+            if (!suppressWarning) {
+                if (foundUnknownClasses.add(clazz)) {
+                    final MappingResolver mappingResolver = FabricLoader.getInstance().getMappingResolver();
+                    final String intermediary = mappingResolver.unmapClassName("intermediary", clazz.getName());
+                    System.err.println("Raknetify: Warning: unknown packet type %s (%s) for raknet multi-channel".formatted(intermediary.replace('.', '/'), clazz.getName()));
+                }
             }
             channelOverride = 7;
         }

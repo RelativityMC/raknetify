@@ -24,7 +24,6 @@
 
 package com.ishland.raknetify.common.connection.multichannel;
 
-import com.google.common.collect.ImmutableMap;
 import com.ishland.raknetify.common.Constants;
 import com.ishland.raknetify.common.connection.RakNetSimpleMultiChannelCodec;
 import com.ishland.raknetify.common.util.MathUtil;
@@ -56,7 +55,7 @@ public class CustomPayloadChannel {
         }
 
         @Override
-        public int getChannelOverride(ByteBuf origBuf) {
+        public int getChannelOverride(ByteBuf origBuf, boolean suppressWarning) {
             ByteBuf buf = origBuf.slice();
             final int packetId = MathUtil.readVarInt(buf);
             if (isCustomPayload.test(packetId)) {

@@ -130,9 +130,9 @@ public class RaknetifyFabric implements ModInitializer, PreLaunchEntrypoint {
                 final Object2IntMap<Class<? extends Packet<?>>> packetIds = getPacketIdsFromPacketHandler(value);
                 for (Object2IntMap.Entry<Class<? extends Packet<?>>> type : packetIds.object2IntEntrySet()) {
                     if (entry.getKey() == NetworkSide.CLIENTBOUND)
-                        s2c.put(type.getIntValue(), RakNetMultiChannel.getPacketChannelOverride(type.getKey()));
+                        s2c.put(type.getIntValue(), RakNetMultiChannel.getPacketChannelOverride(type.getKey(), false));
                     else if (entry.getKey() == NetworkSide.SERVERBOUND)
-                        c2s.put(type.getIntValue(), RakNetMultiChannel.getPacketChannelOverride(type.getKey()));
+                        c2s.put(type.getIntValue(), RakNetMultiChannel.getPacketChannelOverride(type.getKey(), false));
                 }
             }
         } else {
@@ -193,7 +193,7 @@ public class RaknetifyFabric implements ModInitializer, PreLaunchEntrypoint {
                     System.out.println("Skipping unmapped packet type: " + s2cPacketType);
                     continue;
                 }
-                s2c.put(i, RakNetMultiChannel.getPacketChannelOverride(clazz));
+                s2c.put(i, RakNetMultiChannel.getPacketChannelOverride(clazz, false));
 //                System.out.println("Mapped packet type: " + s2cPacketType + " to channel " + RakNetMultiChannel.getPacketChannelOverride(clazz));
             }
 
@@ -204,7 +204,7 @@ public class RaknetifyFabric implements ModInitializer, PreLaunchEntrypoint {
                     System.out.println("Skipping unmapped packet type: " + c2sPacketType);
                     continue;
                 }
-                c2s.put(i, RakNetMultiChannel.getPacketChannelOverride(clazz));
+                c2s.put(i, RakNetMultiChannel.getPacketChannelOverride(clazz, false));
 //                System.out.println("Mapped packet type: " + c2sPacketType + " to channel " + RakNetMultiChannel.getPacketChannelOverride(clazz));
             }
         }
