@@ -97,8 +97,8 @@ public class RakNetSimpleMultiChannelCodec extends ChannelDuplexHandler {
             final FrameData data = encode0(ctx, buf);
             if (data != null) {
                 pendingWrites.add(new PendingWrite(data, promise));
-                buf.release();
             }
+            buf.release();
             return;
         }
 
