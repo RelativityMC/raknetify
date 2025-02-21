@@ -146,17 +146,19 @@ public class RakNetSimpleMultiChannelCodec extends ChannelDuplexHandler {
 
     private FrameData encode0(ChannelHandlerContext ctx, ByteBuf buf) {
         if (buf.isReadable()) {
-            final int packetChannelOverride = isMultichannelEnabled ? getChannelOverride(buf) : 0;
+            final int packetChannelOverride = getChannelOverride(buf);
             if (packetChannelOverride == Integer.MIN_VALUE) {
                 return null; // the void
             }
             final FrameData frameData = FrameData.create(ctx.alloc(), packetId, buf);
-            if (packetChannelOverride >= 0)
-                frameData.setOrderChannel(packetChannelOverride);
-            else if (packetChannelOverride == -1)
-                frameData.setReliability(FramedPacket.Reliability.RELIABLE);
-            else if (packetChannelOverride == -2)
-                frameData.setReliability(FramedPacket.Reliability.UNRELIABLE);
+            if (isMultichannelEnabled) {
+                if (packetChannelOverride >= 0)
+                    frameData.setOrderChannel(packetChannelOverride);
+                else if (packetChannelOverride == -1)
+                    frameData.setReliability(FramedPacket.Reliability.RELIABLE);
+                else if (packetChannelOverride == -2)
+                    frameData.setReliability(FramedPacket.Reliability.UNRELIABLE);
+            }
             return frameData;
         }
         return null;
