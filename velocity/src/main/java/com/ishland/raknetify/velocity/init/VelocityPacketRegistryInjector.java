@@ -2,7 +2,7 @@
  * This file is a part of the Velocity implementation of the Raknetify
  * project, licensed under GPLv3.
  *
- * Copyright (c) 2022-2023 ishland
+ * Copyright (c) 2022-2025 ishland
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
