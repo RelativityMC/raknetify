@@ -51,7 +51,6 @@ import net.fabricmc.loader.api.entrypoint.PreLaunchEntrypoint;
 import net.minecraft.SharedConstants;
 import net.minecraft.network.NetworkPhase;
 import net.minecraft.network.NetworkSide;
-import net.minecraft.network.NetworkState;
 import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.network.listener.ClientPlayPacketListener;
 import net.minecraft.network.listener.ServerPlayPacketListener;
@@ -61,6 +60,7 @@ import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.PacketType;
 import net.minecraft.network.packet.PingPackets;
 import net.minecraft.network.packet.PlayPackets;
+import net.minecraft.network.state.NetworkState;
 import net.minecraft.network.state.PlayStateFactories;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.FieldNode;
@@ -137,20 +137,29 @@ public class RaknetifyFabric implements ModInitializer, PreLaunchEntrypoint {
             }
         } else {
             final List<PacketType<Packet<? super ServerPlayPacketListener>>> c2sPacketTypes;
-            try {
-                c2sPacketTypes = ((IPacketCodecDispatcher<ByteBuf, Packet<? super ServerPlayPacketListener>, PacketType<Packet<? super ServerPlayPacketListener>>>)
-                        ((NetworkState<ServerPlayPacketListener>) MultiVersionUtil.NetworkState$Factory$bind.invoke(PlayStateFactories.C2S, RegistryByteBuf.makeFactory(null))).codec()).getPacketTypes()
-                        .stream().map(byteBufPacketPacketTypePacketType -> byteBufPacketPacketTypePacketType.id()).toList();
-            } catch (Throwable e) {
-                throw new RuntimeException(e);
-            }
             final List<PacketType<Packet<? super ServerPlayPacketListener>>> s2cPacketTypes;
-            try {
-                s2cPacketTypes = ((IPacketCodecDispatcher<ByteBuf, Packet<? super ServerPlayPacketListener>, PacketType<Packet<? super ServerPlayPacketListener>>>)
-                       ((NetworkState<ClientPlayPacketListener>) MultiVersionUtil.NetworkState$Factory$bind.invoke(PlayStateFactories.S2C, RegistryByteBuf.makeFactory(null))).codec()).getPacketTypes()
+            if (!RaknetifyFabricMixinPlugin.AFTER_1_21_4) {
+                try {
+                    c2sPacketTypes = ((IPacketCodecDispatcher<ByteBuf, Packet<? super ServerPlayPacketListener>, PacketType<Packet<? super ServerPlayPacketListener>>>)
+                            ((NetworkState<ServerPlayPacketListener>) MultiVersionUtil.NetworkState$Factory$bind1_20_5.invoke(PlayStateFactories.C2S, RegistryByteBuf.makeFactory(null))).codec()).getPacketTypes()
+                            .stream().map(byteBufPacketPacketTypePacketType -> byteBufPacketPacketTypePacketType.id()).toList();
+                } catch (Throwable e) {
+                    throw new RuntimeException(e);
+                }
+                try {
+                    s2cPacketTypes = ((IPacketCodecDispatcher<ByteBuf, Packet<? super ServerPlayPacketListener>, PacketType<Packet<? super ServerPlayPacketListener>>>)
+                            ((NetworkState<ClientPlayPacketListener>) MultiVersionUtil.NetworkState$Factory$bind1_20_5.invoke(PlayStateFactories.S2C, RegistryByteBuf.makeFactory(null))).codec()).getPacketTypes()
+                            .stream().map(byteBufPacketPacketTypePacketType -> byteBufPacketPacketTypePacketType.id()).toList();
+                } catch (Throwable e) {
+                    throw new RuntimeException(e);
+                }
+            } else {
+                c2sPacketTypes = ((IPacketCodecDispatcher<ByteBuf, Packet<? super ServerPlayPacketListener>, PacketType<Packet<? super ServerPlayPacketListener>>>)
+                        PlayStateFactories.C2S.bind(RegistryByteBuf.makeFactory(null), null).codec()).getPacketTypes()
                         .stream().map(byteBufPacketPacketTypePacketType -> byteBufPacketPacketTypePacketType.id()).toList();
-            } catch (Throwable e) {
-                throw new RuntimeException(e);
+                s2cPacketTypes = ((IPacketCodecDispatcher<ByteBuf, Packet<? super ServerPlayPacketListener>, PacketType<Packet<? super ServerPlayPacketListener>>>)
+                        PlayStateFactories.S2C.bind(RegistryByteBuf.makeFactory(null)).codec()).getPacketTypes()
+                        .stream().map(byteBufPacketPacketTypePacketType -> byteBufPacketPacketTypePacketType.id()).toList();
             }
 
             record FieldNodeClazzPair(FieldNode fieldNode, Class<?> clazz) {

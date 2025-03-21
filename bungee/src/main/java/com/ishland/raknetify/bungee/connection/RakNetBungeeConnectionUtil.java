@@ -81,7 +81,7 @@ public class RakNetBungeeConnectionUtil {
         if (channel.config() instanceof RakNet.Config) {
             channel.pipeline().replace(PipelineUtils.TIMEOUT_HANDLER, PipelineUtils.TIMEOUT_HANDLER, new ChannelDuplexHandler()); // no-op
             channel.pipeline().replace(PipelineUtils.FRAME_DECODER, PipelineUtils.FRAME_DECODER, new ChannelDuplexHandler()); // no-op
-            channel.pipeline().replace(PipelineUtils.FRAME_PREPENDER, PipelineUtils.FRAME_PREPENDER, new ChannelDuplexHandler()); // no-op
+            channel.pipeline().addBefore(PipelineUtils.FRAME_PREPENDER_AND_COMPRESS, StripFrameHandler.NAME, StripFrameHandler.INSTANCE); // no-op
             if (channel.pipeline().get(HAProxyMessageDecoder.class) != null)
                 channel.pipeline().remove(HAProxyMessageDecoder.class);
             channel.pipeline().addBefore(PipelineUtils.BOSS_HANDLER, RakNetBungeeClientChannelEventListener.NAME, new RakNetBungeeClientChannelEventListener());
