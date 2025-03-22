@@ -88,23 +88,19 @@ public class RaknetifyFabric implements ModInitializer, PreLaunchEntrypoint {
 
     private static final boolean SAVE_CHANNEL_MAPPINGS = Boolean.getBoolean("raknetify.saveChannelMappings");
     private static final boolean EXIT_AFTER_SAVE_CHANNEL_MAPPINGS = Boolean.getBoolean("raknetify.saveChannelMappings.exit");
-    private static final boolean HANDLE_MAPPINGS_ON_PRELAUNCH = Boolean.getBoolean("raknetify.handleMappingsOnPreLaunch");
-
 
     @Override
     public void onPreLaunch() {
-        MultiVersionUtil.init();
-        if (HANDLE_MAPPINGS_ON_PRELAUNCH)
-            handleMappings();
     }
 
     @Override
     public void onInitialize() {
+        MultiVersionUtil.init();
+
         if (FabricLoader.getInstance().isDevelopmentEnvironment())
             auditMixins();
 
-        if (!HANDLE_MAPPINGS_ON_PRELAUNCH)
-            handleMappings();
+        handleMappings();
 
         // If new property name is present, use it
         String levelStr = SystemPropertyUtil.get("io.netty.leakDetection.level", ResourceLeakDetector.Level.SIMPLE.name());
@@ -141,14 +137,14 @@ public class RaknetifyFabric implements ModInitializer, PreLaunchEntrypoint {
             if (!RaknetifyFabricMixinPlugin.AFTER_1_21_4) {
                 try {
                     c2sPacketTypes = ((IPacketCodecDispatcher<ByteBuf, Packet<? super ServerPlayPacketListener>, PacketType<Packet<? super ServerPlayPacketListener>>>)
-                            ((NetworkState<ServerPlayPacketListener>) MultiVersionUtil.NetworkState$Factory$bind1_20_5.invoke(PlayStateFactories.C2S, RegistryByteBuf.makeFactory(null))).codec()).getPacketTypes()
+                            ((NetworkState<ServerPlayPacketListener>) MultiVersionUtil.NetworkState$Factory$bind1_20_5.invoke(MultiVersionUtil.PlayStateFactories$C2S1_20_5.get(), RegistryByteBuf.makeFactory(null))).codec()).getPacketTypes()
                             .stream().map(byteBufPacketPacketTypePacketType -> byteBufPacketPacketTypePacketType.id()).toList();
                 } catch (Throwable e) {
                     throw new RuntimeException(e);
                 }
                 try {
                     s2cPacketTypes = ((IPacketCodecDispatcher<ByteBuf, Packet<? super ServerPlayPacketListener>, PacketType<Packet<? super ServerPlayPacketListener>>>)
-                            ((NetworkState<ClientPlayPacketListener>) MultiVersionUtil.NetworkState$Factory$bind1_20_5.invoke(PlayStateFactories.S2C, RegistryByteBuf.makeFactory(null))).codec()).getPacketTypes()
+                            ((NetworkState<ClientPlayPacketListener>) MultiVersionUtil.NetworkState$Factory$bind1_20_5.invoke(MultiVersionUtil.PlayStateFactories$S2C1_20_5.get(), RegistryByteBuf.makeFactory(null))).codec()).getPacketTypes()
                             .stream().map(byteBufPacketPacketTypePacketType -> byteBufPacketPacketTypePacketType.id()).toList();
                 } catch (Throwable e) {
                     throw new RuntimeException(e);

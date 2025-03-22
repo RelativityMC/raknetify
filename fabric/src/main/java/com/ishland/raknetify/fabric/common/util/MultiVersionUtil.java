@@ -53,6 +53,7 @@ public class MultiVersionUtil {
     private static final String CLASSNAME_NetworkState$InternalPacketHandler = "net.minecraft.class_2539$class_4532";
     private static final String CLASSNAME_NetworkState$Factory = "net.minecraft.class_9127$class_9128";
     private static final String CLASSNAME_ContextAwareNetworkStateFactory = "net.minecraft.class_10947";
+    private static final String CLASSNAME_PlayStateFactories = "net.minecraft.class_9095";
 
     public static final VarHandle ServerPlayNetworkHandler$connection;
     public static final VarHandle ClientPlayNetworkHandler$connection;
@@ -60,6 +61,9 @@ public class MultiVersionUtil {
     public static final Class<?> clazzNetworkStatePacketHandler;
     public static final VarHandle NetworkStatePacketHandler$backingHandler1_20_2;
     public static final MethodHandle NetworkState$Factory$bind1_20_5;
+    public static final Class<?> clazzPlayStateFactories;
+    public static final VarHandle PlayStateFactories$C2S1_20_5;
+    public static final VarHandle PlayStateFactories$S2C1_20_5;
 
     static {
         try {
@@ -110,7 +114,7 @@ public class MultiVersionUtil {
             }
 
             {
-                clazzNetworkStatePacketHandler = getOrNull(() -> Class.forName(CLASSNAME_NetworkStatePacketHandler), ClassNotFoundException.class);
+                clazzNetworkStatePacketHandler = getOrNull(() -> Class.forName(resolver.mapClassName(INTERMEDIARY, CLASSNAME_NetworkStatePacketHandler)), ClassNotFoundException.class);
                 if (clazzNetworkStatePacketHandler != null) {
                     final Field backingHandler1_20_2 = getOrNull(() -> clazzNetworkStatePacketHandler.getDeclaredField(resolver.mapFieldName(INTERMEDIARY, CLASSNAME_NetworkStatePacketHandler, "field_45674", "L" + resolver.mapClassName(INTERMEDIARY, CLASSNAME_NetworkState$InternalPacketHandler) + ";")), NoSuchFieldException.class);
                     if (backingHandler1_20_2 != null) {
@@ -140,6 +144,41 @@ public class MultiVersionUtil {
                     NetworkState$Factory$bind1_20_5 = null;
                 }
             }
+
+            clazzPlayStateFactories = getOrNull(() -> Class.forName(resolver.mapClassName(INTERMEDIARY, CLASSNAME_PlayStateFactories), false, MultiVersionUtil.class.getClassLoader()), ClassNotFoundException.class);
+
+            {
+                if (clazzPlayStateFactories != null) {
+                    final Field playStateFactoriesC2S1_20_5 = getOrNull(() -> clazzPlayStateFactories.getDeclaredField(resolver.mapFieldName(INTERMEDIARY, CLASSNAME_PlayStateFactories, "field_48172", "L" + resolver.mapClassName(INTERMEDIARY, CLASSNAME_NetworkState$Factory) + ";")), NoSuchFieldException.class);
+                    if (playStateFactoriesC2S1_20_5 != null) {
+                        playStateFactoriesC2S1_20_5.setAccessible(true);
+                        PlayStateFactories$C2S1_20_5 = MethodHandles
+                                .privateLookupIn(clazzPlayStateFactories, MethodHandles.lookup())
+                                .unreflectVarHandle(playStateFactoriesC2S1_20_5);
+                    } else {
+                        PlayStateFactories$C2S1_20_5 = null;
+                    }
+                } else {
+                    PlayStateFactories$C2S1_20_5 = null;
+                }
+            }
+
+            {
+                if (clazzPlayStateFactories != null) {
+                    final Field playStateFactoriesS2C1_20_5 = getOrNull(() -> clazzPlayStateFactories.getDeclaredField(resolver.mapFieldName(INTERMEDIARY, CLASSNAME_PlayStateFactories, "field_48173", "L" + resolver.mapClassName(INTERMEDIARY, CLASSNAME_NetworkState$Factory) + ";")), NoSuchFieldException.class);
+                    if (playStateFactoriesS2C1_20_5 != null) {
+                        playStateFactoriesS2C1_20_5.setAccessible(true);
+                        PlayStateFactories$S2C1_20_5 = MethodHandles
+                                .privateLookupIn(clazzPlayStateFactories, MethodHandles.lookup())
+                                .unreflectVarHandle(playStateFactoriesS2C1_20_5);
+                    } else {
+                        PlayStateFactories$S2C1_20_5 = null;
+                    }
+                } else {
+                    PlayStateFactories$S2C1_20_5 = null;
+                }
+            }
+
         } catch (Throwable t) {
             throw new RuntimeException(t);
         }
