@@ -172,6 +172,11 @@ public class RakNetMultiChannel {
             "net/minecraft/class_9091", // CookieResponseC2SPacket
             "net/minecraft/class_9178", // DebugSampleS2CPacket
             "net/minecraft/class_9179", // DebugSampleSubscriptionC2SPacket
+
+            "net/minecraft/class_11173", // WaypointS2CPacket
+            "net/minecraft/class_11406", // ClearDialogS2CPacket
+            "net/minecraft/class_11407", // ShowDialogS2CPacket
+            "net/minecraft/class_11411", // CustomClickActionC2SPacket
     });
 
     // Entities related stuff
@@ -212,6 +217,7 @@ public class RakNetMultiChannel {
             "net/minecraft/class_2828$class_2830", // PlayerMoveC2SPacket$Full
             "net/minecraft/class_2828$class_2831", // PlayerMoveC2SPacket$LookAndOnGround
             "net/minecraft/class_9836", // ClientTickEndC2SPacket: used to track movement on vanilla server
+            "net/minecraft/class_11410", // ChangeGameModeC2SPacket
 
             "net/minecraft/class_2664", // ExplosionS2C
             "net/minecraft/class_2678", // GameJoinS2C

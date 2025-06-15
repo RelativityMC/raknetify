@@ -29,6 +29,8 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.MappingResolver;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
+import net.minecraft.entity.player.HungerManager;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.ClientConnection;
 import net.minecraft.network.state.NetworkState;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
@@ -54,6 +56,7 @@ public class MultiVersionUtil {
     private static final String CLASSNAME_NetworkState$Factory = "net.minecraft.class_9127$class_9128";
     private static final String CLASSNAME_ContextAwareNetworkStateFactory = "net.minecraft.class_10947";
     private static final String CLASSNAME_PlayStateFactories = "net.minecraft.class_9095";
+    private static final String CLASSNAME_HungerManager = "net.minecraft.class_1702";
 
     public static final VarHandle ServerPlayNetworkHandler$connection;
     public static final VarHandle ClientPlayNetworkHandler$connection;
@@ -64,6 +67,8 @@ public class MultiVersionUtil {
     public static final Class<?> clazzPlayStateFactories;
     public static final VarHandle PlayStateFactories$C2S1_20_5;
     public static final VarHandle PlayStateFactories$S2C1_20_5;
+    public static final MethodHandle HungerManager$writeNbt1_21_5;
+    public static final MethodHandle HungerManager$readNbt1_21_5;
 
     static {
         try {
@@ -133,7 +138,7 @@ public class MultiVersionUtil {
             {
                 Method factoryBind = getOrNull(() -> NetworkState.Unbound.class.getDeclaredMethod("bind" /* actually not obfuscated in 1.20.6 */, Function.class), NoSuchMethodException.class, NoClassDefFoundError.class);
                 if (factoryBind == null) {
-                    factoryBind = getOrNull(() -> NetworkState.Unbound.class.getDeclaredMethod(resolver.mapMethodName(INTERMEDIARY, CLASSNAME_NetworkState$Factory, "method_61107", "(Ljava/util/function/Function;)L%s;".formatted(resolver.mapClassName(INTERMEDIARY, "net.minecraft.class_9127"))), Function.class), NoSuchMethodException.class, NoClassDefFoundError.class);
+                    factoryBind = getOrNull(() -> NetworkState.Unbound.class.getDeclaredMethod(resolver.mapMethodName(INTERMEDIARY, CLASSNAME_NetworkState$Factory, "method_61107", "(Ljava/util/function/Function;)Lnet/minecraft/class_9127;"), Function.class), NoSuchMethodException.class, NoClassDefFoundError.class);
                 }
                 if (factoryBind != null) {
                     factoryBind.setAccessible(true);
@@ -149,7 +154,7 @@ public class MultiVersionUtil {
 
             {
                 if (clazzPlayStateFactories != null) {
-                    final Field playStateFactoriesC2S1_20_5 = getOrNull(() -> clazzPlayStateFactories.getDeclaredField(resolver.mapFieldName(INTERMEDIARY, CLASSNAME_PlayStateFactories, "field_48172", "L" + resolver.mapClassName(INTERMEDIARY, CLASSNAME_NetworkState$Factory) + ";")), NoSuchFieldException.class);
+                    final Field playStateFactoriesC2S1_20_5 = getOrNull(() -> clazzPlayStateFactories.getDeclaredField(resolver.mapFieldName(INTERMEDIARY, CLASSNAME_PlayStateFactories, "field_48172", "L" + CLASSNAME_NetworkState$Factory.replace('.', '/') + ";")), NoSuchFieldException.class);
                     if (playStateFactoriesC2S1_20_5 != null) {
                         playStateFactoriesC2S1_20_5.setAccessible(true);
                         PlayStateFactories$C2S1_20_5 = MethodHandles
@@ -165,7 +170,7 @@ public class MultiVersionUtil {
 
             {
                 if (clazzPlayStateFactories != null) {
-                    final Field playStateFactoriesS2C1_20_5 = getOrNull(() -> clazzPlayStateFactories.getDeclaredField(resolver.mapFieldName(INTERMEDIARY, CLASSNAME_PlayStateFactories, "field_48173", "L" + resolver.mapClassName(INTERMEDIARY, CLASSNAME_NetworkState$Factory) + ";")), NoSuchFieldException.class);
+                    final Field playStateFactoriesS2C1_20_5 = getOrNull(() -> clazzPlayStateFactories.getDeclaredField(resolver.mapFieldName(INTERMEDIARY, CLASSNAME_PlayStateFactories, "field_48173", "L" + CLASSNAME_NetworkState$Factory.replace('.', '/') + ";")), NoSuchFieldException.class);
                     if (playStateFactoriesS2C1_20_5 != null) {
                         playStateFactoriesS2C1_20_5.setAccessible(true);
                         PlayStateFactories$S2C1_20_5 = MethodHandles
@@ -176,6 +181,30 @@ public class MultiVersionUtil {
                     }
                 } else {
                     PlayStateFactories$S2C1_20_5 = null;
+                }
+            }
+
+            {
+                final Method writeNbt1_21_5 = getOrNull(() -> HungerManager.class.getDeclaredMethod(resolver.mapMethodName(INTERMEDIARY, CLASSNAME_HungerManager, "method_7582", "(Lnet/minecraft/class_2487;)V"), NbtCompound.class), NoSuchMethodException.class);
+                if (writeNbt1_21_5 != null) {
+                    writeNbt1_21_5.setAccessible(true);
+                    HungerManager$writeNbt1_21_5 = MethodHandles
+                            .privateLookupIn(HungerManager.class, MethodHandles.lookup())
+                            .unreflect(writeNbt1_21_5);
+                } else {
+                    HungerManager$writeNbt1_21_5 = null;
+                }
+            }
+
+            {
+                final Method readNbt1_21_5 = getOrNull(() -> HungerManager.class.getDeclaredMethod(resolver.mapMethodName(INTERMEDIARY, CLASSNAME_HungerManager, "method_7584", "(Lnet/minecraft/class_2487;)V"), NbtCompound.class), NoSuchMethodException.class);
+                if (readNbt1_21_5 != null) {
+                    readNbt1_21_5.setAccessible(true);
+                    HungerManager$readNbt1_21_5 = MethodHandles
+                            .privateLookupIn(HungerManager.class, MethodHandles.lookup())
+                            .unreflect(readNbt1_21_5);
+                } else {
+                    HungerManager$readNbt1_21_5 = null;
                 }
             }
 

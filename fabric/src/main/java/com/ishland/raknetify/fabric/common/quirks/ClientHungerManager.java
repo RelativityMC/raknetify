@@ -24,17 +24,49 @@
 
 package com.ishland.raknetify.fabric.common.quirks;
 
+import com.ishland.raknetify.fabric.common.util.MultiVersionUtil;
+import com.ishland.raknetify.fabric.mixin.RaknetifyFabricMixinPlugin;
 import net.minecraft.component.type.FoodComponent;
 import net.minecraft.entity.player.HungerManager;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.storage.NbtReadView;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 
 public class ClientHungerManager extends HungerManager {
 
     public static ClientHungerManager from(HungerManager hungerManager) {
         ClientHungerManager clientHungerManager = new ClientHungerManager();
-        NbtCompound compound = new NbtCompound();
-        hungerManager.writeNbt(compound);
-        clientHungerManager.readNbt(compound);
+        if (RaknetifyFabricMixinPlugin.AFTER_1_21_5) {
+            for (Field field : HungerManager.class.getFields()) {
+                if ((field.getModifiers() & Modifier.STATIC) == 0 && (field.getModifiers() & Modifier.FINAL) == 0) {
+                    if (!field.trySetAccessible()) {
+                        System.err.println("Failed to set field " + field.getName() + " accessible in HungerManager");
+                        continue;
+                    }
+                    try {
+                        Object value = field.get(hungerManager);
+                        field.set(clientHungerManager, value);
+                    } catch (Throwable e) {
+                        System.err.println("Failed to copy field " + field.getName() + " from HungerManager to ClientHungerManager");
+                        e.printStackTrace();
+                    }
+                }
+            }
+        } else {
+            NbtCompound compound = new NbtCompound();
+            try {
+                MultiVersionUtil.HungerManager$writeNbt1_21_5.invoke(hungerManager, compound);
+            } catch (Throwable e) {
+                throw new RuntimeException(e);
+            }
+            try {
+                MultiVersionUtil.HungerManager$readNbt1_21_5.invoke(clientHungerManager, compound);
+            } catch (Throwable e) {
+                throw new RuntimeException(e);
+            }
+        }
         return clientHungerManager;
     }
 
