@@ -99,6 +99,9 @@ public class RakNetVelocityConnectionUtil {
                     RaknetifyVelocityPlugin.LOGGER.warn("No multi-channel mappings for protocol version {} ({})", protocolVersion.getProtocol(), Arrays.toString(protocolVersion.getVersionsSupportedBy().toArray(String[]::new)));
                 }
             }
+
+            channel.pipeline().addBefore(Connections.HANDLER, RakNetVelocityPingUpdater.NAME, new RakNetVelocityPingUpdater(player));
+
             RaknetifyVelocityPlugin.LOGGER.info(String.format("Raknetify: %s logged in via RakNet, mtu %d", evt.getPlayer().getGameProfile().getName(), config.getMTU()));
         }
     }
