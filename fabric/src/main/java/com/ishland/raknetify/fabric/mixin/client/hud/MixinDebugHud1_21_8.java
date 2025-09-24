@@ -22,29 +22,25 @@
  * THE SOFTWARE.
  */
 
-package com.ishland.raknetify.fabric.mixin.common.quirks;
+package com.ishland.raknetify.fabric.mixin.client.hud;
 
+import com.ishland.raknetify.fabric.common.client.DebugHudUtil;
+import net.minecraft.client.gui.hud.DebugHud;
 import org.spongepowered.asm.mixin.Dynamic;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Pseudo;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import java.util.Queue;
+import java.util.List;
 
-@Pseudo
-@Mixin(targets = "net.minecraft.class_9188")
-public class MixinSampleSubscriptionTracker {
-
-    @Shadow @Final private Queue<?> pendingQueue;
+@Mixin(DebugHud.class)
+public class MixinDebugHud1_21_8 {
 
     @Dynamic
-    @Inject(method = "method_56654", at = @At("RETURN"))
-    private void cleanQueue(CallbackInfo ci) {
-        this.pendingQueue.clear();
+    @Inject(method = "method_1835", at = @At("RETURN"))
+    private void getLeftText(CallbackInfoReturnable<List<String>> cir) {
+        DebugHudUtil.getDebugString(cir.getReturnValue()::add);
     }
 
 }

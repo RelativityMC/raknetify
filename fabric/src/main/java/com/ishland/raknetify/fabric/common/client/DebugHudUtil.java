@@ -22,32 +22,24 @@
  * THE SOFTWARE.
  */
 
-package com.ishland.raknetify.fabric.mixin.client.hud;
+package com.ishland.raknetify.fabric.common.client;
 
 import com.ishland.raknetify.common.connection.MetricsSynchronizationHandler;
 import com.ishland.raknetify.common.connection.MultiChannelingStreamingCompression;
 import com.ishland.raknetify.common.connection.SimpleMetricsLogger;
 import com.ishland.raknetify.fabric.common.util.MultiVersionUtil;
 import com.ishland.raknetify.fabric.mixin.access.IClientConnection;
-import com.ishland.raknetify.fabric.mixin.access.IClientPlayNetworkHandler;
 import io.netty.channel.Channel;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.hud.DebugHud;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.network.ClientConnection;
 import network.ycc.raknet.RakNet;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import java.util.List;
+import java.util.function.Consumer;
 
-@Mixin(DebugHud.class)
-public class MixinDebugHud {
+public class DebugHudUtil {
 
-    @Inject(method = "getLeftText", at = @At("RETURN"))
-    private void getLeftText(CallbackInfoReturnable<List<String>> cir) {
+    public static void getDebugString(Consumer<String> consumer) {
         final ClientPlayNetworkHandler networkHandler = MinecraftClient.getInstance().getNetworkHandler();
         if (networkHandler != null) {
             final ClientConnection connection = (ClientConnection) MultiVersionUtil.ClientPlayNetworkHandler$connection.get(networkHandler);
@@ -55,7 +47,7 @@ public class MixinDebugHud {
             if (channel != null) {
                 if (channel.config() instanceof RakNet.Config config) {
                     if (config.getMetrics() instanceof SimpleMetricsLogger logger) {
-                        cir.getReturnValue().add(
+                        consumer.accept(
                                 "[Raknetify] A: true, MTU: %d, RTT: %.2f/%.2fms"
                                         .formatted(config.getMTU(),
                                                 logger.getMeasureRTTns() / 1_000_000.0,
@@ -63,28 +55,28 @@ public class MixinDebugHud {
                                         ));
                         final MetricsSynchronizationHandler serverSync = logger.getMetricsSynchronizationHandler();
                         if (serverSync != null && serverSync.isRemoteSupported()) {
-                            cir.getReturnValue().add(
+                            consumer.accept(
                                     "[Raknetify] C: BUF: %.2fMB; S: BUF: %.2fMB"
                                             .formatted(
                                                     logger.getCurrentQueuedBytes() / 1024.0 / 1024.0,
                                                     serverSync.getQueuedBytes() / 1024.0 / 1024.0
                                             ));
                         } else {
-                            cir.getReturnValue().add(
+                            consumer.accept(
                                     "[Raknetify] C: BUF: %.2fMB"
                                             .formatted(
                                                     logger.getCurrentQueuedBytes() / 1024.0 / 1024.0
                                             ));
                         }
 
-                        cir.getReturnValue().add(
+                        consumer.accept(
                                 "[Raknetify] C: I: %s, O: %s"
                                         .formatted(
                                                 logger.getMeasureTrafficInFormatted(),
                                                 logger.getMeasureTrafficOutFormatted()
                                         ));
 
-                        cir.getReturnValue().add(
+                        consumer.accept(
                                 "[Raknetify] C: ERR: %.4f%%, %d tx, %d rx, BST: %d"
                                         .formatted(
                                                 logger.getMeasureErrorRate() * 100.0,
@@ -92,7 +84,7 @@ public class MixinDebugHud {
                                                 logger.getMeasureBurstTokens() + config.getDefaultPendingFrameSets()
                                         ));
                         if (serverSync != null && serverSync.isRemoteSupported()) {
-                            cir.getReturnValue().add(
+                            consumer.accept(
                                     "[Raknetify] S: ERR: %.4f%%, %d tx, %d rx, BST: %d"
                                             .formatted(
                                                     serverSync.getErrorRate() * 100.0,
@@ -101,7 +93,7 @@ public class MixinDebugHud {
                                             ));
                         }
                     } else {
-                        cir.getReturnValue().add(
+                        consumer.accept(
                                 "[Raknetify] A: true, MTU: %d"
                                         .formatted(config.getMTU())
                         );
@@ -109,7 +101,7 @@ public class MixinDebugHud {
 
                     final MultiChannelingStreamingCompression compression = channel.pipeline().get(MultiChannelingStreamingCompression.class);
                     if (compression != null && compression.isActive()) {
-                        cir.getReturnValue().add(
+                        consumer.accept(
                                 "[Raknetify] CRatio: I: %.2f%%, O: %.2f%%"
                                         .formatted(compression.getInCompressionRatio() * 100, compression.getOutCompressionRatio() * 100)
                         );
@@ -119,7 +111,7 @@ public class MixinDebugHud {
                 }
             }
         }
-        cir.getReturnValue().add("[Raknetify] A: false");
+        consumer.accept("[Raknetify] A: false");
     }
 
 }

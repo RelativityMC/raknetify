@@ -13,11 +13,12 @@
     "access.IPacketCodecDispatcherPacketType",
     "access.IPacketEncryptionManager",
     "access.IServerPlayNetworkHandler",
+    "access.IWorld",
     "client.MixinClientPlayNetworkHandler",
     "client.MixinConnectionScreen1",
     "client.MixinMultiplayerServerListPinger",
     "client.MixinMultiplayerServerListPinger1",
-    "client.hud.MixinDebugHud",
+    "client.hud.MixinDebugHud1_21_8",
     "common.MixinCCConnect",
     "common.MixinClientConnection",
     "common.MixinClientConnection1",
@@ -44,6 +45,7 @@
   },
   "client": [
     "access.IClientPlayNetworkHandler",
+    "access.IDebugHudEntries",
     "client.MixinMultiplayerServerListPinger1_20_2",
     "client.MixinMultiplayerServerListPinger1_20_5",
     "common.MixinServerAddress"

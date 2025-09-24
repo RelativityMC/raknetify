@@ -243,6 +243,9 @@ public class RakNetMultiChannel {
 
             // 1.20.5
             "net/minecraft/class_9632", // ProjectilePowerS2CPacket
+
+            "net/minecraft/class_11984", // EntityValueDebugS2CPacket
+            "net/minecraft/class_11985", // EventDebugS2CPacket
     });
 
     // Primarily used for interactions dependent to world
@@ -354,6 +357,11 @@ public class RakNetMultiChannel {
             "net/minecraft/class_10387", // PlayerLoadedC2SPacket
 
             "net/minecraft/class_10614", // TestInstanceBlockStatusS2CPacket
+
+            "net/minecraft/class_11982", // BlockValueDebugS2CPacket
+            "net/minecraft/class_11983", // ChunkValueDebugS2CPacket
+            "net/minecraft/class_11986", // GameTestHighlightPosS2CPacket
+
     });
 
     private static final Set<Class<?>> unreliable = createClassSet(new String[]{

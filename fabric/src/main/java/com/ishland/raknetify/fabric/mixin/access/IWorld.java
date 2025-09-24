@@ -22,29 +22,16 @@
  * THE SOFTWARE.
  */
 
-package com.ishland.raknetify.fabric.mixin.common.quirks;
+package com.ishland.raknetify.fabric.mixin.access;
 
-import org.spongepowered.asm.mixin.Dynamic;
-import org.spongepowered.asm.mixin.Final;
+import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Pseudo;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
-import java.util.Queue;
+@Mixin(World.class)
+public interface IWorld {
 
-@Pseudo
-@Mixin(targets = "net.minecraft.class_9188")
-public class MixinSampleSubscriptionTracker {
-
-    @Shadow @Final private Queue<?> pendingQueue;
-
-    @Dynamic
-    @Inject(method = "method_56654", at = @At("RETURN"))
-    private void cleanQueue(CallbackInfo ci) {
-        this.pendingQueue.clear();
-    }
+    @Accessor("isClient")
+    boolean raknetify$isClient();
 
 }

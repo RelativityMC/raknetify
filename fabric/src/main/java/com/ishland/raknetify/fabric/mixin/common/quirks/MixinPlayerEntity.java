@@ -25,6 +25,8 @@
 package com.ishland.raknetify.fabric.mixin.common.quirks;
 
 import com.ishland.raknetify.fabric.common.quirks.ClientHungerManager;
+import com.ishland.raknetify.fabric.common.util.LegacySupportUtil;
+import com.ishland.raknetify.fabric.mixin.access.IWorld;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.HungerManager;
@@ -47,7 +49,7 @@ public abstract class MixinPlayerEntity extends LivingEntity {
 
     @Inject(method = "<init>", at = @At("RETURN"), remap = false)
     private void replaceHungerManager(CallbackInfo ci) {
-        if (this.getWorld().isClient) {
+        if (((IWorld) LegacySupportUtil.getEntityWorld(this)).raknetify$isClient()) {
             this.hungerManager = ClientHungerManager.from(this.hungerManager);
         }
     }

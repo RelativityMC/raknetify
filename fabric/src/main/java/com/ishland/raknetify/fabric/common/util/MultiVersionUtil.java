@@ -29,6 +29,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.MappingResolver;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.HungerManager;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.ClientConnection;
@@ -57,6 +58,7 @@ public class MultiVersionUtil {
     private static final String CLASSNAME_ContextAwareNetworkStateFactory = "net.minecraft.class_10947";
     private static final String CLASSNAME_PlayStateFactories = "net.minecraft.class_9095";
     private static final String CLASSNAME_HungerManager = "net.minecraft.class_1702";
+    private static final String CLASSNAME_Entity = "net.minecraft.class_1297";
 
     public static final VarHandle ServerPlayNetworkHandler$connection;
     public static final VarHandle ClientPlayNetworkHandler$connection;
@@ -69,6 +71,7 @@ public class MultiVersionUtil {
     public static final VarHandle PlayStateFactories$S2C1_20_5;
     public static final MethodHandle HungerManager$writeNbt1_21_5;
     public static final MethodHandle HungerManager$readNbt1_21_5;
+    public static final MethodHandle Entity$getEntity1_21_8;
 
     static {
         try {
@@ -205,6 +208,18 @@ public class MultiVersionUtil {
                             .unreflect(readNbt1_21_5);
                 } else {
                     HungerManager$readNbt1_21_5 = null;
+                }
+            }
+
+            {
+                final Method getEntity1_21_8 = getOrNull(() -> Entity.class.getDeclaredMethod(resolver.mapFieldName(INTERMEDIARY, CLASSNAME_Entity, "method_37908", "()Lnet/minecraft/class_1937;")), NoSuchMethodException.class);
+                if (getEntity1_21_8 != null) {
+                    getEntity1_21_8.setAccessible(true);
+                    Entity$getEntity1_21_8 = MethodHandles
+                            .privateLookupIn(Entity.class, MethodHandles.lookup())
+                            .unreflect(getEntity1_21_8);
+                } else {
+                    Entity$getEntity1_21_8 = null;
                 }
             }
 

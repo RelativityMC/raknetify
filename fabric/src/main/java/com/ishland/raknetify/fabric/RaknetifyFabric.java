@@ -27,6 +27,7 @@ package com.ishland.raknetify.fabric;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.ishland.raknetify.common.data.ProtocolMultiChannelMappings;
+import com.ishland.raknetify.fabric.common.client.DebugHudUtil1_21_9;
 import com.ishland.raknetify.fabric.common.connection.RakNetMultiChannel;
 import com.ishland.raknetify.common.util.NetworkInterfaceListener;
 import com.ishland.raknetify.fabric.common.util.FieldSignatureParser;
@@ -45,6 +46,7 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import net.fabricmc.api.EnvType;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.entrypoint.PreLaunchEntrypoint;
@@ -101,6 +103,10 @@ public class RaknetifyFabric implements ModInitializer, PreLaunchEntrypoint {
             auditMixins();
 
         handleMappings();
+
+        if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT && RaknetifyFabricMixinPlugin.AFTER_1_21_8) {
+            DebugHudUtil1_21_9.init();
+        }
 
         // If new property name is present, use it
         String levelStr = SystemPropertyUtil.get("io.netty.leakDetection.level", ResourceLeakDetector.Level.SIMPLE.name());
