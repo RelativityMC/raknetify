@@ -161,7 +161,7 @@ curseforge {
 
                 changelog {
                     format = io.github.themrmilchmann.gradle.publish.curseforge.ChangelogFormat.MARKDOWN
-                    from(com.ishland.buildscript.ParseGitHubActionChangelog.getChangelog())
+                    from(com.ishland.buildscript.ParseGItHubActionChangelog.getChangelog())
                 }
             }
         }
