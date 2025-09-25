@@ -1,11 +1,13 @@
 evaluationDependsOn(":")
 
 apply plugin: 'fabric-loom'
-apply plugin: 'com.github.johnrengelman.shadow'
+apply plugin: 'com.gradleup.shadow'
 apply plugin: 'com.modrinth.minotaur'
-apply plugin: 'com.matthewprenger.cursegradle'
+apply plugin: 'io.github.themrmilchmann.curseforge-publish'
 
-archivesBaseName = project.archives_base_name + "-fabric"
+base {
+    archivesName = project.archives_base_name + "-fabric"
+}
 group = project.maven_group + ".fabric"
 
 configurations {
@@ -109,55 +111,59 @@ modrinth {
 	loaders = ["fabric", "quilt"]
 }
 
-if (System.getenv("CURSEFORGE_TOKEN")) {
-	curseforge {
-		apiKey = System.getenv("CURSEFORGE_TOKEN")
-		project {
-			id = '631457'
-			changelogType = "markdown"
-			changelog = com.ishland.buildscript.ParseGItHubActionChangelog.getChangelog()
-			releaseType = 'alpha'
+curseforge {
+    apiToken = System.getenv("CURSEFORGE_TOKEN")
+    publications {
+        register("main") {
+            projectId = "631457"
 
-			addGameVersion "1.17"
-			addGameVersion "1.17.1"
-			addGameVersion "1.18"
-			addGameVersion "1.18.1"
-			addGameVersion "1.18.2"
-			addGameVersion "1.19"
-			addGameVersion "1.19.1"
-			addGameVersion "1.19.2"
-			addGameVersion "1.19.3"
-			addGameVersion "1.19.4"
-			addGameVersion "1.20"
-			addGameVersion "1.20.1"
-			addGameVersion "1.20.2"
-			addGameVersion "1.20.3"
-			addGameVersion "1.20.4"
-			addGameVersion "1.20.5"
-			addGameVersion "1.20.6"
-			addGameVersion "1.21"
-			addGameVersion "1.21.1"
-			addGameVersion "1.21.2"
-			addGameVersion "1.21.3"
-			addGameVersion "1.21.4"
-			addGameVersion "1.21.5"
-			addGameVersion "1.21.6"
-			addGameVersion "1.21.7"
-			addGameVersion "1.21.8"
-			addGameVersion "Fabric"
-			addGameVersion "Java 17"
-			addGameVersion "Java 18"
-			addGameVersion "Java 19"
-			addGameVersion "Java 20"
-			addGameVersion "Java 21"
-			addGameVersion "Java 22"
+            gameVersion("minecraft-1-17", "1.17")
+            gameVersion("minecraft-1-17", "1.17.1")
+            gameVersion("minecraft-1-18", "1.18")
+            gameVersion("minecraft-1-18", "1.18.1")
+            gameVersion("minecraft-1-18", "1.18.2")
+            gameVersion("minecraft-1-19", "1.19")
+            gameVersion("minecraft-1-19", "1.19.1")
+            gameVersion("minecraft-1-19", "1.19.2")
+            gameVersion("minecraft-1-19", "1.19.3")
+            gameVersion("minecraft-1-19", "1.19.4")
+            gameVersion("minecraft-1-20", "1.20")
+            gameVersion("minecraft-1-20", "1.20.1")
+            gameVersion("minecraft-1-20", "1.20.2")
+            gameVersion("minecraft-1-20", "1.20.3")
+            gameVersion("minecraft-1-20", "1.20.4")
+            gameVersion("minecraft-1-20", "1.20.5")
+            gameVersion("minecraft-1-20", "1.20.6")
+            gameVersion("minecraft-1-21", "1.21")
+            gameVersion("minecraft-1-21", "1.21.1")
+            gameVersion("minecraft-1-21", "1.21.2")
+            gameVersion("minecraft-1-21", "1.21.3")
+            gameVersion("minecraft-1-21", "1.21.4")
+            gameVersion("minecraft-1-21", "1.21.5")
+            gameVersion("minecraft-1-21", "1.21.6")
+            gameVersion("minecraft-1-21", "1.21.7")
+            gameVersion("minecraft-1-21", "1.21.8")
+            gameVersion("modloader", "fabric")
+            gameVersion("java", "Java 22")
+            gameVersion("java", "Java 21")
+            gameVersion("java", "Java 20")
+            gameVersion("java", "Java 19")
+            gameVersion("java", "Java 18")
+            gameVersion("java", "Java 17")
+            gameVersion("environment", "Server")
+            gameVersion("environment", "Client")
 
-			mainArtifact(remapShadowJar) {
-				displayName = project.version + " devbuild"
-			}
-		}
-		options {
-			forgeGradleIntegration = false
-		}
-	}
+            artifacts.register("main") {
+                from(remapShadowJar)
+
+                displayName = project.version + " devbuild"
+                releaseType = io.github.themrmilchmann.gradle.publish.curseforge.ReleaseType.ALPHA
+
+                changelog {
+                    format = io.github.themrmilchmann.gradle.publish.curseforge.ChangelogFormat.MARKDOWN
+                    from(com.ishland.buildscript.ParseGitHubActionChangelog.getChangelog())
+                }
+            }
+        }
+    }
 }

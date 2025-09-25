@@ -1,24 +1,26 @@
 plugins {
 	id 'fabric-loom' version '1.11-SNAPSHOT' apply false
-	id 'com.github.johnrengelman.shadow' version '7.1.0' apply false
-	id 'org.cadixdev.licenser' version '0.6.1' apply false
+	id 'com.gradleup.shadow' version '9.2.1' apply false
+	id 'dev.yumi.gradle.licenser' version '2.1.1' apply false
 	id 'com.modrinth.minotaur' version '2.+' apply false
-	id 'com.matthewprenger.cursegradle' version '1.4.0' apply false
+	id 'io.github.themrmilchmann.curseforge-publish' version '0.8.0' apply false
 }
 
 subprojects {
 	apply plugin: 'java'
 	apply plugin: 'java-library'
 	apply plugin: 'maven-publish'
-	apply plugin: 'org.cadixdev.licenser'
+	apply plugin: 'dev.yumi.gradle.licenser'
 
-	sourceCompatibility = JavaVersion.VERSION_17
-	targetCompatibility = JavaVersion.VERSION_17
+	java {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
 
 	version = project.mod_version + "." + getVersionSuffix()
 
 	license {
-		header = rootProject.file('HEADER.txt')
+		rule(rootProject.file('HEADER.txt'))
 	}
 
 	repositories {
@@ -74,11 +76,9 @@ afterEvaluate {
 }
 
 String getVersionSuffix() {
-	def stdout = new ByteArrayOutputStream()
-	exec {
-		commandLine 'git', 'describe', '--tags', '--dirty'
-		standardOutput = stdout
-	}
+    def stdout = providers.exec {
+        commandLine 'git', 'describe', '--tags', '--dirty', '--broken'
+    }.standardOutput.asText.get()
 	stdout = stdout.toString().strip()
 	def suffix = ""
 	if (stdout.endsWith("-dirty")) {

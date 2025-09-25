@@ -4,16 +4,18 @@ import java.nio.file.StandardCopyOption
 
 evaluationDependsOn(":")
 
-apply plugin: 'com.github.johnrengelman.shadow'
+apply plugin: 'com.gradleup.shadow'
 apply plugin: 'com.modrinth.minotaur'
 
 afterEvaluate {
     license {
-        header = project.file('HEADER.txt')
+        rule(project.file('HEADER.txt'))
     }
 }
 
-archivesBaseName = project.archives_base_name + "-velocity"
+base {
+    archivesName = project.archives_base_name + "-velocity"
+}
 group = project.maven_group + ".velocity"
 
 repositories {

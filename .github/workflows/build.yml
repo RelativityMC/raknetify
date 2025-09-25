@@ -43,7 +43,7 @@ jobs:
       - name: build
         run: ./gradlew build
       - name: upload to modrinth and curseforge
-        run: ./gradlew modrinth curseforge
+        run: ./gradlew modrinth publishMainPublicationToCurseForge
         if: github.ref == 'refs/heads/master'
         env:
           MODRINTH_TOKEN: ${{ secrets.MODRINTH_UPLOAD_TOKEN }}

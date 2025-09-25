@@ -3,10 +3,12 @@ import java.nio.file.StandardCopyOption
 
 evaluationDependsOn(":")
 
-apply plugin: 'com.github.johnrengelman.shadow'
+apply plugin: 'com.gradleup.shadow'
 apply plugin: 'com.modrinth.minotaur'
 
-archivesBaseName = project.archives_base_name + "-bungee"
+base {
+    archivesName = project.archives_base_name + "-bungee"
+}
 group = project.maven_group + ".bungee"
 
 repositories {
