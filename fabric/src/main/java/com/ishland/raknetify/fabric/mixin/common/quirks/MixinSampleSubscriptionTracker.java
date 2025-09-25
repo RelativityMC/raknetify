@@ -39,7 +39,7 @@ import java.util.Queue;
 @Mixin(targets = "net.minecraft.class_9188")
 public class MixinSampleSubscriptionTracker {
 
-    @Shadow @Final private Queue<?> pendingQueue;
+    @Shadow(aliases = "field_48812") @Final private Queue<?> pendingQueue;
 
     @Dynamic
     @Inject(method = "method_56654", at = @At("RETURN"))
