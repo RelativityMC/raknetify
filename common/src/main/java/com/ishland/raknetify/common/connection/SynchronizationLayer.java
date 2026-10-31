@@ -200,6 +200,7 @@ public class SynchronizationLayer extends ChannelDuplexHandler {
                     FIELD_RELIABILITY_LAST_RECEIVED_SEQ_ID.set(this.reliabilityHandler, seqId);
                 } finally {
                     byteBuf.release();
+                    packet.release();
                 }
             }
             return;
