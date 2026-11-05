@@ -236,7 +236,7 @@ import net.minecraft.network.protocol.game.ServerboundUseItemPacket;
 import net.minecraft.network.protocol.ping.ClientboundPongResponsePacket;
 import net.minecraft.network.protocol.ping.ServerboundPingRequestPacket;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
-import net.fabricmc.loader.api.FabricLoader;
+import com.ishland.raknetify.fabric.common.util.MinecraftVersions;
 
 import java.util.Set;
 
@@ -501,17 +501,17 @@ public class RakNetMultiChannel {
         channel7.forEach(clazz -> classToChannelIdOverride.put(clazz, 7));
         unreliable.forEach(clazz -> classToChannelIdOverride.put(clazz, -2));
         theVoid.forEach(clazz -> classToChannelIdOverride.put(clazz, Integer.MIN_VALUE));
-        if (!atLeast("26.3")) {
+        if (!MinecraftVersions.AT_LEAST_26_3) {
             addEarlierPacket("ServerboundSwingPacket", 2);
         }
-        if (!atLeast("26.2")) {
+        if (!MinecraftVersions.AT_LEAST_26_2) {
             addEarlierPacket("ServerboundSpectateEntityPacket", 3);
         }
-        if (atLeast("26.3")) classToChannelIdOverride.put(ServerboundPunchPacket.class, 2);
-        if (atLeast("26.3")) classToChannelIdOverride.put(ClientboundSwingAnimationPacket.class, 2);
-        if (atLeast("26.2")) classToChannelIdOverride.put(ServerboundSpectatorActionPacket.class, 3);
-        if (atLeast("26.3")) classToChannelIdOverride.put(ClientboundPostEffectsPacket.class, 4);
-        if (atLeast("26.3")) classToChannelIdOverride.put(ClientboundAddTransientBlockPacket.class, 7);
+        if (MinecraftVersions.AT_LEAST_26_3) classToChannelIdOverride.put(ServerboundPunchPacket.class, 2);
+        if (MinecraftVersions.AT_LEAST_26_3) classToChannelIdOverride.put(ClientboundSwingAnimationPacket.class, 2);
+        if (MinecraftVersions.AT_LEAST_26_2) classToChannelIdOverride.put(ServerboundSpectatorActionPacket.class, 3);
+        if (MinecraftVersions.AT_LEAST_26_3) classToChannelIdOverride.put(ClientboundPostEffectsPacket.class, 4);
+        if (MinecraftVersions.AT_LEAST_26_3) classToChannelIdOverride.put(ClientboundAddTransientBlockPacket.class, 7);
     }
 
     private static void addEarlierPacket(String name, int channel) {
@@ -521,15 +521,6 @@ public class RakNetMultiChannel {
             classToChannelIdOverride.put(packet, channel);
         } catch (ClassNotFoundException e) {
             throw new IllegalStateException("Missing expected packet " + name, e);
-        }
-    }
-
-    private static boolean atLeast(String version) {
-        try {
-            return net.fabricmc.loader.api.metadata.version.VersionPredicate.parse(">=" + version)
-                    .test(FabricLoader.getInstance().getModContainer("minecraft").orElseThrow().getMetadata().getVersion());
-        } catch (net.fabricmc.loader.api.VersionParsingException e) {
-            throw new IllegalArgumentException(version, e);
         }
     }
 

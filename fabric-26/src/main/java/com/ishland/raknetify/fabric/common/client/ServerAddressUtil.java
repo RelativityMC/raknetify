@@ -24,7 +24,7 @@
 
 package com.ishland.raknetify.fabric.common.client;
 
-import com.ishland.raknetify.fabric.mixin.RaknetifyFabricMixinPlugin;
+import com.ishland.raknetify.fabric.common.util.MinecraftVersions;
 import net.minecraft.client.multiplayer.resolver.ServerAddress;
 
 public final class ServerAddressUtil {
@@ -33,7 +33,7 @@ public final class ServerAddressUtil {
     }
 
     public static ServerAddress withAddress(ServerAddress original, String host, int port) {
-        if (!RaknetifyFabricMixinPlugin.IS_26_4_SNAPSHOT) return new ServerAddress(host, port);
+        if (!MinecraftVersions.IS_26_4_SNAPSHOT) return new ServerAddress(host, port);
         try {
             return (ServerAddress) ServerAddress.class.getMethod("withHostAndPort", String.class, int.class)
                     .invoke(original, host, port);

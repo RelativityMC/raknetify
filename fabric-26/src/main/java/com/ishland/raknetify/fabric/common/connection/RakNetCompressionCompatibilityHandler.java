@@ -24,7 +24,7 @@
 
 package com.ishland.raknetify.fabric.common.connection;
 
-import com.ishland.raknetify.fabric.mixin.RaknetifyFabricMixinPlugin;
+import com.ishland.raknetify.fabric.common.util.MinecraftVersions;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPromise;
@@ -34,7 +34,7 @@ public class RakNetCompressionCompatibilityHandler extends ChannelDuplexHandler 
 
     @Override
     public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
-        boolean setupCompression = RaknetifyFabricMixinPlugin.IS_26_4_SNAPSHOT
+        boolean setupCompression = MinecraftVersions.IS_26_4_SNAPSHOT
                 ? msg.getClass().getName().equals("net.minecraft.network.protocol.login.ClientboundSetupCompressionPacket")
                 : msg instanceof ClientboundLoginCompressionPacket;
         if (setupCompression) {

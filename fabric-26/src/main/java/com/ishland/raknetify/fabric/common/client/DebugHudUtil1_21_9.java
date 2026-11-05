@@ -25,7 +25,7 @@
 package com.ishland.raknetify.fabric.common.client;
 
 import com.ishland.raknetify.fabric.mixin.access.IDebugHudEntries;
-import com.ishland.raknetify.fabric.mixin.RaknetifyFabricMixinPlugin;
+import com.ishland.raknetify.fabric.common.util.MinecraftVersions;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -51,7 +51,7 @@ public class DebugHudUtil1_21_9 {
         return new DebugScreenEntry() {
             @Override
             public void display(DebugScreenDisplayer lines, @Nullable Level world, @Nullable LevelChunk clientChunk, @Nullable LevelChunk chunk) {
-                if (RaknetifyFabricMixinPlugin.IS_26_4_SNAPSHOT) {
+                if (MinecraftVersions.IS_26_4_SNAPSHOT) {
                     DebugHudUtil.getDebugString(s -> DebugHudLines26_4.addLine(lines, s));
                 } else {
                     DebugHudUtil.getDebugString(s -> lines.addToGroup(ID, s));
