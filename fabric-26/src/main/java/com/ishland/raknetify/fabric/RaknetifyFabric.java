@@ -28,6 +28,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.ishland.raknetify.common.data.ProtocolMultiChannelMappings;
 import com.ishland.raknetify.fabric.common.client.DebugHudUtil1_21_9;
+import com.ishland.raknetify.fabric.mixin.RaknetifyFabricMixinPlugin;
 import com.ishland.raknetify.fabric.common.connection.RakNetMultiChannel;
 import com.ishland.raknetify.common.util.NetworkInterfaceListener;
 import com.ishland.raknetify.fabric.common.util.FieldSignatureParser;
@@ -94,7 +95,7 @@ public class RaknetifyFabric implements ModInitializer, PreLaunchEntrypoint {
 
         handleMappings();
 
-        if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
+        if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT && !RaknetifyFabricMixinPlugin.IS_26_4_SNAPSHOT) {
             DebugHudUtil1_21_9.init();
         }
 

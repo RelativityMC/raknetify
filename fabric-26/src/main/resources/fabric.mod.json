@@ -31,7 +31,7 @@
 
   "depends": {
     "fabricloader": "${loader}",
-    "minecraft": "${minecraft}",
+    "minecraft": ["${minecraft}", "26.4-alpha.7"],
     "java": "${java}"
   },
   "suggests": {

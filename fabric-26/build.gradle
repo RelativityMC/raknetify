@@ -21,7 +21,7 @@ dependencies {
 
 processResources {
     inputs.property 'version', project.version
-    inputs.property 'minecraft', '>=26.1 <26.4'
+    inputs.property 'minecraft', '>=26.1 <=26.3'
     filesMatching('fabric.mod.json') {
         expand version: project.version, minecraft: inputs.properties.minecraft,
                 loader: '>=0.19.5', java: '>=25'

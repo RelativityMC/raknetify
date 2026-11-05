@@ -45,7 +45,7 @@ public class MixinServerLoginNetworkHandler {
     @Shadow @Final private MinecraftServer server;
 
     @Dynamic
-    @Redirect(method = "verifyLoginAndFinishConnectionSetup", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;getCompressionThreshold()I"), require = 1)
+    @Redirect(method = {"verifyLoginAndFinishConnectionSetup", "<init>"}, at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;getCompressionThreshold()I"), require = 1)
     private int stopCompressionIfStreamingCompressionExists(MinecraftServer server) {
         final MultiChannelingStreamingCompression compression = ((IClientConnection) this.connection).getChannel().pipeline().get(MultiChannelingStreamingCompression.class);
         if (compression != null && compression.isActive()) {

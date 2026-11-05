@@ -25,6 +25,7 @@
 package com.ishland.raknetify.fabric.common.client;
 
 import com.ishland.raknetify.fabric.mixin.access.IDebugHudEntries;
+import com.ishland.raknetify.fabric.mixin.RaknetifyFabricMixinPlugin;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -38,21 +39,30 @@ public class DebugHudUtil1_21_9 {
 
     private static final AtomicBoolean initialized = new AtomicBoolean(false);
 
+    public static final Identifier ID = Identifier.fromNamespaceAndPath("raknetify", "raknetify_debug_info");
+
     public static void init() {
         if (!initialized.compareAndSet(false, true)) return;
 
-        Identifier identifier = Identifier.fromNamespaceAndPath("raknetify", "raknetify_debug_info");
-        IDebugHudEntries.invokeRegister(identifier, new DebugScreenEntry() {
+        IDebugHudEntries.invokeRegister(ID, createEntry());
+    }
+
+    public static DebugScreenEntry createEntry() {
+        return new DebugScreenEntry() {
             @Override
             public void display(DebugScreenDisplayer lines, @Nullable Level world, @Nullable LevelChunk clientChunk, @Nullable LevelChunk chunk) {
-                DebugHudUtil.getDebugString(s -> lines.addToGroup(identifier, s));
+                if (RaknetifyFabricMixinPlugin.IS_26_4_SNAPSHOT) {
+                    DebugHudUtil.getDebugString(s -> DebugHudLines26_4.addLine(lines, s));
+                } else {
+                    DebugHudUtil.getDebugString(s -> lines.addToGroup(ID, s));
+                }
             }
 
             @Override
             public boolean isAllowed(boolean reducedDebugInfo) {
                 return true;
             }
-        });
+        };
     }
 
 }

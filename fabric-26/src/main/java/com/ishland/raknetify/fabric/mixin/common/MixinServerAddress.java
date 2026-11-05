@@ -26,6 +26,7 @@ package com.ishland.raknetify.fabric.mixin.common;
 
 import com.ishland.raknetify.common.Constants;
 import com.ishland.raknetify.common.util.PrefixUtil;
+import com.ishland.raknetify.fabric.common.client.ServerAddressUtil;
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import net.minecraft.client.multiplayer.resolver.ServerAddress;
@@ -39,7 +40,7 @@ public class MixinServerAddress {
         PrefixUtil.Info info = PrefixUtil.getInfo(address);
         if (info.useRakNet()) {
             ServerAddress addr = original.call(info.stripped());
-            return new ServerAddress(
+            return ServerAddressUtil.withAddress(addr,
                     (info.largeMTU() ? Constants.RAKNET_LARGE_MTU_PREFIX : Constants.RAKNET_PREFIX) + addr.getHost(),
                     addr.getPort()
             );
