@@ -50,7 +50,8 @@ def check_tcp(port, version):
         size = read_varint(stream)
         assert 0 < size < length
         status = json.loads(stream.read(size))
-        assert status['version']['name'] == version, status
+        assert status['version']['name'] == version.replace('-snapshot-', ' Snapshot '), status
+        assert status['version']['protocol'] == PROTOCOLS[version], status
 
 
 def check_udp(port):
