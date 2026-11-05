@@ -49,8 +49,7 @@ jobs:
         run: ./genMappings.sh
       - name: fail if mappings changed
         run: |
-          git update-index --refresh
-          if ! git diff-index --quiet HEAD --; then
+          if ! git diff --exit-code --; then
               echo "Mappings changed, please commit them"
               git diff
               git diff --staged
