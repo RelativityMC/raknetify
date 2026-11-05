@@ -1,5 +1,6 @@
 plugins {
 	id 'fabric-loom' version '1.17.21' apply false
+	id 'net.fabricmc.fabric-loom' version '1.17.21' apply false
 	id 'com.gradleup.shadow' version '9.2.1' apply false
 	id 'dev.yumi.gradle.licenser' version '4.0.0' apply false
 	id 'com.modrinth.minotaur' version '2.+' apply false

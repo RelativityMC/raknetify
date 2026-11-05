@@ -1,1 +1,48 @@
-apply from: rootProject.file('fabric/build.gradle')
+apply plugin: 'net.fabricmc.fabric-loom'
+apply plugin: 'com.gradleup.shadow'
+
+base {
+    archivesName = project.archives_base_name + '-fabric-26'
+}
+
+configurations {
+    shadowInclude
+}
+
+dependencies {
+    minecraft "com.mojang:minecraft:${project.modern_minecraft_version}"
+    implementation "net.fabricmc:fabric-loader:${project.loader_version}"
+    shadowInclude implementation(project(':common'))
+}
+
+processResources {
+    inputs.property 'version', project.version
+    inputs.property 'minecraft', '>=26.1 <26.4'
+    filesMatching('fabric.mod.json') {
+        expand version: project.version, minecraft: inputs.properties.minecraft,
+                loader: '>=0.19.5', java: '>=25'
+    }
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_25
+    targetCompatibility = JavaVersion.VERSION_25
+    withSourcesJar()
+}
+
+loom {
+    accessWidenerPath = file('src/main/resources/raknetify-fabric.accesswidener')
+}
+
+shadowJar {
+    dependencies {
+        exclude(dependency('it.unimi.dsi:fastutil'))
+    }
+    exclude 'META-INF/LICENSE.txt', 'META-INF/NOTICE.txt'
+    minimize()
+    archiveClassifier = 'all'
+    configurations = [project.configurations.shadowInclude]
+    from '../LICENSE'
+}
+
+assemble.dependsOn(shadowJar)
