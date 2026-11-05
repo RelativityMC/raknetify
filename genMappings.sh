@@ -32,15 +32,21 @@ do
     cp ../fabric/build/libs/raknetify-*-all.jar mods/ || exit 1
   fi
 
-  if [ -e fabric-server-mc"$version".jar ]; then
-    echo "Using existing fabric-server-mc$version.jar"
+  launcher="fabric-server-mc${version}-loader${loader_version}-installer${installer_version}.jar"
+  if [ -e "$launcher" ]; then
+    echo "Using existing $launcher"
   else
-    wget -O fabric-server-mc"$version".jar https://meta.fabricmc.net/v2/versions/loader/"$version"/$loader_version/$installer_version/server/jar || exit 1
+    wget -O "$launcher" https://meta.fabricmc.net/v2/versions/loader/"$version"/$loader_version/$installer_version/server/jar || exit 1
   fi
 
   sleep 1
 
-  java -Draknetify.saveChannelMappings=true -Draknetify.saveChannelMappings.exit=true -jar fabric-server-mc"$version".jar || exit 1
+  touch .mapping-generation-start
+  java -Draknetify.saveChannelMappings=true -Draknetify.saveChannelMappings.exit=true -jar "$launcher" || exit 1
+  if [ ! channelMappings.json -nt .mapping-generation-start ]; then
+    echo "Mapping generation did not write output for $version"
+    exit 1
+  fi
 done
 
 cp channelMappings.json ../common/src/main/resources/raknetify-channel-mappings.json
