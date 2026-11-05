@@ -57,9 +57,22 @@ public class MultiChannellingEncryption extends ChannelDuplexHandler {
         this.encryption = new PacketEncryptionManager(Objects.requireNonNull(encryption));
     }
 
+    private MultiChannellingEncryption(PacketEncryptionManager decryption, PacketEncryptionManager encryption) {
+        this.decryption = decryption;
+        this.encryption = encryption;
+    }
+
+    public static MultiChannellingEncryption inbound(Cipher cipher) {
+        return new MultiChannellingEncryption(new PacketEncryptionManager(Objects.requireNonNull(cipher)), null);
+    }
+
+    public static MultiChannellingEncryption outbound(Cipher cipher) {
+        return new MultiChannellingEncryption(null, new PacketEncryptionManager(Objects.requireNonNull(cipher)));
+    }
+
     @Override
     public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
-        if (msg instanceof FrameData data) {
+        if (encryption != null && msg instanceof FrameData data) {
             data.touch();
             final ByteBuf buf = data.createData().skipBytes(1);
             ByteBuf res = null;
@@ -86,7 +99,7 @@ public class MultiChannellingEncryption extends ChannelDuplexHandler {
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        if (msg instanceof FrameData data) {
+        if (decryption != null && msg instanceof FrameData data) {
             data.touch();
             final ByteBuf buf = data.createData().skipBytes(1);
             ByteBuf res = null;
