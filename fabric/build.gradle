@@ -5,12 +5,7 @@ apply plugin: 'com.gradleup.shadow'
 apply plugin: 'com.modrinth.minotaur'
 apply plugin: 'io.github.themrmilchmann.curseforge-publish'
 
-def modernMinecraft = project.name == 'fabric-26'
 def fabricSources = rootProject.file('fabric/src/main')
-if (modernMinecraft) {
-	ext.minecraft_version = project.modern_minecraft_version
-	ext.yarn_mappings = project.modern_yarn_mappings
-}
 
 sourceSets.main {
 	java.setSrcDirs([new File(fabricSources, 'java')])
@@ -18,7 +13,7 @@ sourceSets.main {
 }
 
 base {
-    archivesName = project.archives_base_name + (modernMinecraft ? "-fabric-26" : "-fabric")
+    archivesName = project.archives_base_name + "-fabric"
 }
 group = project.maven_group + ".fabric"
 
@@ -30,19 +25,10 @@ repositories {
 	maven { url 'https://repo.codemc.io/repository/relativitymc/' }
 }
 
-def packetMappingFiles = files()
-if (modernMinecraft) {
-	['26.1', '26.1.1', '26.1.2', '26.2'].each {
-		def mapping = configurations.detachedConfiguration(dependencies.create("org.relativitymc:intermediary:${it}:v2"))
-		mapping.transitive = false
-		packetMappingFiles.from(mapping)
-	}
-}
-
 dependencies {
 	// To change the versions see the gradle.properties file
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
-	mappings "${modernMinecraft ? 'org.relativitymc:modern-yarn' : 'net.fabricmc:yarn'}:${project.yarn_mappings}:v2"
+	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
 	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
 	shadowInclude implementation(project(":common"))
@@ -53,9 +39,9 @@ dependencies {
 
 processResources {
 	inputs.property "version", project.version
-	inputs.property "minecraft", modernMinecraft ? '>=26.1 <26.4' : '>=1.18 <26'
-	inputs.property "java", modernMinecraft ? '>=25' : '>=17'
-	inputs.property "loader", modernMinecraft ? '>=0.19.5' : '>=0.15.2'
+	inputs.property "minecraft", '>=1.18 <26'
+	inputs.property "java", '>=17'
+	inputs.property "loader", '>=0.15.2'
 
 	filesMatching("fabric.mod.json") {
 		expand "version": project.version,
@@ -70,15 +56,11 @@ def packetNames = tasks.register('generatePacketNames') {
 	def output = layout.buildDirectory.file('generated/packetNames/raknetify-packet-names.properties')
 	inputs.file(packetSource)
 	inputs.file(provider { loom.mappingConfiguration.tinyMappings.toFile() })
-	inputs.files(packetMappingFiles)
 	outputs.file(output)
 	doLast {
 		def classes = (packetSource.text =~ 'net/minecraft/class_[0-9_]+(?:\\$class_[0-9_]+)*').collect().toSet()
 		def names = new TreeMap<String, Set<String>>()
 		def mappingFiles = [loom.mappingConfiguration.tinyMappings.toFile()]
-		packetMappingFiles.each {
-			mappingFiles.addAll(zipTree(it).matching { include 'mappings/mappings.tiny' }.files)
-		}
 		mappingFiles.each { mappingFile ->
 			mappingFile.eachLine('UTF-8') { line ->
 				def fields = line.split('\t')
@@ -111,10 +93,6 @@ java {
 }
 
 loom {
-	if (modernMinecraft) {
-		intermediaryUrl = 'https://repo.codemc.io/repository/relativitymc/org/relativitymc/intermediary/%1$s/intermediary-%1$s-v2.jar'
-		useIntermediateMappings = true
-	}
 	accessWidenerPath = new File(fabricSources, 'resources/raknetify-fabric.accesswidener')
 	runs {
 		server {
@@ -188,48 +166,39 @@ curseforge {
         register("main") {
             projectId = "631457"
 
-            if (modernMinecraft) {
-                gameVersion("minecraft-26-1", "26-1")
-                gameVersion("minecraft-26-1", "26-1-1")
-                gameVersion("minecraft-26-1", "26-1-2")
-                gameVersion("minecraft-26-2", "26-2")
-                gameVersion("minecraft-26-3", "26-3")
-                gameVersion("java", "java-25")
-            } else {
-                gameVersion("minecraft-1-18", "1-18")
-                gameVersion("minecraft-1-18", "1-18-1")
-                gameVersion("minecraft-1-18", "1-18-2")
-                gameVersion("minecraft-1-19", "1-19")
-                gameVersion("minecraft-1-19", "1-19-1")
-                gameVersion("minecraft-1-19", "1-19-2")
-                gameVersion("minecraft-1-19", "1-19-3")
-                gameVersion("minecraft-1-19", "1-19-4")
-                gameVersion("minecraft-1-20", "1-20")
-                gameVersion("minecraft-1-20", "1-20-1")
-                gameVersion("minecraft-1-20", "1-20-2")
-                gameVersion("minecraft-1-20", "1-20-3")
-                gameVersion("minecraft-1-20", "1-20-4")
-                gameVersion("minecraft-1-20", "1-20-5")
-                gameVersion("minecraft-1-20", "1-20-6")
-                gameVersion("minecraft-1-21", "1-21")
-                gameVersion("minecraft-1-21", "1-21-1")
-                gameVersion("minecraft-1-21", "1-21-2")
-                gameVersion("minecraft-1-21", "1-21-3")
-                gameVersion("minecraft-1-21", "1-21-4")
-                gameVersion("minecraft-1-21", "1-21-5")
-                gameVersion("minecraft-1-21", "1-21-6")
-                gameVersion("minecraft-1-21", "1-21-7")
-                gameVersion("minecraft-1-21", "1-21-8")
-                gameVersion("minecraft-1-21", "1-21-9")
-                gameVersion("minecraft-1-21", "1-21-10")
-                gameVersion("minecraft-1-21", "1-21-11")
-                gameVersion("java", "java-22")
-                gameVersion("java", "java-21")
-                gameVersion("java", "java-20")
-                gameVersion("java", "java-19")
-                gameVersion("java", "java-18")
-                gameVersion("java", "java-17")
-            }
+            gameVersion("minecraft-1-18", "1-18")
+            gameVersion("minecraft-1-18", "1-18-1")
+            gameVersion("minecraft-1-18", "1-18-2")
+            gameVersion("minecraft-1-19", "1-19")
+            gameVersion("minecraft-1-19", "1-19-1")
+            gameVersion("minecraft-1-19", "1-19-2")
+            gameVersion("minecraft-1-19", "1-19-3")
+            gameVersion("minecraft-1-19", "1-19-4")
+            gameVersion("minecraft-1-20", "1-20")
+            gameVersion("minecraft-1-20", "1-20-1")
+            gameVersion("minecraft-1-20", "1-20-2")
+            gameVersion("minecraft-1-20", "1-20-3")
+            gameVersion("minecraft-1-20", "1-20-4")
+            gameVersion("minecraft-1-20", "1-20-5")
+            gameVersion("minecraft-1-20", "1-20-6")
+            gameVersion("minecraft-1-21", "1-21")
+            gameVersion("minecraft-1-21", "1-21-1")
+            gameVersion("minecraft-1-21", "1-21-2")
+            gameVersion("minecraft-1-21", "1-21-3")
+            gameVersion("minecraft-1-21", "1-21-4")
+            gameVersion("minecraft-1-21", "1-21-5")
+            gameVersion("minecraft-1-21", "1-21-6")
+            gameVersion("minecraft-1-21", "1-21-7")
+            gameVersion("minecraft-1-21", "1-21-8")
+            gameVersion("minecraft-1-21", "1-21-9")
+            gameVersion("minecraft-1-21", "1-21-10")
+            gameVersion("minecraft-1-21", "1-21-11")
+            gameVersion("java", "java-22")
+            gameVersion("java", "java-21")
+            gameVersion("java", "java-20")
+            gameVersion("java", "java-19")
+            gameVersion("java", "java-18")
+            gameVersion("java", "java-17")
             gameVersion("modloader", "fabric")
             gameVersion("environment", "server")
             gameVersion("environment", "client")

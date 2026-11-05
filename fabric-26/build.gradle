@@ -1,9 +1,13 @@
 apply plugin: 'net.fabricmc.fabric-loom'
 apply plugin: 'com.gradleup.shadow'
+apply plugin: 'com.modrinth.minotaur'
+apply plugin: 'io.github.themrmilchmann.curseforge-publish'
 
 base {
     archivesName = project.archives_base_name + '-fabric-26'
 }
+
+group = project.maven_group + ".fabric"
 
 configurations {
     shadowInclude
@@ -46,3 +50,45 @@ shadowJar {
 }
 
 assemble.dependsOn(shadowJar)
+
+jar {
+    from "../LICENSE"
+}
+
+modrinth {
+	versionNumber = project.version
+	versionName = project.version + " devbuild"
+	uploadFile = shadowJar
+	loaders = ["fabric", "quilt"]
+}
+
+curseforge {
+    apiToken = System.getenv("CURSEFORGE_TOKEN")
+    publications {
+        register("main") {
+            projectId = "631457"
+
+            gameVersion("minecraft-26-1", "26-1")
+            gameVersion("minecraft-26-1", "26-1-1")
+            gameVersion("minecraft-26-1", "26-1-2")
+            gameVersion("minecraft-26-2", "26-2")
+            gameVersion("minecraft-26-3", "26-3")
+            gameVersion("java", "java-25")
+            gameVersion("modloader", "fabric")
+            gameVersion("environment", "server")
+            gameVersion("environment", "client")
+
+            artifacts.register("main") {
+                from(shadowJar)
+
+                displayName = project.version + " devbuild"
+                releaseType = rootProject.curseforgeAlpha
+
+                changelog {
+                    format = rootProject.curseforgeMarkdown
+                    from(com.ishland.buildscript.ParseGItHubActionChangelog.getChangelog())
+                }
+            }
+        }
+    }
+}
