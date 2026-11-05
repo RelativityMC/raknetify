@@ -53,6 +53,7 @@ public class MixinClientConnection26_4 {
     private void enableOutboundEncryption(Cipher cipher, CallbackInfo ci) {
         if (this.channel.config() instanceof RakNet.Config) {
             ci.cancel();
+            // Outbound traversal runs in reverse, so addBefore encrypts the frames after streaming compression.
             this.channel.pipeline().addBefore(MultiChannelingStreamingCompression.NAME,
                     MultiChannellingEncryption.NAME + "-outbound", MultiChannellingEncryption.outbound(cipher));
         }

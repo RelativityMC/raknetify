@@ -44,6 +44,7 @@ public class MixinServerLoginNetworkHandler {
 
     @Shadow @Final private MinecraftServer server;
 
+    // Compression setup moved into the constructor in the snapshot, so both locations share this redirect.
     @Dynamic
     @Redirect(method = {"verifyLoginAndFinishConnectionSetup", "<init>"}, at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;getCompressionThreshold()I"), require = 1)
     private int stopCompressionIfStreamingCompressionExists(MinecraftServer server) {

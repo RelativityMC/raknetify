@@ -35,6 +35,7 @@ public final class ServerAddressUtil {
     public static ServerAddress withAddress(ServerAddress original, String host, int port) {
         if (!MinecraftVersions.IS_26_4_SNAPSHOT) return new ServerAddress(host, port);
         try {
+            // Resolve the snapshot copy method at runtime to preserve query properties while compiling against 26.3.
             return (ServerAddress) ServerAddress.class.getMethod("withHostAndPort", String.class, int.class)
                     .invoke(original, host, port);
         } catch (ReflectiveOperationException exception) {

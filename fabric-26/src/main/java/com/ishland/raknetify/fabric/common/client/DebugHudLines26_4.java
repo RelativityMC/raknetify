@@ -27,12 +27,14 @@ package com.ishland.raknetify.fabric.common.client;
 import net.minecraft.client.gui.components.debug.DebugScreenDisplayer;
 import java.lang.reflect.Method;
 
+// Load this adapter only on the snapshot, where DebugGroup replaces the identifier-based grouping API.
 final class DebugHudLines26_4 {
     private static final Object GROUP;
     private static final Method ADD_LINE;
 
     static {
         try {
+            // Cache the reflected API once because debug lines are emitted on every HUD update.
             Class<?> builderClass = Class.forName("net.minecraft.client.gui.components.debug.DebugGroup$Builder");
             Object builder = builderClass.getMethod("titled", String.class).invoke(null, "Raknetify");
             GROUP = builderClass.getMethod("build").invoke(builder);

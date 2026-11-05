@@ -36,6 +36,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(DebugScreenEntries.class)
 public class MixinDebugHudEntries26_4 {
 
+    // Register through the snapshot's registry bootstrap instead of the removed static registration API.
     @Inject(method = "bootstrap", at = @At("RETURN"))
     private static void registerDebugEntry(Registry<DebugScreenEntry> registry, CallbackInfoReturnable<Object> ci) {
         Registry.register(registry, DebugHudUtil1_21_9.ID, DebugHudUtil1_21_9.createEntry());

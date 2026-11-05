@@ -36,6 +36,7 @@ public final class MinecraftVersions {
 
     public static final boolean AT_LEAST_26_2 = matches(">=26.2");
     public static final boolean AT_LEAST_26_3 = matches(">=26.3");
+    // Keep this exact snapshot predicate aligned with the Minecraft dependency in fabric.mod.json.
     public static final boolean IS_26_4_SNAPSHOT = matches("26.4-alpha.7");
 
     private MinecraftVersions() {

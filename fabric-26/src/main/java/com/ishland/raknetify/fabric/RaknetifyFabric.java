@@ -116,6 +116,7 @@ public class RaknetifyFabric implements ModInitializer, PreLaunchEntrypoint {
 
         Int2IntArrayMap s2c = new Int2IntArrayMap();
         Int2IntArrayMap c2s = new Int2IntArrayMap();
+        // Inspect registration order only: these codecs must never encode or decode with the null registry context.
         final var c2sPacketTypes = ((IPacketCodecDispatcher<ByteBuf, Packet<? super ServerGamePacketListener>, PacketType<Packet<? super ServerGamePacketListener>>>)
                     GameProtocols.SERVERBOUND_TEMPLATE.bind(RegistryFriendlyByteBuf.decorator(null), null).codec()).getById()
                     .stream().map(byteBufPacketPacketTypePacketType -> byteBufPacketPacketTypePacketType.type()).toList();
@@ -126,6 +127,7 @@ public class RaknetifyFabric implements ModInitializer, PreLaunchEntrypoint {
         record FieldNodeClazzPair(FieldNode fieldNode, Class<?> clazz) {
         }
 
+        // Generic field signatures link the codec's PacketType entries to the class-based channel rules.
         Map<PacketType<?>, Class<?>> vanillaPacketTypes = new Object2ObjectOpenHashMap<>();
         for (FieldNodeClazzPair fieldNodeClazzPair : Stream.of(GamePacketTypes.class, CommonPacketTypes.class, CookiePacketTypes.class, PingPacketTypes.class)
                 .flatMap(clazz -> {

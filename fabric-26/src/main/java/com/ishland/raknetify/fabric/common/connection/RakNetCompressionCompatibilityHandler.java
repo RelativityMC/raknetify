@@ -34,6 +34,7 @@ public class RakNetCompressionCompatibilityHandler extends ChannelDuplexHandler 
 
     @Override
     public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
+        // The snapshot renamed this packet, so evaluate the old class reference only on earlier versions.
         boolean setupCompression = MinecraftVersions.IS_26_4_SNAPSHOT
                 ? msg.getClass().getName().equals("net.minecraft.network.protocol.login.ClientboundSetupCompressionPacket")
                 : msg instanceof ClientboundLoginCompressionPacket;

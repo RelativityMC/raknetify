@@ -501,12 +501,14 @@ public class RakNetMultiChannel {
         channel7.forEach(clazz -> classToChannelIdOverride.put(clazz, 7));
         unreliable.forEach(clazz -> classToChannelIdOverride.put(clazz, -2));
         theVoid.forEach(clazz -> classToChannelIdOverride.put(clazz, Integer.MIN_VALUE));
+        // These older packet names are absent from the 26.3 compile target and must be resolved by name.
         if (!MinecraftVersions.AT_LEAST_26_3) {
             addEarlierPacket("ServerboundSwingPacket", 2);
         }
         if (!MinecraftVersions.AT_LEAST_26_2) {
             addEarlierPacket("ServerboundSpectateEntityPacket", 3);
         }
+        // Keep newer class references inside their version guards so older runtimes never resolve them.
         if (MinecraftVersions.AT_LEAST_26_3) classToChannelIdOverride.put(ServerboundPunchPacket.class, 2);
         if (MinecraftVersions.AT_LEAST_26_3) classToChannelIdOverride.put(ClientboundSwingAnimationPacket.class, 2);
         if (MinecraftVersions.AT_LEAST_26_2) classToChannelIdOverride.put(ServerboundSpectatorActionPacket.class, 3);

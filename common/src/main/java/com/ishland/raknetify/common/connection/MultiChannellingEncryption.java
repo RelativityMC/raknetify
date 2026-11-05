@@ -57,6 +57,7 @@ public class MultiChannellingEncryption extends ChannelDuplexHandler {
         this.encryption = new PacketEncryptionManager(Objects.requireNonNull(encryption));
     }
 
+    // A null manager passes that direction through while the handshake enables the other direction independently.
     private MultiChannellingEncryption(PacketEncryptionManager decryption, PacketEncryptionManager encryption) {
         this.decryption = decryption;
         this.encryption = encryption;

@@ -66,6 +66,7 @@ public class MixinServerLoginNetworkHandler26_4 {
                 Cipher cipher = Crypt.getCipher(2, secretKey);
                 Cipher cipher2 = Crypt.getCipher(1, secretKey);
 
+                // Re-enter the RakNet hooks to install frame encryption in place of Krypton's byte-stream handlers.
                 this.connection.setEncryptionKey(cipher, cipher2);
             }
         }
