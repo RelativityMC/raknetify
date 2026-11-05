@@ -9,7 +9,6 @@
     "access.IClientConnection",
     "access.IPacketCodecDispatcher",
     "access.IPacketEncryptionManager",
-    "access.IServerPlayNetworkHandler",
     "access.IWorld",
     "common.MixinCCConnect",
     "common.MixinClientConnection",
@@ -35,7 +34,6 @@
     "defaultRequire": 1
   },
   "client": [
-    "access.IClientPlayNetworkHandler",
     "access.IDebugHudEntries",
     "client.hud.MixinDebugHudEntries26_4",
     "client.MixinMultiplayerServerListPinger1_21_11",

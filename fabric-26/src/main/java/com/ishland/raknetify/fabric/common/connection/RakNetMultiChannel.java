@@ -514,22 +514,6 @@ public class RakNetMultiChannel {
         if (atLeast("26.3")) classToChannelIdOverride.put(ClientboundAddTransientBlockPacket.class, 7);
     }
 
-//    private static final ThreadLocal<Class<?>> currentPacketClass = new ThreadLocal<>();
-//
-//    public static void setCurrentPacketClass(Class<?> clazz) {
-//        Preconditions.checkNotNull(clazz, "clazz");
-//        if (currentPacketClass.get() != null) throw new IllegalStateException("Already set");
-//        currentPacketClass.set(clazz);
-//    }
-//
-//    public static void clearCurrentPacketClass(Class<?> clazz) {
-//        Preconditions.checkNotNull(clazz);
-//        final Class<?> threadLocalClazz = currentPacketClass.get();
-//        if (threadLocalClazz == null) throw new IllegalArgumentException("Not set");
-//        if (threadLocalClazz != clazz) throw new IllegalArgumentException("Mismatch");
-//        currentPacketClass.set(null);
-//    }
-
     private static void addEarlierPacket(String name, int channel) {
         try {
             Class<?> packet = Class.forName("net.minecraft.network.protocol.game." + name, false,
